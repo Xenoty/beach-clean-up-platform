@@ -1,0 +1,69 @@
+﻿@model SereneMarine_Web.ViewModels.Petitions.CreatePetitionViewModel
+
+@{
+    ViewBag.Title = "Update Petition";
+}
+
+<div>
+    @Html.ActionLink("Back to Petitions", "Index")
+</div>
+
+<hr />
+
+@using (Html.BeginForm("Update", "Petitions", FormMethod.Post))
+{
+    @Html.AntiForgeryToken()
+
+<div class="form-horizontal">
+    <hr />
+    @if (ViewBag.ApiError != null)
+    {
+        <div class="alert-danger">
+            <strong>@ViewBag.ApiError.StatusCode.ToString()</strong>
+            <strong>@ViewBag.ApiError.Content.ToString()</strong>
+        </div>
+    }
+    @Html.HiddenFor(model => model.petition_id)
+    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+    <div class="form-group">
+        @Html.LabelFor(model => model.name, htmlAttributes: new { @class = "control-label col-md-2", @autocomplete = "off" })
+        <div class="col-md-10">
+            @Html.EditorFor(model => model.name, new { htmlAttributes = new { @class = "form-control" } })
+            @Html.ValidationMessageFor(model => model.name, "", new { @class = "text-danger" })
+        </div>
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(model => model.description, htmlAttributes: new { @class = "control-label col-md-2", @autocomplete = "off" })
+        <div class="col-md-10">
+            @Html.EditorFor(model => model.description, new { htmlAttributes = new { @class = "form-control" } })
+            @Html.ValidationMessageFor(model => model.description, "", new { @class = "text-danger" })
+        </div>
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(model => model.required_signatures, htmlAttributes: new { @class = "control-label col-md-2", @autocomplete = "off" })
+        <div class="col-md-10">
+            @Html.EditorFor(model => model.required_signatures, new { htmlAttributes = new { @class = "form-control" } })
+            @Html.ValidationMessageFor(model => model.required_signatures, "", new { @class = "text-danger" })
+        </div>
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(model => model.completed, htmlAttributes: new { @class = "control-label col-md-2", @autocomplete = "off" })
+        <div class="col-md-10">
+            @Html.EditorFor(model => model.completed, new { htmlAttributes = new { @class = "form-control" } })
+            @Html.ValidationMessageFor(model => model.completed, "", new { @class = "text-danger" })
+        </div>
+    </div>
+
+    <div class="form-group">
+        <div class="col-md-offset-2 col-md-10">
+            <input type="submit" value="Save" class="btn btn-success" />
+        </div>
+    </div>
+</div>
+}
+
+

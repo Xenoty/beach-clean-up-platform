@@ -1,0 +1,366 @@
+﻿@model SereneMarine_Web.ViewModels.ThreadMessages.ThreadMessagesIndexVM
+
+@{
+    ViewData["Title"] = "Thread Messages";
+}
+
+<style>
+    .custom_ta {
+        width: 100% !important;
+    }
+
+
+
+    .msg-container {
+        width: fit-content;
+        min-width: 50%;
+        margin-bottom: 2rem;
+        margin-left: 3rem;
+    }
+
+    .msg-title {
+        display: block;
+        margin-bottom: .5rem;
+        overflow: auto;
+    }
+
+        .msg-title .msg_author {
+            font-family: Helvetica-Bold;
+            font-size: 17px;
+            float: left;
+            color: #676767;
+        }
+
+        .msg-title .msg_date {
+            float: left;
+            font-size: 14px;
+            padding-left: 21px;
+            line-height: 27px;
+            color: grey;
+        }
+
+
+        .msg-title .msg_edit {
+            padding-left: 10px;
+            float: right;
+        }
+
+    .msg-container .msg-content {
+        background-color: #F9F9F9;
+        color: var(--blueDark);
+        padding: .6rem 1rem;
+        clear: both;
+        font-size: 15px;
+    }
+
+    .msgFunction {
+        width: 100%;
+        background-color: var(--blueLight);
+        color: var(--blueDark);
+        padding: 1rem 2rem;
+        margin-top: 1rem;
+    }
+
+        .msgFunction textarea {
+            background-color: transparent;
+            color: var(--blueDark);
+            width: 100%;
+            border: 1px solid rgba(0,0,0,.3);
+        }
+
+        .msgFunction .btn .cancel {
+            background-color: transparent;
+            border: 1px solid grey;
+            color: grey;
+            transition: 0.3s;
+        }
+
+    .cancel:hover {
+        background-color: grey;
+        color: white;
+    }
+
+    .msg-btns {
+        float: left;
+    }
+
+        .msg-btns .btn {
+            padding: 1px 11px;
+        }
+
+        .msg-btns .cancel {
+            margin-left: 15px;
+            color: grey;
+            border: 1px solid grey;
+        }
+
+    .msgFunction #btnDelete {
+        float: right;
+        padding: 1px 11px;
+    }
+
+    .cancel:hover {
+        color: var(--blueLight);
+    }
+
+    .back-btn {
+        position: absolute;
+        top: 5px;
+        left: 7px;
+        max-width: 32px;
+    }
+
+
+
+
+
+
+    .msg_edit img {
+        cursor: pointer;
+        margin-right: 15px;
+        width: 100%;
+        max-width: 25px;
+    }
+
+    .btn-wrapper {
+        overflow: auto;
+    }
+
+    .thread_details .date {
+        clear: both;
+    }
+
+    .empty-model{
+        background-color:lightgray;
+        width:100%;
+        text-align:center;
+        padding:1rem;
+    }
+    
+</style>
+
+
+@if (Model == null)
+{
+    <p>No messages...</p>
+}
+else
+{
+    <div class="thread-container">
+
+        <a href="~/Threads/" class="back-btn">
+            <svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 35.301 17.099">
+                <g id="left-arrow" transform="translate(-185 -162)">
+                    <g id="Group_59" data-name="Group 59" transform="translate(185 162)">
+                        <path id="Path_104" data-name="Path 104" d="M33.922,139.171H4.719l4.838-4.814A1.379,1.379,0,0,0,7.611,132.4L.405,139.572h0a1.38,1.38,0,0,0,0,1.952h0L7.61,148.7a1.379,1.379,0,0,0,1.946-1.955l-4.837-4.814h29.2a1.379,1.379,0,1,0,0-2.758Z" transform="translate(0 -132)" fill="#648a8b" />
+                    </g>
+                </g>
+            </svg>
+        </a>
+
+        <div class="title_container">
+            <div class="back-btn">
+
+            </div>
+            <div class="topic">
+                @Html.DisplayFor(model => model.threadsModel.thread_topic)
+            </div>
+            <div class="thread_details">
+                <div class="author">
+                    @Html.DisplayFor(model => model.threadsModel.author)
+                </div>
+                <div class="date">
+                    @Html.DisplayFor(model => model.threadsModel.created_date)
+                </div>
+
+            </div>
+
+            <div class="descr_container">
+                <div class="cta noSelect" onclick="dropdown('descr_content', 'descr_arrow');">
+                    Description <b id="descr_arrow">&#8593;</b>
+                </div>
+                <div id="descr_content" class="content" style="display:block;">
+                    @Html.DisplayFor(model => model.threadsModel.thread_descr)
+                </div>
+
+            </div>
+
+
+        </div>
+    </div>
+    <button type="button" class="btn btn-darkBlue float" data-toggle="modal" data-target="#exampleModal">
+        Reply
+    </button>
+
+    <!-- Modal -->
+    <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            @using (Html.BeginForm("Index", "ThreadMessages", FormMethod.Post))
+            {
+                @Html.AntiForgeryToken()
+                @Html.HiddenFor(model => model.threadsModel.thread_id)
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">Send Message</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+
+                    </div>
+                    <div class="modal-body">
+                        @if (!User.Identity.IsAuthenticated)
+                        {
+                            @:<p>You need an account to reply to Topics. @Html.ActionLink("Log in", "Login", "Account", new { ReturnUrl = Context.Request.Path }, htmlAttributes: new { id = "loginLink" })</p>
+
+
+                        }
+                        @Html.EditorFor(model => model.ThreadMessages.thread_message, new { htmlAttributes = new { @class = "custom_ta", @autocomplete = "off", @required = true, @minlength =2, @maxlength = 200 } })
+                        @Html.ValidationMessageFor(model => model.ThreadMessages.thread_message, "", new { @class = "text-danger" })
+                    </div>
+                    <div class="modal-footer">
+                        @*<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                            @*<button type="button" class="btn btn-primary">Save changes</button>*@
+                        <input type="submit" value="Save" class="btn btn-success" />
+                    </div>
+                </div>
+            }
+
+        </div>
+    </div>
+
+    @if (TempData["response"] != null)
+    {
+        <div class="alert-success">
+            <strong>@TempData["response"].ToString()</strong>
+        </div>
+    }
+
+    @if (ViewBag.ApiError != null)
+    {
+        <div class="alert-danger">
+            <strong>@ViewBag.ApiError.StatusCode.ToString()</strong>
+            <strong>@ViewBag.ApiError.Content.ToString()</strong>
+        </div>
+    }
+
+    @if (Model.threadMsgsList.Count == 0)
+    {
+        <div class="empty-model">
+            No Messages in thread.
+        </div>
+    }
+    else
+    {
+        var count = 0;
+        var authenticated = false;
+        //now display all messages in thread
+    <div class="thread-msgs-wrapper">
+        @foreach (var item in Model.threadMsgsList)
+        {
+            count++;
+            var id_name = "msgFunction" + count;
+            <div class="form-group">
+
+                <div class="col-md-10">
+                    <div class="msg-container">
+                        <div class="msg-title">
+                            <div class="msg_author">
+                                @item.Name
+                            </div>
+                            <div class="msg_date">
+                                @item.replied_date
+                            </div>
+                            <div class="msg_edit">
+                                @if (User.Identity.IsAuthenticated)
+                                {
+                                    var claimsIdentity = User.Identity as System.Security.Claims.ClaimsIdentity;
+                                    var user_id = claimsIdentity.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier);
+                                    @if (item.User_Id == user_id.Value)
+                                    {
+                                        authenticated = true;
+
+                                        <img src="~/images/icons/edit.svg" alt="Edit" onclick="DisplayMessage('msgFunction'+@count);" />
+                                        @*<button type="button" onclick="DisplayMessage('msgFunction'+@count);">Edit</button>*@
+
+                                    }
+
+                                }
+                            </div>
+                        </div>
+                        <div class="msg-content">
+                            @item.thread_message
+                        </div>
+
+                        @if (authenticated == true)
+                        {
+                            <div class="msgFunction" id="@id_name" style="display:none">
+                                @using (Html.BeginForm("Save", "ThreadMessages", FormMethod.Post))
+                                {
+                                    @Html.AntiForgeryToken()
+
+                                    <textarea name="message" rows="5" maxlength="200">@item.thread_message</textarea>
+
+                                    <input type="hidden" value="@Model.threadsModel.thread_id" name="thread_id" />
+                                    <input type="hidden" value="@item.thread_message_id" name="message_id" />
+                                    <div class="msg-btns">
+                                        <input type="submit" value="Save" class="btn btn-darkBlue" />
+                                        <button type="button" onclick="DisplayMessage('msgFunction'+@count);" class="btn cancel">Cancel</button>
+                                    </div>
+                                }
+
+                                @using (Html.BeginForm("Delete", "ThreadMessages", FormMethod.Post))
+                                {
+                                    <input type="hidden" value="@Model.threadsModel.thread_id" name="thread_id" />
+                                    <input type="hidden" value="@item.thread_message_id" name="message_id" />
+                                    <div class="btn-wrapper">
+                                        <input type="submit" id="btnDelete" value="Delete" class="btn btn-outline-danger" />
+                                    </div>
+
+                                }
+
+
+                                @*<input type="submit" value="Delete" class="btn btn-outline-danger" />*@
+                            </div>
+                        }
+
+                    </div>
+
+
+                </div>
+
+            </div>
+
+
+        }
+    </div>
+    }
+
+}
+
+@section scripts{
+    <script type="text/javascript">
+        function DisplayMessage(id) {
+            var elm = document.getElementById(id).style.display;
+            //console.log(id);
+            //console.log(elm);
+            if (elm == "none") {
+                console.log("display = none")
+                document.getElementById(id).style.display = "block";
+            } else {
+                document.getElementById(id).style.display = "none";
+            }
+        }
+
+        function dropdown(id, arrowId) {
+            var elm = document.getElementById(id).style.display;
+
+            if (elm == "none") {
+                document.getElementById(id).style.display = "block";
+                document.getElementById(arrowId).innerHTML = "&#8593;";
+            } else {
+                document.getElementById(id).style.display = "none";
+                document.getElementById(arrowId).innerHTML = "&#8595;";
+            }
+        }
+    </script>
+}

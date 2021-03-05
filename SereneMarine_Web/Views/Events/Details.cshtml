@@ -1,0 +1,346 @@
+﻿@model SereneMarine_Web.ViewModels.Events.EventsViewModel;
+
+@{
+    ViewBag.Title = "Event Details";
+    var authenticated = false;
+
+    if (User.Identity.IsAuthenticated)
+    {
+        authenticated = true;
+    }
+
+    var percentLiteral = ViewBag.Attending + "%";
+}
+
+<script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v4.5.1/mapbox-gl-geocoder.min.js"></script>
+<link rel="stylesheet" href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v4.5.1/mapbox-gl-geocoder.css" type="text/css" />
+<!-- Promise polyfill script required to use Mapbox GL Geocoder in IE 11 -->
+<script src="https://cdn.jsdelivr.net/npm/es6-promise@4/dist/es6-promise.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/es6-promise@4/dist/es6-promise.auto.min.js"></script>
+
+<style>
+
+    .event-details-grid {
+        display: grid;
+        /* grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));*/
+        grid-template-columns: 1fr .5fr;
+        grid-gap: 3rem;
+        display: grid;
+        grid-gap: 3rem;
+    }
+
+    .event-details {
+        position: relative;
+        padding: 1.6rem;
+        background-color: var(--primary);
+    }
+
+    .back-btn {
+        position: absolute;
+        top: 5px;
+        left: 7px;
+        max-width: 32px;
+    }
+
+    .event_name, .sub-title {
+        font-family: Helvetica-Bold;
+        color: var(--secondary);
+    }
+
+    .event_name {
+        font-size: 2rem;
+        line-height: 2.1rem;
+    }
+
+    .event-seciton {
+        margin-bottom: 5px;
+    }
+
+    .sub-title {
+        font-size: 22px;
+    }
+
+    .event_content {
+        background-color: var(--secondary);
+        padding: 1rem;
+        color: white;
+        font-size: 18px;
+        line-height: 22px;
+    }
+
+        .event_content svg {
+            max-width: 20px;
+            max-height: 20px;
+            margin: auto;
+        }
+
+    .content-row {
+        display: grid;
+        grid-template-columns: .2fr 1fr;
+        grid-column-gap: 10px;
+    }
+
+    .left-align {
+        float: left;
+    }
+
+    .right-alight {
+        float: right;
+    }
+
+    .attendance_count {
+        background-color: var(--primary);
+        padding: 2px 14px;
+        color: var(--secondary);
+        border-radius: 10px;
+    }
+
+    .single-row {
+        overflow: auto;
+        margin-bottom: 1.2rem;
+    }
+
+    .cta {
+        margin: auto;
+        width: fit-content;
+        margin-top: 1.2rem;
+    }
+
+        .cta #btn_Submit {
+            background-color: transparent;
+            border: none;
+            color: white;
+            font-family: 'Helvetica-Bold';
+            font-size: 1.3rem;
+            padding: .6rem 1.5rem;
+            width: fit-content;  
+            background-color: var(--secondary);
+            color: var(--primary);
+            border-radius: 15px;
+            cursor: pointer;
+        }
+
+    .disabled {
+        background-color: #8d8f95 !important;
+        color: #d6d6d6;
+        cursor: not-allowed !important;
+    }
+
+    .collapsible{
+        cursor:pointer;
+    }
+
+</style>
+
+@if (ViewBag.ApiError != null)
+{
+    <div class="alert-danger">
+        <strong>@ViewBag.ApiError.StatusCode.ToString()</strong>
+        <strong>@ViewBag.ApiError.Content.ToString()</strong>
+    </div>
+}
+@if (TempData["response"] != null)
+{
+    <div class="alert-success">
+        <strong>@TempData["response"].ToString()</strong>
+    </div>
+}
+
+<div class="event-details-grid">
+    <div class="map-wrapper">
+        <div id='map' style='width: auto; height: 800px;position:relative'></div>
+    </div>
+    <div class="event-details">
+
+        <a href="@Url.Action("Index", "Events")" class="back-btn">
+            <svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 35.301 17.099">
+                <g id="left-arrow" transform="translate(-185 -162)">
+                    <g id="Group_59" data-name="Group 59" transform="translate(185 162)">
+                        <path id="Path_104" data-name="Path 104" d="M33.922,139.171H4.719l4.838-4.814A1.379,1.379,0,0,0,7.611,132.4L.405,139.572h0a1.38,1.38,0,0,0,0,1.952h0L7.61,148.7a1.379,1.379,0,0,0,1.946-1.955l-4.837-4.814h29.2a1.379,1.379,0,1,0,0-2.758Z" transform="translate(0 -132)" fill="#648a8b" />
+                    </g>
+                </g>
+            </svg>
+        </a>
+
+        <div class="event_name">
+            @Html.DisplayFor(x => x.event_name)
+        </div>
+        <div class="event-section">
+            <div class="sub-title collapsible" onclick="dropdown('event_descr', 'descr_arrow');">
+                Description <b id="descr_arrow">&#8593;</b>
+            </div>
+            <div id="event_descr" class="event_content" style="display:block">
+                @Html.DisplayFor(x => x.event_descr)
+            </div>
+        </div>
+        <div class="event-seciton">
+            <div class="sub-title">
+                Location
+            </div>
+            <div class="event_content">
+                <div class="content-row">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="352.065" height="512" viewBox="0 0 352.065 512">
+                        <g id="pin" transform="translate(-79.968 0)">
+                            <path id="Path_99" data-name="Path 99" d="M407.579,87.677C376.506,34.053,321.314,1.292,259.939.04c-2.62-.054-5.257-.054-7.878,0C190.687,1.292,135.5,34.053,104.421,87.677,72.659,142.489,71.79,208.329,102.1,263.8L229.059,496.187c.057.1.114.206.173.308a30.86,30.86,0,0,0,53.538,0c.059-.1.116-.2.173-.308L409.906,263.8c30.3-55.471,29.435-121.311-2.327-176.123ZM256,232a72,72,0,1,1,72-72A72.081,72.081,0,0,1,256,232Z"
+                                  fill="#d1dbff" />
+                        </g>
+                    </svg>
+                    @Html.DisplayFor(x => x.address)
+                </div>
+            </div>
+        </div>
+        <div class="event-seciton">
+            <div class="sub-title">
+                Date
+            </div>
+            <div class="event_content">
+                <div class="row-subtitle">
+                    Start
+                </div>
+                <div class="content-row">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" id="clock_svg">
+                        <path id="clock" d="M256,0C114.836,0,0,114.836,0,256S114.836,512,256,512,512,397.164,512,256,397.164,0,256,0ZM377.75,388.414a21.313,21.313,0,0,1-30.164,0L240.918,281.75a21.237,21.237,0,0,1-6.25-15.082V128a21.332,21.332,0,1,1,42.664,0V257.836L377.75,358.25a21.311,21.311,0,0,1,0,30.164Zm0,0"
+                              fill="#d1dbff" />
+                    </svg>
+                    @Html.DisplayFor(x => x.event_startdate)
+                </div>
+                <div class="row-subtitle">
+                    End
+                </div>
+                <div class="content-row">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" id="clock_svg">
+                        <path id="clock" d="M256,0C114.836,0,0,114.836,0,256S114.836,512,256,512,512,397.164,512,256,397.164,0,256,0ZM377.75,388.414a21.313,21.313,0,0,1-30.164,0L240.918,281.75a21.237,21.237,0,0,1-6.25-15.082V128a21.332,21.332,0,1,1,42.664,0V257.836L377.75,358.25a21.311,21.311,0,0,1,0,30.164Zm0,0"
+                              fill="#d1dbff" />
+                    </svg>
+                    @Html.DisplayFor(x => x.event_enddate)
+                </div>
+
+            </div>
+        </div>
+        <div class="event-seciton">
+            <div class="sub-title">
+                Attendance
+            </div>
+            <div class="event_content">
+                <div class="single-row">
+                    <div class="left-align">
+                        Max
+                    </div>
+                    <div class="attendance_count right-alight">
+                        @Html.DisplayFor(x => x.max_attendance)
+                    </div>
+                </div>
+                <div class="single-row">
+                    <div class="left-align">
+                        Current
+                    </div>
+                    <div class="attendance_count right-alight">
+                        @Html.DisplayFor(x => x.current_attendance)
+                    </div>
+                </div>
+                <div class="progress">
+                    <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="@ViewBag.Attending" aria-valuemin="0" aria-valuemax="100" style="width: @percentLiteral">@percentLiteral</div>
+                </div>
+
+            </div>
+        </div>
+        <div class="cta">
+            @using (Html.BeginForm("Details", "Events", FormMethod.Post))
+            {
+                @Html.HiddenFor(model => model.event_name)
+                @Html.HiddenFor(model => model.event_id)
+
+                @if (Model.event_enddate < DateTime.Now)
+                {
+
+                    <input id="btn_Submit" type="submit" value="Completed" disabled class="disabled"/>
+                }
+                else
+                {
+                    @if (authenticated != false)
+                    {
+                        <input id="btn_Submit" type="submit" value="Join Event" />
+                    }
+                    else
+                    {
+                        <input id="btn_Submit" type="button" value="Join Event" data-toggle="modal" data-target="#exampleModal" />
+
+                        <!-- Modal -->
+                        <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                            <div class="modal-dialog" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="exampleModalLabel">Join Event!</h5>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+
+                                    </div>
+                                    <div class="modal-body">
+                                        <p>@Html.ActionLink("Log in", "Login", "Account", new { ReturnUrl = Context.Request.Path }, htmlAttributes: new { id = "loginLink" }) or Enter your email address below</p>
+                                        <input type="email" name="email" required autocomplete="off" pattern="^[a-zA-Z0-9._+-]+&#64;[a-zA-Z0-9.-]+\.[a-zA-Z]{2,9}$"/>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <input type="submit" value="Join" class="btn btn-success" />
+                                    </div>
+                                </div>
+
+
+                            </div>
+                        </div>
+                    }
+                }
+            }
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+      mapboxgl.accessToken = 'pk.eyJ1IjoiZGF5bmU5NSIsImEiOiJjazZnOWhpYmUweWVsM2xtdmZvemxxZ3RmIn0.CCVZlLeLo_gsyIMA5iX08w';
+
+    var map = new mapboxgl.Map({
+        container: 'map',
+        style: 'mapbox://styles/mapbox/streets-v11',
+        center: [31.0218, -29.8587], // starting position [lng, lat]
+        zoom: 12 // starting zoom
+
+    });
+        map.addControl(
+            new MapboxGeocoder({
+                accessToken: mapboxgl.accessToken,
+                mapboxgl: mapboxgl
+            })
+    );
+
+    var lat_List = [];
+    var long_List = []
+    var eventNames_List = []
+
+
+    lat_List.push("@Model.latitude");
+    long_List.push("@Model.longitude");
+    eventNames_List.push("@Model.event_name");
+
+    for (var i = 0; i < lat_List.length; i++) {
+
+        var latC = lat_List[i].toString().replace(/,/, '.');
+        var longC = long_List[i].toString().replace(/,/, '.');
+
+        window["Marker" + i] = new mapboxgl.Marker()
+            .setLngLat([latC, longC]).addTo(map).setPopup(new mapboxgl.Popup().setHTML(eventNames_List[i]));
+    }
+
+    function dropdown(id, arrowId) {
+        var elm = document.getElementById(id).style.display;
+
+        if (elm == "none") {
+            document.getElementById(id).style.display = "block";
+            document.getElementById(arrowId).innerHTML = "&#8593;";
+        } else {
+            document.getElementById(id).style.display = "none";
+            document.getElementById(arrowId).innerHTML = "&#8595;";
+        }
+    }
+</script>
+
+

@@ -1,0 +1,382 @@
+﻿@model SereneMarine_Web.ViewModels.Petitions.PetitionDetailViewModel
+
+@{
+    ViewData["Title"] = "Petition Details";
+    var authenticated = false;
+
+    if (User.Identity.IsAuthenticated)
+    {
+        authenticated = true;
+    }
+
+    var percent = ViewBag.Percent;
+    var count = 0;
+}
+
+<style>
+    .petition-container {
+        /*    width: fit-content;
+        max-width: 800px;
+        min-width: 320px;*/
+        position:relative;
+        padding: 1rem;
+        margin: auto;
+        background-color: var(--primary);
+        margin-bottom: 3rem;
+        margin-top: 2rem;
+    }
+
+        .petition-container * {
+            color: var(--secondary);
+        }
+
+    .pet_title h1 {
+        font-size: 2rem;
+        line-height: 2rem;
+        font-family: Helvetica-Bold;
+    }
+
+    .pet_details {
+        font-size: 1rem;
+        margin-bottom: 15px;
+    }
+
+    .pet_descr {
+        background-color: var(--secondary);
+        color: var(--primary);
+        padding: 1rem;
+    }
+
+    .cta {
+        font-size: 1.3rem;
+        padding: .6rem 1.5rem;
+        width: fit-content;
+        margin: auto;
+        margin-bottom: 3rem;
+        background-color: var(--secondary);
+        color: var(--primary);
+        border-radius: 15px;
+    }
+
+        .cta #btn_Submit {
+            background-color: transparent;
+            border: none;
+            color: white;
+            font-family: 'Helvetica-Bold';
+        }
+
+    .petition-wrapper {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        grid-gap: 3rem;
+        margin-bottom: 10rem;
+    }
+
+    .pet-stats {
+        display: grid;
+        grid-template-columns: 1fr .3fr;
+        grid-column-gap: 2rem;
+    }
+
+    .pet_signatures {
+    }
+
+        .pet_signatures .section-title {
+            background-color: var(--secondary);
+            color: var(--primary);
+            padding: 8px 1.9rem;
+            width: fit-content;
+            margin-bottom: 10px;
+            /* font-size: .8rem; */
+            border-radius: 11px;
+        }
+
+    .section-title h2 {
+        margin: 0;
+        font-family: 'HELVETICA-BOLD';
+        font-size: 1.8rem;
+    }
+
+    .pet_row {
+        overflow: auto;
+        margin-bottom: 1rem;
+    }
+
+        .pet_row h3 {
+            color: var(--secondary);
+            font-size: 1.6rem;
+            width: fit-content;
+            float: left;
+            font-family: 'Helvetica-Bold';
+        }
+
+        .pet_row span {
+            float: right;
+            width: fit-content;
+            background-color: var(--secondary);
+            color: var(--primary);
+            border-radius: 20px;
+            padding: 2px 1rem;
+            font-size: 1.6rem;
+            font-family: 'Helvetica-Bold';
+        }
+
+    .pet_percentage {
+        width: 200px;
+        height: 200px;
+        position: relative;
+        /* margin: auto;*/
+    }
+
+    .pet-recent-sign {
+        /*    max-width: 400px;
+        margin: auto;*/
+    }
+
+    .table {
+        color: var(--secondary);
+    }
+
+    table span {
+        font-family: 'Helvetica';
+        font-size: 14px;
+        font-weight: 100;
+    }
+
+    .table-heading {
+        background-color: var(--primary);
+        font-size: 1.3rem;
+    }
+
+    .modal-content {
+        color: #6e6e6e;
+    }
+
+    .modal-body a{
+        color:var(--secondary);
+    }
+
+    .back-btn {
+        position: absolute;
+        top: -10px;
+        left: 7px;
+        max-width: 32px;
+    }
+</style>
+
+<div class="petition-container">
+
+    <a href="@Url.Action("Index", "Petitions")" class="back-btn">
+        <svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 35.301 17.099">
+            <g id="left-arrow" transform="translate(-185 -162)">
+                <g id="Group_59" data-name="Group 59" transform="translate(185 162)">
+                    <path id="Path_104" data-name="Path 104" d="M33.922,139.171H4.719l4.838-4.814A1.379,1.379,0,0,0,7.611,132.4L.405,139.572h0a1.38,1.38,0,0,0,0,1.952h0L7.61,148.7a1.379,1.379,0,0,0,1.946-1.955l-4.837-4.814h29.2a1.379,1.379,0,1,0,0-2.758Z" transform="translate(0 -132)" fill="#648a8b" />
+                </g>
+            </g>
+        </svg>
+    </a>
+
+    <div class="pet_title">
+        <h1> @Html.DisplayFor(model => model.name)</h1>
+    </div>
+    <div class="pet_details">
+        <div class="pet_author">
+
+        </div>
+        <div class="pet_date">
+            @Html.DisplayFor(model => model.created_date)
+        </div>
+    </div>
+    <div class="pet_descr">
+        @Html.DisplayFor(model => model.description)
+    </div>
+</div>
+
+@if (TempData["response"] != null)
+{
+    <div class="alert-success">
+        <strong>@TempData["response"].ToString()</strong>
+    </div>
+}
+
+@if (ViewBag.ApiError != null)
+{
+    <div class="alert-danger">
+        <strong>@ViewBag.ApiError.StatusCode.ToString()</strong>
+        <strong>@ViewBag.ApiError.Content.ToString()</strong>
+    </div>
+}
+
+
+@using (Html.BeginForm("Details", "Petitions", new { currentSig = @ViewBag.TotalSignatures, tabId = @ViewBag.TableId }, FormMethod.Post))
+{
+    @Html.HiddenFor(model => model.name)
+    @Html.HiddenFor(model => model.petition_id)
+    @Html.HiddenFor(model => model.current_signatures)
+    @Html.HiddenFor(model => model.required_signatures)
+
+
+<div class="cta">
+    @if (authenticated != false)
+    {
+        <input id="btn_Submit" type="submit" value="Sign Petition" />
+    }
+    else
+    {
+        <input id="btn_Submit" type="button" value="Sign Petition" data-toggle="modal" data-target="#exampleModal" />
+
+        <!-- Modal -->
+        <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">Sign Petition</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+
+                    </div>
+                    <div class="modal-body">
+                        <p>@Html.ActionLink("Log in", "Login", "Account", new { ReturnUrl = Context.Request.Path }, htmlAttributes: new { id = "loginLink" }) or Enter your email address below</p>
+                        <input type="email" name="email" required autocomplete="off" pattern="^[a-zA-Z0-9._+-]+&#64;[a-zA-Z0-9.-]+\.[a-zA-Z]{2,9}$" />
+                        @*@Html.EditorFor(model => model.Email, new { htmlAttributes = new { @class = "custom_ta", @autocomplete = "off", @required = true } })
+                        @Html.ValidationMessageFor(model => model.Email, "", new { @class = "text-danger" })*@
+                    </div>
+                    <div class="modal-footer">
+                        <input type="submit" value="Save" class="btn btn-success"/>
+                    </div>
+                </div>
+
+
+            </div>
+        </div>
+    }
+</div>
+
+}
+
+
+<div class="petition-wrapper">
+    <div class="pet-stats">
+        <div class="pet_signatures">
+            <div class="section-title">
+                <h2>Goal</h2>
+            </div>
+            <div class="pet_row">
+                <h3>Current Signatures</h3> <span>@Model.current_signatures</span>
+            </div>
+            <div class="pet_row">
+                <h3>Required</h3> <span>@Model.required_signatures</span>
+            </div>
+        </div>
+        <div id="container" class="pet_percentage">
+
+        </div>
+    </div>
+    <div class="pet-recent-sign">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th colspan="3" class="table-heading">Recent Signatures  <span>Top 5</span></th>
+
+                </tr>
+                @*<tr>
+                        <td colspan="2">Latest signatures: Top 10</td>
+                    </tr>*@
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Who</th>
+                    <th scope="col">When</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                @if (Model.petitionsSigned.Count == 0)
+                {
+                    <tr>
+                        <td scope="row" colspan="3" style="text-align:center; background-color:#f1f1f1;">
+                            Be the first to sign this petition!
+                        </td>
+                    </tr>
+                }
+                else
+                {
+                    @foreach (var item in Model.petitionsSigned)
+                    {
+                        count++;
+                        <tr>
+                            <td scope="row">@count</td>
+
+                            <td>
+                                @*@item.Name*@
+                                Anonymous
+                            </td>
+                            <td>
+                                @*@item.signed_date*@
+                                @Html.DisplayFor(model => item.signed_date)
+                            </td>
+                        </tr>
+                    }
+                }
+
+            </tbody>
+
+
+        </table>
+    </div>
+</div>
+
+
+
+<script src="~/js/progressbar.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+    function DisplayForm() {
+        var form = document.getElementById("details");
+        form.style.display = "block";
+    }
+
+    @*console.log(@percent);*@
+
+    var val = @percent;
+    var animateVal;
+    console.log(val);
+    if (val > 100) {
+        console.log("val > 100");
+        animateVal = 1.0;
+    } else {
+        console.log("val < 100");
+        animateVal = val / 100;
+    }
+    //console.log(val);
+
+    var bar = new ProgressBar.Circle(container, {
+        color: '#7a97ff',
+        // This has to be the same size as the maximum width to
+        // prevent clipping
+        strokeWidth: 4,
+        trailWidth: 1,
+        easing: 'easeInOut',
+        duration: 1400,
+        text: {
+            autoStyleContainer: false
+        },
+        from: { color: '#7a97ff', width: 1 },
+        to: { color: '#7a97ff', width: 4 },
+        // Set default step function for all animate calls
+        step: function (state, circle) {
+            circle.path.setAttribute('stroke', state.color);
+            circle.path.setAttribute('stroke-width', state.width);
+
+            var value = val;
+            circle.setText(value + "%");
+        }
+    });
+    bar.text.style.fontFamily = '"Raleway", Helvetica, sans-serif';
+    bar.text.style.fontSize = '2rem';
+    //console.log("Val = :" + val);
+    //console.log("AnimateVal = :" + animateVal);
+    bar.animate(animateVal);
+</script>
+
+

@@ -1,0 +1,69 @@
+﻿@model SereneMarine_Web.ViewModels.Petitions.CreatePetitionViewModel
+
+@{
+    ViewData["Title"] = "Create";
+}
+
+<h1>Create Petition</h1>
+
+
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+<hr />
+
+@using (Html.BeginForm("Create", "Petitions", FormMethod.Post))
+{
+    @Html.AntiForgeryToken()
+
+    @if (ViewBag.ApiError != null)
+    {
+        <div class="alert-danger">
+            <strong>@ViewBag.ApiError.StatusCode.ToString()</strong>
+            <strong>@ViewBag.ApiError.Content.ToString()</strong>
+        </div>
+    }
+    @if (ViewBag.Response != null)
+    {
+        <div class="alert-success">
+            <strong>@ViewBag.Response.ToString()</strong>
+        </div>
+    }
+
+    @*<div asp-validation-summary="ModelOnly" class="text-danger"></div>*@
+    <div class="form-group">
+        @Html.LabelFor(model => model.name, htmlAttributes: new { @class = "control-label col-md-2" })
+        <div class="col-md-10">
+            @Html.EditorFor(model => model.name, new { htmlAttributes = new { @class = "form-control", @autocomplete = "off" } })
+            @Html.ValidationMessageFor(model => model.name, "", new { @class = "text-danger" })
+        </div>
+    </div>
+    <div class="form-group">
+        @Html.LabelFor(model => model.description, htmlAttributes: new { @class = "control-label col-md-2" })
+        <div class="col-md-10">
+            @Html.EditorFor(model => model.description, new { htmlAttributes = new { @class = "form-control", @autocomplete = "off" } })
+            @Html.ValidationMessageFor(model => model.description, "", new { @class = "text-danger" })
+        </div>
+    </div>
+    <div class="form-group">
+        @Html.LabelFor(model => model.required_signatures, htmlAttributes: new { @class = "control-label col-md-2" })
+        <div class="col-md-10">
+            @Html.EditorFor(model => model.required_signatures, new { htmlAttributes = new { @class = "form-control", @autocomplete = "off" } })
+            @Html.ValidationMessageFor(model => model.required_signatures, "", new { @class = "text-danger" })
+        </div>
+    </div>
+    <div class="form-group">
+        <div class="col-md-offset-2 col-md-10">
+            <input type="submit" value="Create" class="btn btn-success" />
+        </div>
+    
+    </div>
+
+}
+
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

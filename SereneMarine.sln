@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30907.101
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebApi", "SereneMarine_API\WebApi.csproj", "{E548330E-AF8D-4B66-BF79-52718E66D421}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SereneMarine_Web", "SereneMarine_Web\SereneMarine_Web.csproj", "{DC3EA1EE-1B93-4C05-8844-8FDA20AA0829}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{E548330E-AF8D-4B66-BF79-52718E66D421}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E548330E-AF8D-4B66-BF79-52718E66D421}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E548330E-AF8D-4B66-BF79-52718E66D421}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E548330E-AF8D-4B66-BF79-52718E66D421}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DC3EA1EE-1B93-4C05-8844-8FDA20AA0829}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DC3EA1EE-1B93-4C05-8844-8FDA20AA0829}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DC3EA1EE-1B93-4C05-8844-8FDA20AA0829}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DC3EA1EE-1B93-4C05-8844-8FDA20AA0829}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {466DE27C-A99A-4870-B622-187662A1AA09}
+	EndGlobalSection
+EndGlobal

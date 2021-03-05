@@ -1,0 +1,238 @@
+﻿@model SereneMarine_Web.Models.ThreadsModel;
+
+@{
+    ViewData["Title"] = "Threads";
+    var authenticated = false;
+
+    if (User.Identity.IsAuthenticated && User.IsInRole("Admin"))
+    {
+        authenticated = true;
+    }
+}
+
+<style>
+    .title_container .topic {
+        font-size: 1.3rem;
+        line-height: 1.4rem;
+    }
+
+    .thread-container{
+        padding:1.5rem;
+    }
+
+    .thread-wrapper{
+        display:grid;
+        grid-template-columns:repeat(auto-fit, minmax(320px, 1fr));
+        grid-gap:3rem;
+    }
+
+    .descr_container .cta{
+        font-size:18px;
+        margin-left:2rem;
+    }
+
+    .thread_details{
+        float:right;
+    }
+
+    .thread_details *{
+        font-size:14px;
+        display:inline;
+    }
+
+    .view-btn{
+        float:right;
+    }
+
+    
+
+    .title_container .author {
+        float: none;
+        margin-right: 10px;
+    }
+
+    .title-wrapper{
+        position:relative;
+    }
+
+    #threadCreate{
+        /*position:absolute;
+        top:5px;
+        right:15px;*/
+    }
+
+    .thread-actions{
+        margin-bottom:5px;
+    }
+    .thread-actions a{
+        text-decoration:none;
+    }
+
+    .thread-actions svg{
+        max-width:19px
+    }
+
+    .delete-svg * path{
+        fill: var(--blueDark);
+    }
+
+    .edit-svg * path{
+        fill: var(--blueDark);
+    }
+
+    .delete-svg:hover * path{
+        fill:red;
+    }
+
+    .edit-svg:hover * path{
+        fill:green;
+    }
+
+    #editSvg{
+        max-width:25px;
+    }
+
+    .action-link {
+        margin-left: 1rem;
+    }
+
+    .floating-btn{
+        position:relative;
+    }
+</style>
+
+<div class="title-wrapper">
+    <div class="title">
+        <h1>Join interesting Topics the community is talking about!</h1>
+    </div>
+
+    @if (authenticated == true)
+    {
+        <div class="floating-btn">
+            @Html.ActionLink("Create New Thread", "Create", "Threads", "", new { @id = "threadCreate", @class = "btn btn-success float" })
+        </div>
+      
+    }
+</div>
+
+
+
+@if (TempData["response"] != null)
+{
+    <div class="alert-success">
+        <strong>@TempData["response"].ToString()</strong>
+    </div>
+}
+
+@if (TempData["RoutingError"] != null)
+{
+    <div class="alert-danger">
+        <strong>@TempData["RoutingError"].ToString()</strong>
+    </div>
+}
+
+
+
+@if (Model != null)
+{
+    var count = 0;
+
+    <div class="thread-wrapper">
+        @foreach (var item in Model.ThreadsViewModel)
+        {
+            count++;
+            var descr_id = "desc_cont" + count;
+            var arrow_id = "descr_arrow" + count;
+         
+            <div class="thread-container">
+                <div class="title_container">
+                    @if (authenticated == true)
+                    {
+                        var update_id = "/Threads/Update/" + item.thread_id;
+                        var delete_id = "/Threads/Delete/" + item.thread_id;
+                        <div class="thread-actions">
+                          
+                            <a href="@update_id">
+                                <svg id="editSvg" xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 27.067 27.067" class="edit-svg">
+                                    <g id="Group_29" data-name="Group 29" transform="translate(0 1.933)">
+                                        <g id="Group_28" data-name="Group 28">
+                                            <path id="Path_101" data-name="Path 101" d="M22.233,45.737a.967.967,0,0,0-.967.967V56.37a.967.967,0,0,1-.967.967H2.9a.967.967,0,0,1-.967-.967V37.037A.967.967,0,0,1,2.9,36.07H14.5a.967.967,0,1,0,0-1.933H2.9a2.9,2.9,0,0,0-2.9,2.9V56.37a2.9,2.9,0,0,0,2.9,2.9H20.3a2.9,2.9,0,0,0,2.9-2.9V46.7A.967.967,0,0,0,22.233,45.737Z" transform="translate(0 -34.137)" fill="#d1dbff" />
+                                        </g>
+                                    </g>
+                                    <g id="Group_31" data-name="Group 31" transform="translate(5.8)">
+                                        <g id="Group_30" data-name="Group 30">
+                                            <path id="Path_102" data-name="Path 102" d="M122.591,1.088a3.7,3.7,0,0,0-5.234,0L104.625,13.82a.977.977,0,0,0-.233.378L102.458,20a.967.967,0,0,0,.916,1.272.982.982,0,0,0,.305-.049l5.8-1.933a.967.967,0,0,0,.378-.234L122.591,6.321A3.7,3.7,0,0,0,122.591,1.088Z" transform="translate(-102.409 -0.004)" fill="#d1dbff" />
+                                        </g>
+                                    </g>
+                                </svg>
+
+                                
+                            </a>
+                            <a href="@delete_id" class="action-link">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 20.968 31.039" class="delete-svg">
+                                    <g id="trash-can" transform="translate(-83.057)" >
+                                        <path id="XMLID_1089_" d="M103.988,93.243l-.677-2.029a1,1,0,0,0-.949-.684H84.72a1,1,0,0,0-.949.684l-.677,2.029a.71.71,0,0,0,.673.934h19.548A.71.71,0,0,0,103.988,93.243Z" transform="translate(0 -85.043)" fill="#ffd1d1" />
+                                        <path id="XMLID_835_" d="M103.145,199.548a1.379,1.379,0,0,0,1.37,1.227h11.744a1.379,1.379,0,0,0,1.37-1.227l2.1-18.858H101.05Z" transform="translate(-16.902 -169.736)" fill="#ffd1d1" />
+                                        <path id="XMLID_831_" d="M197.709,2.607a.789.789,0,0,1,.788-.788h2.679a.789.789,0,0,1,.788.788V3.67h1.819V2.607A2.61,2.61,0,0,0,201.175,0H198.5a2.61,2.61,0,0,0-2.607,2.607V3.67h1.819Z" transform="translate(-105.993)" fill="#ffd1d1" />
+                                    </g>
+                                </svg>
+                            </a>
+                        </div>
+                    }
+                    <div class="topic">
+                        @item.thread_topic
+                    </div>
+                    <div class="view-btn">
+                        @Html.ActionLink("View", "Index", "ThreadMessages", new { id = item.thread_id }, new { @class = "btn btn-darkBlue" })
+
+                    </div>
+
+                    <div class="descr_container">
+                        <div class="cta noSelect" onclick="dropdown(@descr_id, @arrow_id);">
+                            Description <b id="@arrow_id">&#8595;</b>
+                        </div>
+                        <div id="@descr_id" class="content" style="display:none;">
+                            @item.thread_descr
+                        </div>
+
+                    </div>
+
+                    <div class="thread_details">
+                        <div class="author">
+                            @item.author
+                        </div>
+                        <div class="date">
+                            @Html.DisplayFor(x => item.created_date)
+                        </div>
+
+                    </div>
+
+
+                </div>
+            </div>
+        }
+    </div>
+  
+
+
+}
+else
+{
+    <h3>There are currently no Threads open.</h3>
+}
+
+<script type="text/javascript">
+    function dropdown(id, arrowId) {
+        //console.log(id);
+        //console.log(arrowId);
+        var elm = id.style.display;
+
+        if (elm == "none") {
+            id.style.display = "block";
+            arrowId.innerHTML = "&#8593;";
+        } else {
+            id.style.display = "none";
+           arrowId.innerHTML = "&#8595;";
+        }
+    }
+</script>

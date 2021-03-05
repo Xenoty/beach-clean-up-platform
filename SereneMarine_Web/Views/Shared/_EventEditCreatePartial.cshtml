@@ -1,0 +1,197 @@
+﻿@model SereneMarine_Web.ViewModels.Events.EventUpdateModel
+
+<script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v4.5.1/mapbox-gl-geocoder.min.js"></script>
+<link rel="stylesheet" href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v4.5.1/mapbox-gl-geocoder.css" type="text/css" />
+<!-- Promise polyfill script required to use Mapbox GL Geocoder in IE 11 -->
+<script src="https://cdn.jsdelivr.net/npm/es6-promise@4/dist/es6-promise.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/es6-promise@4/dist/es6-promise.auto.min.js"></script>
+
+<style>
+    .map-wrapper{
+        display:grid;
+        grid-template-columns: 1fr;
+    }
+
+    .collapsible {
+        display: block;
+        cursor: pointer;
+        padding: 5px 16px;
+        background-color: var(--primary);
+        width: fit-content;
+        border-radius: 5px;
+        color: var(--secondary);
+        margin-bottom: 1rem;
+    }
+
+    .coordinates-wrapper {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        grid-gap: 3rem;
+    }
+
+    .event-section{
+        display:grid;
+        grid-template-rows: 1fr;
+    }
+
+    .map-wrapper {
+        margin-top: 1rem;
+    }
+</style>
+
+<div class="form-group">
+    @Html.LabelFor(model => model.event_name, htmlAttributes: new { @class = "control-label col-md-2", @autocomplete ="off" })
+    <div class="col-md-10">
+        @Html.EditorFor(model => model.event_name, new { htmlAttributes = new { @class = "form-control", @autocomplete = "off" } })
+        @Html.ValidationMessageFor(model => model.event_name, "", new { @class = "text-danger" })
+    </div>
+</div>
+
+<div class="form-group">
+    @Html.LabelFor(model => model.event_descr, htmlAttributes: new { @class = "control-label col-md-2" })
+    <div class="col-md-10">
+        @Html.EditorFor(model => model.event_descr, new { htmlAttributes = new { @class = "form-control", @autocomplete = "off" } })
+        @Html.ValidationMessageFor(model => model.event_descr, "", new { @class = "text-danger" })
+    </div>
+</div>
+
+<div class="form-group">
+    @Html.LabelFor(model => model.address, htmlAttributes: new { @class = "control-label col-md-2" })
+    <div class="col-md-10">
+        @Html.EditorFor(model => model.address, new { htmlAttributes = new { @class = "form-control" } })
+        @Html.ValidationMessageFor(model => model.address, "", new { @class = "text-danger" })
+    </div>
+</div>
+
+<div class="form-group">
+    <div class="col-md-10">
+        <label class="form-title">Coordinates <i>(optional)</i></label>
+        <label>. Please use the map below, and click on the location.</label>
+        <div class="collapsible" onclick="dropdown('map', 'descr_arrow');">
+            Show Map <b id="descr_arrow">&#8593;</b>
+        </div>
+        <div class="coordinates-wrapper">
+            <div class="event-section">
+                @Html.LabelFor(model => model.latitude, htmlAttributes: new { @class = "control-label col-md-5" })
+                @Html.EditorFor(model => model.latitude, new { htmlAttributes = new { @class = "control-label col-md-5", @id = "latitude" } })
+                @Html.ValidationMessageFor(model => model.latitude, "", new { @class = "text-danger" })
+            </div>
+            <div class="event-section">
+                @Html.LabelFor(model => model.longitude, htmlAttributes: new { @class = "control-label col-md-5" })
+                @Html.EditorFor(model => model.longitude, new { htmlAttributes = new { @class = "control-label col-md-5 cancel", @id = "longitude" } })
+                @Html.ValidationMessageFor(model => model.longitude, "", new { @class = "text-danger" })
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-10">
+        
+        <div class="map-wrapper">
+            <div id="map" style="display:none;width: auto;height: 600px;position: relative;">
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="form-group">
+    @Html.LabelFor(model => model.max_attendance, htmlAttributes: new { @class = "control-label col-md-2" })
+    <div class="col-md-10">
+        @Html.EditorFor(model => model.max_attendance, new { htmlAttributes = new { @class = "form-control" } })
+        @Html.ValidationMessageFor(model => model.max_attendance, "", new { @class = "text-danger" })
+    </div>
+</div>
+
+<div class="form-group">
+    @Html.LabelFor(model => model.event_startdate, htmlAttributes: new { @class = "control-label col-md-2" })
+    <div class="col-md-10">
+        <div class="input-group date" id="datetimepicker1">
+            @Html.EditorFor(model => model.event_startdate, new { htmlAttributes = new { @class = "form-control" } })
+            <span class="input-group-addon">
+                <span class="glyphicon glyphicon-calendar"></span>
+            </span>
+        </div>
+        @Html.ValidationMessageFor(model => model.event_startdate, "", new { @class = "text-danger" })
+    </div>
+</div>
+
+<div class="form-group">
+    @Html.LabelFor(model => model.event_enddate, htmlAttributes: new { @class = "control-label col-md-2" })
+    <div class="col-md-10">
+        <div class="input-group date" id="datetimepicker2">
+            @Html.EditorFor(model => model.event_enddate, new { htmlAttributes = new { @class = "form-control" } })
+            <span class="input-group-addon">
+                <span class="glyphicon glyphicon-calendar"></span>
+            </span>
+        </div>
+        @Html.ValidationMessageFor(model => model.event_enddate, "", new { @class = "text-danger" })
+    </div>
+</div>
+
+<script type="text/javascript">
+
+    mapboxgl.accessToken = 'pk.eyJ1IjoiZGF5bmU5NSIsImEiOiJjazZnOWhpYmUweWVsM2xtdmZvemxxZ3RmIn0.CCVZlLeLo_gsyIMA5iX08w';
+
+    var map = new mapboxgl.Map({
+        container: 'map',
+        style: 'mapbox://styles/mapbox/streets-v11',
+        center: [31.0218, -29.8587], // starting position [lng, lat]
+        zoom: 12 // starting zoom
+
+    });
+
+    map.addControl(
+        new MapboxGeocoder({
+            accessToken: mapboxgl.accessToken,
+            mapboxgl: mapboxgl
+        })
+    );
+
+    map.on('style.load', function () {
+        map.on('click', function (e) {
+            var coordinates = e.lngLat;
+            new mapboxgl.Popup()
+                .setLngLat(coordinates)
+                .setHTML('you clicked here: <br/>' + coordinates)
+                .addTo(map);
+            //now populate fields for lat long
+            //split coordinates 
+            var tempCoord = coordinates.toString().split("(");
+            //console.log("tempCoord: " + tempCoord);
+            var coord = tempCoord[1].replace(")", "");
+            //console.log("coord: " + coord);
+            var FinalCoord = coord.split(",");
+            //console.log("FinalCoord: " + coord);
+            //for (var i = 0; i < FinalCoord.length; i++) {
+            //    FinalCoord[i] = FinalCoord[i].replace(".", ",");
+            //    console.log("FinalCoord[i]: " + FinalCoord[i])
+            //};
+            var lat = FinalCoord[0];
+            //console.log("lat = "+ lat);
+            var long = FinalCoord[1];
+            //console.log("long = "+ long);
+            //console.log(FinalCoord);
+            document.getElementById("latitude").value = lat;
+            document.getElementById("longitude").value = long;
+        });
+    });
+
+
+    function dropdown(id, arrowId) {
+        var elm = document.getElementById(id).style.display;
+
+        if (elm == "none") {
+            document.getElementById(id).style.display = "block";
+            document.getElementById(arrowId).innerHTML = "&#8593;";
+            map.resize();
+        } else {
+            document.getElementById(id).style.display = "none";
+            document.getElementById(arrowId).innerHTML = "&#8595;";
+        }
+    }
+
+    $(function () {
+        $('#datetimepicker1').datetimepicker();
+        $('#datetimepicker2').datetimepicker();
+    });
+</script>

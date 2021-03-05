@@ -1,0 +1,41 @@
+﻿@using Microsoft.AspNetCore.Http;
+@inject IHttpContextAccessor httpAccessor;
+
+<style>
+   li{
+       margin: auto;
+   }
+   a{
+       color: rgba(0,0,0,.7);
+   }
+</style>
+
+@if (httpAccessor.HttpContext.Session.GetString("JWToken") != null
+&& httpAccessor.HttpContext.Session.GetString("JWToken").ToString().Length > 0
+|| User.Identity.IsAuthenticated)
+{
+    <li class="dropdown" style="line-height:1.5;margin:auto;">
+        <a href="#" style="text-decoration:none !important;color:rgba(0,0,0,.7);" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Welcome, @User.Identity.Name <span class="caret"></span></a>
+        <ul class="dropdown-menu" style=" background-color: #d1dbff; border: none; box-shadow: 0px 0px 3px 1px rgba(0,0,0,.2);">
+            <li>
+                <a style="color: rgb(0,0,0,.7);" asp-controller="Account" asp-action="Logout">Logout</a>
+            </li>
+        </ul>
+    </li>
+    @*<li class="nav-item">
+            <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index">Welcome, @User.Identity.Name</a>
+        </li>*@
+    @*<li class="nav-item">
+            <a class="nav-link" asp-area="logout" asp-controller="Home" asp-action="Index">Logout</a>
+        </li>*@
+}
+else
+{
+<li class="nav-item">
+    @Html.ActionLink("Log in", "Login", "Account", new { ReturnUrl = Context.Request.Path }, htmlAttributes: new { id = "loginLink" })
+</li>
+<li class="nav-item">
+    @Html.ActionLink("Register", "Register", "Account", new { ReturnUrl = Context.Request.Path }, htmlAttributes: new { id = "registerLink" })
+
+</li>
+}

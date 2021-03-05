@@ -1,0 +1,34 @@
+﻿@model SereneMarine_Web.ViewModels.Events.EventUpdateModel
+
+@{
+    ViewBag.Title = "Edit Event";
+}
+<div>
+    @Html.ActionLink("Back to List", "Index")
+</div>
+
+@using (Html.BeginForm("Update","Events",FormMethod.Post))
+{
+    @Html.AntiForgeryToken()
+
+<div class="form-horizontal">
+    <hr />
+    @if (ViewBag.ApiError != null)
+    {
+        <div class="alert-danger">
+            <strong>@ViewBag.ApiError.StatusCode.ToString()</strong>
+            <strong>@ViewBag.ApiError.Content.ToString()</strong>
+        </div>
+    }
+    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+    @Html.HiddenFor(model => model.event_id)
+    @await Html.PartialAsync("_EventEditCreatePartial", Model)
+    <div class="form-group">
+        <div class="col-md-offset-2 col-md-10">
+            <input type="submit" value="Save" class="btn btn-success" />
+        </div>
+    </div>
+</div>
+}
+
+

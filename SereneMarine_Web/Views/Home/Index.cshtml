@@ -1,0 +1,111 @@
+﻿@model SereneMarine_Web.Models.ApiStatisticsModel;
+
+@{
+    ViewData["Title"] = "Home Page";
+    var eventsCount = Model.EventsAttended;
+    var petitionsCount = Model.PetitionsSigned;
+    var msgsCount = Model.ThreadMessages;
+}
+<div class="bold">
+    <br />
+    <div class="text-center" id="event_search">
+        <h1 style="font-size:2.2rem;margin-bottom: 1rem;">Be the Difference. Support the Cause.</h1>
+        @*<div class="search-container">
+            <form action="">
+                <input type="text" placeholder="Durban, KwaZulu-Natal" name="search">
+                <img src="~/images/search_icon.png" alt="search_icon" />
+            </form>
+        </div>*@
+    </div>
+
+    <div class="landingGrid">
+        <div id="events" class="item">
+            <div class="item-main-text">
+                <h2><span id="eventsCount" class="counter" data-target="@eventsCount">0</span> people have helped clean-up your beaches.</h2>
+                <h3>Easy, effective and fun.</h3>
+            </div>
+            <a class="cta" asp-area="" asp-controller="Events" asp-action="Index">Join an Event!</a>
+            <a href="#">Learn More ></a>
+        </div>
+        <div id="petitions" class="item">
+            <div class="item-main-text">
+                <h2><span id="petitionsCount" class="counter" data-target="@petitionsCount">0</span> petition signatures so far.</h2>
+                <h3>Contribute to the cause.</h3>
+            </div>
+            <a href="@Url.Action("Index","Petitions")" class="cta">View Petitions</a>
+            <a href="#">Learn More ></a>
+        </div>
+        <div id="donations" class="item">
+            <div class="item-main-text">
+                <h2>10 people have donated to help us keep going.</h2>
+                <h3>Support us in our mission.</h3>
+            </div>
+
+            <a href="@Url.Action("Index","Donations")" class="cta">Donate</a>
+            <a href="#">Learn More ></a>
+        </div>
+        <div id="threads" class="item">
+            <div class="item-main-text">
+                <h2><span id="msgsCount" class="counter" data-target="@msgsCount">0</span> conversations about our environment.</h2>
+                <h3>Join the community.</h3>
+            </div>
+
+            <a href="@Url.Action("Index","Threads")" class="cta">Threads</a>
+            <a href="#">Learn More ></a>
+        </div>
+    </div>
+</div>
+
+@section scripts{ 
+    <script type="text/javascript">
+        $(document).ready(function () {
+            //alert("Document loaded successful!");
+            animateValue("eventsCount", 0, @eventsCount, 500);
+            animateValue("petitionsCount", 0, @petitionsCount, 500);
+            animateValue("msgsCount", 0, @msgsCount, 500);
+        });
+
+        function AnimateNumbers() {
+            const counters = document.querySelectorAll(".counter");
+            const speed = 2000;
+
+            counters.forEach(counter => {
+                const updateCount = () => {
+                    const target = +counter.getAttribute('data-target');
+                    const count = +counter.innerText;
+
+                    const inc = target / speed;
+
+                    if (count < target) {
+                        counter.innerText = Math.ceil(count + inc);
+                        setTimeout(updateCount, 1);
+                    } else {
+                        count.innerHTML = target;
+                    }
+                }
+
+
+                updateCount();
+            });
+        }
+
+        function animateValue(id, start, end, duration) {
+            if (start === end) return;
+            var range = end - start;
+            var current = start;
+            var increment = end > start ? 1 : -1;
+            var stepTime = Math.abs(Math.floor(duration / range));
+            var obj = document.getElementById(id);
+            var timer = setInterval(function () {
+                current += increment;
+                obj.innerHTML = current;
+                if (current == end) {
+                    clearInterval(timer);
+                }
+            }, stepTime);
+        }
+
+       
+    </script>
+}
+

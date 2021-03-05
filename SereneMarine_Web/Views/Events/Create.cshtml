@@ -1,0 +1,40 @@
+﻿@model SereneMarine_Web.ViewModels.Events.EventUpdateModel
+
+@{
+    ViewBag.Title = "Create Event";
+}
+
+<div>
+    @Html.ActionLink("Back to List", "Index")
+</div>
+
+@using (Html.BeginForm("Create", "Events", FormMethod.Post))
+{
+    @Html.AntiForgeryToken()
+
+    <div class="form-horizontal">
+        <hr />
+        @if (ViewBag.ApiError != null)
+        {
+            <div class="alert-danger">
+                <strong>@ViewBag.ApiError.StatusCode.ToString()</strong>
+                <strong>@ViewBag.ApiError.Content.ToString()</strong>
+            </div>
+        }
+        @if (ViewBag.Response != null)
+        {
+            <div class="alert-success">
+                <strong>@ViewBag.Response.ToString()</strong>
+            </div>
+        }
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+        @await Html.PartialAsync("_EventEditCreatePartial", Model)
+        <div class="form-group">
+            <div class="col-md-offset-2 col-md-10">
+                <input type="submit" value="Save" class="btn btn-success" />
+            </div>
+        </div>
+    </div>
+}
+
+

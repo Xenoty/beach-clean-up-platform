@@ -1,0 +1,84 @@
+﻿@model SereneMarine_Web.ViewModels.Threads.ThreadDeleteViewModel
+
+@{
+    ViewData["Title"] = "Delete Thread";
+}
+
+<h3>Are you sure you want to delete this thread?</h3>
+
+<div class="form-horizontal">
+    <hr />
+    @if (ViewBag.ApiError != null)
+    {
+        <div class="alert-danger">
+            <strong>@ViewBag.ApiError.StatusCode.ToString()</strong>
+            <strong>@ViewBag.ApiError.Content.ToString()</strong>
+        </div>
+    }
+    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+    @if (Model == null)
+    {
+        <p>There is nothing to delete.</p>
+    }
+    else
+    {
+    <div class="form-group">
+        @Html.LabelFor(model => model.thread_id, htmlAttributes: new { @class = "control-label col-md-2" })
+        <div class="col-md-10">
+            @Html.DisplayFor(model => model.thread_id, new { htmlAttributes = new { @class = "form-control", @autocomplete = "off" } })
+            @Html.ValidationMessageFor(model => model.thread_id, "", new { @class = "text-danger" })
+        </div>
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(model => model.author, htmlAttributes: new { @class = "control-label col-md-2" })
+        <div class="col-md-10">
+            @Html.DisplayFor(model => model.author, new { htmlAttributes = new { @class = "form-control", @autocomplete = "off" } })
+            @Html.ValidationMessageFor(model => model.author, "", new { @class = "text-danger" })
+        </div>
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(model => model.thread_topic, htmlAttributes: new { @class = "control-label col-md-2" })
+        <div class="col-md-10">
+            @Html.DisplayFor(model => model.thread_topic, new { htmlAttributes = new { @class = "form-control", @autocomplete = "off" } })
+            @Html.ValidationMessageFor(model => model.thread_topic, "", new { @class = "text-danger" })
+        </div>
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(model => model.thread_descr, htmlAttributes: new { @class = "control-label col-md-2" })
+        <div class="col-md-10">
+            @Html.DisplayFor(model => model.thread_descr, new { htmlAttributes = new { @class = "form-control", @autocomplete = "off" } })
+            @Html.ValidationMessageFor(model => model.thread_descr, "", new { @class = "text-danger" })
+        </div>
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(model => model.thread_closed, htmlAttributes: new { @class = "control-label col-md-2" })
+        <div class="col-md-10">
+            @Html.DisplayFor(model => model.thread_closed, new { htmlAttributes = new { @class = "form-control", @autocomplete = "off" } })
+            @Html.ValidationMessageFor(model => model.thread_closed, "", new { @class = "text-danger" })
+        </div>
+    </div>
+
+        @using (Html.BeginForm("Delete", "Threads", FormMethod.Post))
+        {
+            @Html.HiddenFor(model => model.thread_id)
+            @Html.HiddenFor(model => model.thread_topic)
+            <div class="form-group">
+                <div class="col-md-offset-2 col-md-10">
+                    <input type="submit" value="Delete" class="btn btn-danger" />
+                </div>
+            </div>
+        }
+    }
+
+
+</div>
+
+
+<div>
+    @Html.ActionLink("Back to List", "Index")
+</div>

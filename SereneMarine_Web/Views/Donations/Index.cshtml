@@ -1,0 +1,418 @@
+﻿@{
+    ViewData["Title"] = "Donations";
+}
+<style>
+    .donation-cta {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        z-index: 4;
+        transform: translate(-50%, -50%);
+    }
+
+    .donation-btn {
+        padding: .5rem 1rem;
+        border-radius: 15px;
+        background-color: var(--greenDark);
+        color: var(--greenLight);
+        font-size: 2rem;
+        opacity: 1;
+        text-decoration: none;
+        border: 4px solid var(--greenDark);
+        box-shadow: 0px 2px 6px 0px rgba(0,0,0,0.2);
+        font-family: Helvetica-Bold;
+    }
+
+        .donation-btn:hover {
+            color: var(--greenLight);
+            text-decoration: none;
+            /*     opacity: 1;*/
+        }
+
+    .overlay {
+        position: absolute;
+        top: 0px;
+        left: 0px;
+        height: 100%;
+        width: 100%;
+        z-index: 3;
+        background-color: rgba(0,0,0,.4);
+    }
+
+    #carouselExampleFade {
+        position: relative;
+        max-height: 100vh !important;
+        min-height: 100vh !important;
+        overflow: hidden;
+        margin: auto;
+        border-radius: 0px;
+    }
+
+    .carousel-wrapper {
+        position: absolute;
+        max-width: 99.1vw !important;
+        min-width: 99.1vw;
+        padding: 0 !important;
+        margin-top: -15px !important;
+        overflow-x: hidden;
+        left: 0px;
+        /*        z-index: -2;*/
+        top: 0px;
+    }
+
+    #bg-images-car img {
+        /* width: 100%;*/
+        height: 100%;
+        min-height: 100vh;
+        object-position: center;
+        object-fit: cover;
+    }
+
+    .title {
+        background-color: var(--greenDark);
+        margin-bottom: unset;
+    }
+
+        .title h1 {
+            color: var(--greenLight);
+        }
+
+    .donation-content {
+        margin-top: 100vh;
+    }
+
+    .section {
+        padding: .5rem;
+        margin-bottom: 5rem;
+    }
+
+        .section h2 {
+            color: var(--greenDark);
+        }
+
+        .section p {
+            color: var(--greenDark);
+        }
+
+    .section-title {
+        text-align: center;
+        margin-bottom: 3rem;
+    }
+
+    .donation-content h2, .donation-content p {
+        color: var(--greenDark);
+    }
+
+    .donation-content h2 {
+        font-size: 30px;
+        font-family: Helvetica-Bold;
+        text-align: center;
+    }
+
+    .donation-content p {
+        font-size: 17.5px;
+        padding: 0;
+        margin: 0;
+        line-height: 22px;
+    }
+
+    .donation-card {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        grid-gap: 3rem;
+    }
+
+        .donation-card .img {
+            width: fit-content;
+            margin: auto;
+            margin-bottom: 1.5rem;
+        }
+
+        .donation-card img {
+            width: 100%;
+            height: 100%;
+            max-width: 120px;
+            min-height: 120px;
+            display: block;
+        }
+
+        .donation-card .donation_content {
+            padding: 1.5rem;
+            background-color: var(--greenLight);
+            min-height: 120px;
+        }
+
+    .goals {
+        background-color: #F2F2F2;
+        padding: 2rem;
+        margin-bottom:5rem;
+    }
+
+    .goals-wrapper {
+        display: grid;
+        grid-template-columns: .4fr 1fr;
+        grid-gap: 1rem;
+    }
+
+    .goals-img {
+        width: fit-content;
+        margin: auto;
+    }
+
+        .goals-img img {
+            width: 100%;
+            height: 100%;
+            max-width: 140px;
+            display: block;
+        }
+
+    .goals_title {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    #quote-carousel {
+        position: absolute;
+        top: 0px;
+        z-index: 2;
+        margin-top: 85px;
+        width: fit-content;
+        left: 50%;
+        transform: translateX(-50%);
+    }
+
+    .item blockquote {
+        border-left: none;
+        margin: 0;
+    }
+
+        .item blockquote img {
+            margin-bottom: 10px;
+        }
+
+        .item blockquote p:before {
+            content: "\f10d";
+            font-family: 'Fontawesome';
+            float: left;
+            margin-right: 10px;
+        }
+
+        .back-arrow, .down-arrow{
+            position:absolute;
+            z-index:10;
+            cursor:pointer;
+        }
+
+        .back-arrow {
+            max-width: 50px;
+            margin-top: 100px;
+            left: 5%;
+        }
+
+        #left-arrow path{
+            fill:var(--greenLight);
+        }
+
+
+        .down-arrow {
+            position: absolute;
+            top: 50%;
+            left: 60%;
+            transform: translateX(-60%) translateY(-50%);
+            max-width: 40px;
+        }
+
+        .quote-block {
+            position: absolute;
+            left: 50%;
+            top: 15%;
+            transform: translateX(-50%);
+            z-index: 5;
+            min-width: 50%;
+        }
+
+        .quote-wrapper{
+            padding:2rem;
+            background-color:var(--greenLight);
+            opacity:.8;
+            position:relative;
+        }
+
+        .quote-wrapper img{
+            width:100%;
+            max-width:70px;
+            z-index: -1;
+        }
+
+        .quote-wrapper #quote-left{
+            position:absolute;
+            left:20px;
+            top:10px;
+        }
+
+        .quote-wrapper div {
+            color: var(--greenDark);
+        }
+        
+        .quote-wrapper #quote-right{
+            position:absolute;
+            right:20px;
+            bottom:10px;
+        }
+
+        .quote-content{
+            text-align:center;
+            font-size:20px;
+   
+        }
+
+        .quote-author {
+            text-align: center;
+            font-family: Helvetica-Bold;
+            font-size: 2rem;
+  
+        }
+</style>
+
+
+<div class="carousel-wrapper">
+   
+    <div class="back-arrow">
+        <a href="@Url.Action("Index","Home")">
+            <svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 35.301 17.099">
+                <g id="left-arrow" transform="translate(-185 -162)">
+                    <g id="Group_59" data-name="Group 59" transform="translate(185 162)">
+                        <path id="Path_104" data-name="Path 104" d="M33.922,139.171H4.719l4.838-4.814A1.379,1.379,0,0,0,7.611,132.4L.405,139.572h0a1.38,1.38,0,0,0,0,1.952h0L7.61,148.7a1.379,1.379,0,0,0,1.946-1.955l-4.837-4.814h29.2a1.379,1.379,0,1,0,0-2.758Z" transform="translate(0 -132)" fill="#648a8b" />
+                    </g>
+                </g>
+            </svg>
+        </a>   
+    </div>
+    <div class="down-arrow">
+        <a href="#Why">
+            <svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 52 52">
+                <g id="down-arrow" transform="translate(-1739 -910)">
+                    <circle id="Ellipse_5" data-name="Ellipse 5" cx="26" cy="26" r="26" transform="translate(1739 910)" fill="#517755" />
+                    <g id="arrow-point-down" transform="translate(1747.033 926.065)">
+                        <g id="Group_72" data-name="Group 72" transform="translate(0 0)">
+                            <path id="Path_148" data-name="Path 148" d="M17.977,45.193.167,21.743a.817.817,0,1,1,1.3-.987L17.977,42.492,34.486,20.756a.817.817,0,1,1,1.3.987Z" transform="translate(0 -20.431)" fill="#affcb7" />
+                        </g>
+                    </g>
+                </g>
+            </svg>
+        </a>
+
+    </div>
+    <div class="quote-block">
+        <div class="quote-wrapper">
+            <img id="quote-left" src="~/images/icons/quot-mark-start.svg" alt="quote_start"/>
+            <div class="quote-content">
+                <q>Do small things with great love</q>
+            </div>
+            <div class="quote-author">
+                - Mother Theresa
+            </div>
+            <img id="quote-right" src="~/images/icons/quot-mark-end.svg" alt="quote_end"/>
+        </div>
+    </div>
+    <div id="carouselExampleFade" class="carousel slide carousel-fade" data-ride="carousel">
+        @*<div class="overlay">
+
+            </div>*@
+        <div class="donation-cta">
+            <a href="#" class="donation-btn">Contribute Now</a>
+        </div>
+        <div class="carousel-inner" id="bg-images-car">
+            <div class="carousel-item active">
+                <img src="~/images/pollution/fish.jpg" class="d-block w-100" alt="dead_fish">
+            </div>
+            <div class="carousel-item">
+                <img src="~/images/pollution/durban_beachfront.jpg" class="d-block w-100" alt="durban_beachfront">
+            </div>
+            <div class="carousel-item">
+                <img src="~/images/pollution/ocean-plastic-waste.jpg" class="d-block w-100" alt="ocean-waste">
+            </div>
+            <div class="carousel-item">
+                <img src="~/images/pollution/floating_fish.jpg" class="d-block w-100" alt="floating_fish">
+            </div>
+            <div class="carousel-item">
+                <img src="~/images/pollution/Plastic_Beach_Durban_Blue_Lagoon.jpg" class="d-block w-100" alt="Plasti_Durban_Blue_Lagoon">
+            </div>
+            <div class="carousel-item">
+                <img src="~/images/pollution/durban-harbour-plastic-pollution-keolin-moodley-675x900.jpg" class="d-block w-100" alt="durban_harbour">
+            </div>
+        </div>
+        <a class="carousel-control-prev" href="#carouselExampleFade" role="button" data-slide="prev" style="z-index:7">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span class="sr-only">Previous</span>
+        </a>
+        <a class="carousel-control-next" href="#carouselExampleFade" role="button" data-slide="next" style="z-index:7">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <span class="sr-only">Next</span>
+        </a>
+
+    </div>
+
+    
+</div>
+
+
+<div class="donation-content">
+
+    <div class="section" id="Why">
+        <div class="section-title">
+            <h2>Be the Difference. Support the Cause.</h2>
+        </div>
+        <div class="donation-card">
+            <div class="item">
+                <div class="img">
+                    <img src="~/images/icons/earth-globe.svg" alt="Globe" />
+                </div>
+                <div class="donation_content">
+                    <p>
+                        You can play a large role in making the world and our oceans a better place.
+                    </p>
+                </div>
+            </div>
+            <div class="item">
+                <div class="img">
+                    <img src="~/images/icons/cloudy.svg" alt="Clouds" />
+                </div>
+                <div class="donation_content">
+                    <p>
+                        The oceans help regulate the climate. A disrupted ocean leads to disruptive weather.
+                    </p>
+                </div>
+            </div>
+            <div class="item">
+                <div class="img">
+                    <img src="~/images/icons/wave.svg" alt="Wave" />
+                </div>
+                <div class="donation_content">
+                    <p>
+                        Everyone deserves a hazard-free environment.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="goals">
+        <div class="goals-wrapper">
+            <div class="goals-img">
+                <img src="~/images/icons/goal.svg" alt="Goals" />
+            </div>
+            <div class="goals-info">
+                <div class="goals_title">
+                    <h2>What We Strive to Do</h2>
+                </div>
+                <div class="goals_content">
+                    <p>At Serene Marine we aim to increase the participation in beach clean up events while creating pollution awareness by making it easier to find these events and participate. This will result in a safer and cleaner ecosystem for our beloved beaches and marine life.</p>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
