@@ -1,13 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
-namespace SereneMarine_Web.Helpers
+﻿namespace SereneMarine_Web.Helpers
 {
     public static class SD
     {
-        public static string apiBaseURL = "https://serenemarineapi.azurewebsites.net/";
+        public static string apiBaseURL = "http://localhost:4000/";
         public static string UserPath = apiBaseURL + "users/";
         public static string EventsPath = apiBaseURL + "Events/";
         public static string EventAttendancePath = apiBaseURL + "EventAttendance/";
