@@ -1,12 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Claims;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authorization;
-using AutoMapper;
+﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
+using System;
+using System.Collections.Generic;
 using WebApi.Entities;
 using WebApi.Helpers;
 using WebApi.Models.EventAttendance;
@@ -22,16 +18,13 @@ namespace WebApi.Controllers
     {
         private IEventAttendanceService _attendanceService;
         private IMapper _mapper;
-        private readonly AppSettings _appSettings;
 
         public EventAttendanceController(
             IEventAttendanceService attendanceService,
-            IMapper mapper,
-            IOptions<AppSettings> appSettings)
+            IMapper mapper)
         {
             _attendanceService = attendanceService;
             _mapper = mapper;
-            _appSettings = appSettings.Value;
         }
 
         /// <summary>
@@ -130,7 +123,5 @@ namespace WebApi.Controllers
             _attendanceService.DeleteByEventAndUser(event_id, user_id);
             return Ok();
         }
-
-
     }
 }

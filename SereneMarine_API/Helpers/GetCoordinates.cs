@@ -1,14 +1,7 @@
-﻿using GoogleMaps.LocationServices;
-using Microsoft.Extensions.Configuration;
-using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using Newtonsoft.Json;
 using System.Net;
 using System.Net.Http;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using WebApi.Models;
 using WebApi.Models.Events;
 
 namespace WebApi.Helpers
@@ -37,22 +30,22 @@ namespace WebApi.Helpers
             }
 
             //READING DATA FROM JSON RESPONSE 
-            var jsonString = await response.Content.ReadAsStringAsync();
+            string jsonString = await response.Content.ReadAsStringAsync();
             //assign to dynamic obj to access specific elements
             dynamic obj = JsonConvert.DeserializeObject(jsonString);
 
             //check country location first, if not south africa then don't store coordinates
-            var country = obj.features[0].place_name;
-            string test = country.ToString();
+            dynamic country = obj.features[0].place_name;
+
             if (!country.ToString().Contains("South Africa"))
             {
                 return ecm;
             }
-            var coordinates = obj.features[0].geometry.coordinates;
+
+            dynamic coordinates = obj.features[0].geometry.coordinates;
             //assign values to model
             ecm.latitude = coordinates[0];
             ecm.longitude = coordinates[1];
-
 
             return ecm;
         }

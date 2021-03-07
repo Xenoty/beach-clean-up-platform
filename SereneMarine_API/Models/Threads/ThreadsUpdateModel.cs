@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
-namespace WebApi.Models.Threads
+﻿namespace WebApi.Models.Threads
 {
     public class ThreadsUpdateModel
     {

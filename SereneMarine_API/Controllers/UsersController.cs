@@ -1,17 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using Microsoft.AspNetCore.Mvc;
-using AutoMapper;
-using System.IdentityModel.Tokens.Jwt;
-using WebApi.Helpers;
-using Microsoft.Extensions.Options;
-using System.Text;
-using Microsoft.IdentityModel.Tokens;
-using System.Security.Claims;
+﻿using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
-using WebApi.Services;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
+using System;
+using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
 using WebApi.Entities;
+using WebApi.Helpers;
 using WebApi.Models.Users;
+using WebApi.Services;
 
 namespace WebApi.Controllers
 {
@@ -55,7 +55,7 @@ namespace WebApi.Controllers
         /// <response code="400">authentication failed</response>  
         [AllowAnonymous]
         [HttpPost("authenticate")]
-        public IActionResult Authenticate([FromBody]AuthenticateModel model)
+        public IActionResult Authenticate([FromBody] AuthenticateModel model)
         {
             var user = _userService.Authenticate(model.Email_address, model.Password);
 
@@ -117,7 +117,7 @@ namespace WebApi.Controllers
         /// <response code="400">if item is null or required</response>  
         [AllowAnonymous]
         [HttpPost("register")]
-        public IActionResult Register([FromBody]RegisterModel model)
+        public IActionResult Register([FromBody] RegisterModel model)
         {
             // map model to entity
             var user = _mapper.Map<User>(model);
@@ -165,7 +165,7 @@ namespace WebApi.Controllers
         /// Updates user by id
         /// </summary>
         [HttpPut("update/{id}")]
-        public IActionResult Update(string id, [FromBody]UpdateModel model)
+        public IActionResult Update(string id, [FromBody] UpdateModel model)
         {
             // map model to entity and set id
             var user = _mapper.Map<User>(model);

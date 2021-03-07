@@ -1,13 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Claims;
-using System.Threading.Tasks;
-using AutoMapper;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
+using System;
+using System.Collections.Generic;
+using System.Security.Claims;
 using WebApi.Entities;
 using WebApi.Helpers;
 using WebApi.Models.Events;
@@ -23,16 +19,13 @@ namespace WebApi.Controllers
     {
         private IEventService _eventService;
         private IMapper _mapper;
-        private readonly AppSettings _appSettings;
 
         public EventsController(
             IEventService eventService,
-            IMapper mapper,
-            IOptions<AppSettings> appSettings)
+            IMapper mapper)
         {
             _eventService = eventService;
             _mapper = mapper;
-            _appSettings = appSettings.Value;
         }
 
 
@@ -45,8 +38,6 @@ namespace WebApi.Controllers
 
             try
             {
-                ////initalise values and assign to model value
-   
                 //get the userid by using the ClaimTypes.Name
                 ev.User_Id = User.FindFirstValue(ClaimTypes.Name);
                 ev.event_createddate = DateTime.Now;

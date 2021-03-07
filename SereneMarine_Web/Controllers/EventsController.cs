@@ -19,17 +19,11 @@ using System.Threading.Tasks;
 namespace SereneMarine_Web.Controllers
 {
     [Authorize(Roles = "Admin")]
-    public class EventsController : Controller
+    public class EventsController : BaseController
     {
-        private HttpClient client = new HttpClient();
-        private HttpResponseMessage response = null;
-
         #region Views
 
-        public ActionResult Create()
-        {
-            return View();
-        }
+        public ActionResult Create() => View();
 
         #endregion
 

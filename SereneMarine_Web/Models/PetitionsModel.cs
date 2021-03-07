@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace SereneMarine_Web.Models
 {
@@ -11,7 +9,7 @@ namespace SereneMarine_Web.Models
         public string id { get; set; }
         public string petition_id { get; set; }
         public string User_Id { get; set; }
-     
+
         [Display(Name = "Name")]
         public string name { get; set; }
 

@@ -1,11 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
-namespace WebApi.Models
+﻿namespace WebApi.Models
 {
-
     public class UserDatabaseSettings : IUserDatabseSettings
     {
         public string UsersCollectionName { get; set; }
@@ -31,5 +25,5 @@ namespace WebApi.Models
         string ConnectionString { get; set; }
         string DatabaseName { get; set; }
     }
-    
+
 }

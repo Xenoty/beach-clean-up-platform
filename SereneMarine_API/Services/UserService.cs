@@ -24,8 +24,8 @@ namespace WebApi.Services
 
         public UserService(IUserDatabseSettings settings)
         {
-            var client = new MongoClient(settings.ConnectionString);
-            var database = client.GetDatabase(settings.DatabaseName);
+            MongoClient client = new MongoClient(settings.ConnectionString);
+            IMongoDatabase database = client.GetDatabase(settings.DatabaseName);
 
             _users = database.GetCollection<User>(settings.UsersCollectionName);
         }
@@ -35,7 +35,7 @@ namespace WebApi.Services
             if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(password))
                 return null;
 
-            var user = _users.Find<User>(x => x.Email_address == email).FirstOrDefault();
+            User user = _users.Find(x => x.Email_address == email).FirstOrDefault();
 
             // check if username exists
             if (user == null)
@@ -45,20 +45,14 @@ namespace WebApi.Services
             if (!VerifyPasswordHash(password, user.PasswordHash, user.PasswordSalt))
                 return null;
 
-
-
             // authentication successful
             return user;
         }
 
         //get users as list and not as IEnumberable
-        public List<User> GetAll() =>
-           _users.Find(user => true).ToList();
+        public List<User> GetAll() => _users.Find(user => true).ToList();
 
-        public User GetById(string id)
-        {
-            return _users.Find<User>(user => user.User_Id == id).FirstOrDefault();
-        }
+        public User GetById(string id) => _users.Find(user => user.User_Id == id).FirstOrDefault();
 
         public User Create(User user, string password)
         {
@@ -69,12 +63,12 @@ namespace WebApi.Services
             // throw error if the new username is already taken
             if (!string.IsNullOrEmpty(user.Username))
             {
-                if (_users.Find<User>(x => x.Username == user.Username).Any())
+                if (_users.Find(x => x.Username == user.Username).Any())
                     throw new AppException("Username \"" + user.Username + "\" is already taken");
             }
 
             // throw error if the new email is already taken
-            if (_users.Find<User>(x => x.Email_address == user.Email_address).Any())
+            if (_users.Find(x => x.Email_address == user.Email_address).Any())
                 throw new AppException("Email \"" + user.Email_address + "\" is already taken");
 
             byte[] passwordHash, passwordSalt;
@@ -83,7 +77,7 @@ namespace WebApi.Services
             user.PasswordHash = passwordHash;
             user.PasswordSalt = passwordSalt;
 
-           _users.InsertOne(user);
+            _users.InsertOne(user);
 
             return user;
         }
@@ -91,7 +85,7 @@ namespace WebApi.Services
         public void Update(User userParam, string password = null)
         {
             //var user = _context.Users.Find(userParam.Id);
-            var user = _users.Find<User>(user => user.User_Id == userParam.User_Id).SingleOrDefault();
+            User user = _users.Find(user => user.User_Id == userParam.User_Id).SingleOrDefault();
 
             if (user == null)
                 throw new AppException("User not found");
@@ -100,11 +94,11 @@ namespace WebApi.Services
             if (!string.IsNullOrWhiteSpace(userParam.Username) && userParam.Username != user.Username)
             {
                 // throw error if the new username is already taken
-                if (_users.Find<User>(x => x.Username == userParam.Username).FirstOrDefault() != null)
+                if (_users.Find(x => x.Username == userParam.Username).FirstOrDefault() != null)
                     throw new AppException("Username " + userParam.Username + " is already taken");
-                
+
                 // throw error if the new email is already taken
-                if (_users.Find<User>(x => x.Email_address == userParam.Email_address).FirstOrDefault() != null)
+                if (_users.Find(x => x.Email_address == userParam.Email_address).FirstOrDefault() != null)
                     throw new AppException("Email " + userParam.Email_address + " is already taken");
 
                 user.Username = userParam.Username;
@@ -115,16 +109,16 @@ namespace WebApi.Services
                 user.FirstName = userParam.FirstName;
 
             if (!string.IsNullOrWhiteSpace(userParam.LastName))
-                user.LastName = userParam.LastName;      
-            
+                user.LastName = userParam.LastName;
+
             if (!string.IsNullOrWhiteSpace(userParam.Role))
                 user.Role = userParam.Role;
-            
+
             if (!string.IsNullOrWhiteSpace(userParam.ContactNo.ToString()) || userParam.ContactNo != 0)
                 user.ContactNo = userParam.ContactNo;
-            
+
             if (!string.IsNullOrWhiteSpace(userParam.Address))
-                user.Address = userParam.Address;        
+                user.Address = userParam.Address;
 
             // update password if provided
             if (!string.IsNullOrWhiteSpace(password))
@@ -141,21 +135,21 @@ namespace WebApi.Services
 
         public void Delete(string id)
         {
-            var user = _users.Find<User>(user => user.User_Id == id).FirstOrDefault();
+            User user = _users.Find(user => user.User_Id == id).FirstOrDefault();
             if (user != null)
             {
                 _users.DeleteOne(user => user.User_Id == id);
             }
         }
 
-        // private helper methods
+        #region Private Methods
 
         private static void CreatePasswordHash(string password, out byte[] passwordHash, out byte[] passwordSalt)
         {
             if (password == null) throw new ArgumentNullException("password");
             if (string.IsNullOrWhiteSpace(password)) throw new ArgumentException("Value cannot be empty or whitespace only string.", "password");
 
-            using (var hmac = new System.Security.Cryptography.HMACSHA512())
+            using (System.Security.Cryptography.HMACSHA512 hmac = new System.Security.Cryptography.HMACSHA512())
             {
                 passwordSalt = hmac.Key;
                 passwordHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
@@ -169,9 +163,9 @@ namespace WebApi.Services
             if (storedHash.Length != 64) throw new ArgumentException("Invalid length of password hash (64 bytes expected).", "passwordHash");
             if (storedSalt.Length != 128) throw new ArgumentException("Invalid length of password salt (128 bytes expected).", "passwordHash");
 
-            using (var hmac = new System.Security.Cryptography.HMACSHA512(storedSalt))
+            using (System.Security.Cryptography.HMACSHA512 hmac = new System.Security.Cryptography.HMACSHA512(storedSalt))
             {
-                var computedHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
+                byte[] computedHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
                 for (int i = 0; i < computedHash.Length; i++)
                 {
                     if (computedHash[i] != storedHash[i]) return false;
@@ -180,5 +174,7 @@ namespace WebApi.Services
 
             return true;
         }
+
+        #endregion
     }
 }

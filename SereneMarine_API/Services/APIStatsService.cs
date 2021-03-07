@@ -1,8 +1,5 @@
 ﻿using MongoDB.Driver;
-using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using WebApi.Entities;
 using WebApi.Models;
 
@@ -40,19 +37,10 @@ namespace WebApi.Services
             return stats;
         }
 
-        public int CountPetitionsSigned()
-        {
-            return _ps.Find(x => true).ToList().Count();
-        }
+        public int CountPetitionsSigned() => _ps.Find(x => true).ToList().Count();
 
-        public int CountEventsAttended()
-        {
-            return _ea.Find(x => true).ToList().Count();
-        }
+        public int CountEventsAttended() => _ea.Find(x => true).ToList().Count();
 
-        public int CountThreadMessages()
-        {
-            return _tm.Find(x => true).ToList().Count();
-        }
+        public int CountThreadMessages() => _tm.Find(x => true).ToList().Count();
     }
 }

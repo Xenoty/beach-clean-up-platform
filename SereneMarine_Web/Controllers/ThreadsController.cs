@@ -1,29 +1,34 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using SereneMarine_Web.Models;
-using SereneMarine_Web.Helpers;
-using System.Net.Http;
-using Newtonsoft.Json;
-using System.Net;
-using Microsoft.AspNetCore.Authorization;
-using SereneMarine_Web.ViewModels.Threads;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
+using SereneMarine_Web.Helpers;
+using SereneMarine_Web.Models;
+using SereneMarine_Web.ViewModels.Threads;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
-using System;
-using SereneMarine_Web.ViewModels.Events;
-using Microsoft.AspNetCore.Mvc.Rendering;
+using System.Threading.Tasks;
 
 namespace SereneMarine_Web.Controllers
 {
     [Authorize(Roles = "Admin")]
-    public class ThreadsController : Controller
+    public class ThreadsController : BaseController
     {
-        //
-        HttpClient client = new HttpClient();
-        HttpResponseMessage response = null;
+        #region Views
+
+        public ActionResult Create()
+        {
+            return View();
+        }
+
+        #endregion
+
+        #region Tasks
+
         [AllowAnonymous]
         [HttpGet]
         public async Task<IActionResult> Index()
@@ -51,11 +56,6 @@ namespace SereneMarine_Web.Controllers
             model.ThreadsViewModel.OrderBy(a => a.created_date);
 
             return View(model);
-        }
-
-        public ActionResult Create()
-        {
-            return View();
         }
 
         [HttpPost]
@@ -203,7 +203,6 @@ namespace SereneMarine_Web.Controllers
             return RedirectToAction("Index", "Threads");
         }
 
-        //VIEW
         [HttpGet]
         public async Task<IActionResult> Delete(string id)
         {
@@ -263,7 +262,7 @@ namespace SereneMarine_Web.Controllers
                 };
 
                 TempData["ApiError"] = JsonConvert.SerializeObject(exception);
-                return RedirectToAction("Delete", "Threads", new { id = id});
+                return RedirectToAction("Delete", "Threads", new { id = id });
             }
 
             TempData["response"] = $"Thread \"{thread_topic}\" successfully deleted on {DateTime.Now}";
@@ -271,7 +270,6 @@ namespace SereneMarine_Web.Controllers
             return RedirectToAction("Index");
         }
 
-
-
+        #endregion
     }
 }

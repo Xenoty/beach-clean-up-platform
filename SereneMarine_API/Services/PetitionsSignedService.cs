@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using WebApi.Entities;
 using WebApi.Helpers;
 using WebApi.Models;
@@ -34,18 +33,11 @@ namespace WebApi.Services
             _pet = database.GetCollection<Petition>(settings.PetitionsCollectionName);
         }
 
-        public List<PetitionSigned> GetAll() =>
-            _ps.Find(ps => true).ToList();
+        public List<PetitionSigned> GetAll() => _ps.Find(ps => true).ToList();
 
-        public List<PetitionSigned> GetByPetition(string id)
-        {
-            return _ps.Find<PetitionSigned>(ps => ps.petition_id == id).ToList();
-        }
+        public List<PetitionSigned> GetByPetition(string id) => _ps.Find(ps => ps.petition_id == id).ToList();
 
-        public List<PetitionSigned> GetByUser(string id)
-        {
-            return _ps.Find<PetitionSigned>(ps => ps.User_Id == id).ToList();
-        }
+        public List<PetitionSigned> GetByUser(string id) => _ps.Find(ps => ps.User_Id == id).ToList();
 
         public PetitionSigned Create(PetitionSigned ps)
         {
@@ -70,7 +62,7 @@ namespace WebApi.Services
                 throw new AppException($"Event {ps.petition_id} does not exist");
 
             // throw error if the user has already accepted an event abd event exists
-            if (_ps.Find<PetitionSigned>(x => x.User_Id == ps.User_Id && x.petition_id == ps.petition_id).FirstOrDefault() != null)
+            if (_ps.Find(x => x.User_Id == ps.User_Id && x.petition_id == ps.petition_id).FirstOrDefault() != null)
                 throw new AppException("User has already participated in event");
 
             if (ps.signed_date == null || string.IsNullOrEmpty(Convert.ToString(ps.signed_date)) || ps.signed_date == default(DateTime))
@@ -82,7 +74,7 @@ namespace WebApi.Services
         }
         public void DeleteByPetition(string id)
         {
-            var ps = _ps.Find<PetitionSigned>(ps => ps.petition_id == id).FirstOrDefault();
+            PetitionSigned ps = _ps.Find(ps => ps.petition_id == id).FirstOrDefault();
             if (ps != null)
             {
                 _ps.DeleteMany(ps => ps.petition_id == id);
@@ -90,7 +82,7 @@ namespace WebApi.Services
         }
         public void DeleteByUser(string id)
         {
-            var ps = _ps.Find<PetitionSigned>(ps => ps.User_Id == id).FirstOrDefault();
+            PetitionSigned ps = _ps.Find(ps => ps.User_Id == id).FirstOrDefault();
             if (ps != null)
             {
                 _ps.DeleteMany(ps => ps.User_Id == id);
@@ -99,12 +91,11 @@ namespace WebApi.Services
 
         public void DeleteByPetitionAndUser(string petition_id, string user_id)
         {
-            var ps = _ps.Find<PetitionSigned>(ps => ps.petition_id == petition_id && ps.User_Id == user_id).FirstOrDefault();
+            PetitionSigned ps = _ps.Find(ps => ps.petition_id == petition_id && ps.User_Id == user_id).FirstOrDefault();
             if (ps != null)
             {
                 _ps.DeleteOne(ps => ps.petition_id == petition_id && ps.User_Id == user_id);
             }
         }
-
     }
 }

@@ -2,8 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace SereneMarine_Web.ViewModels.Events
 {
@@ -20,6 +18,7 @@ namespace SereneMarine_Web.ViewModels.Events
     {
         [Display(Name = "Upcomming")]
         public bool Current { get; set; }
+
         [Display(Name = "Past")]
         public bool Completed { get; set; }
 
@@ -29,6 +28,7 @@ namespace SereneMarine_Web.ViewModels.Events
         [Display(Name = "Start")]
         [DisplayFormat(DataFormatString = "{0:MM/dd/yyyy HH:MM}")]
         public DateTime? event_startdate { get; set; }
+
         [Display(Name = "End")]
         [DisplayFormat(DataFormatString = "{0:MM/dd/yyyy HH:MM}")]
         public DateTime? event_enddate { get; set; }

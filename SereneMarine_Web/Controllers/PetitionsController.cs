@@ -1,31 +1,35 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
+using SereneMarine_Web.Helpers;
+using SereneMarine_Web.Models;
+using SereneMarine_Web.ViewModels.Petitions;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using SereneMarine_Web.Models;
-using SereneMarine_Web.Helpers;
 using System.Net.Http;
-using Newtonsoft.Json;
-using System.Net;
-using Microsoft.AspNetCore.Authorization;
-using SereneMarine_Web.ViewModels.Petitions;
-using Microsoft.AspNetCore.Http;
 using System.Net.Http.Headers;
-using System.Text;
 using System.Security.Claims;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace SereneMarine_Web.Controllers
 {
     [Authorize(Roles = "Admin")]
-    public class PetitionsController : Controller
+    public class PetitionsController : BaseController
     {
-        HttpClient client = new HttpClient();
-        HttpResponseMessage responsePs = null;
-        HttpResponseMessage response = null;
+        #region Views
+
+        public ActionResult Create() => View();
+
+        #endregion
+
+        #region Tasks
+
         [AllowAnonymous]
         [HttpGet]
-        public async Task <IActionResult> Index()
+        public async Task<IActionResult> Index()
         {
             PetitionsModel model = new PetitionsModel();
 
@@ -48,12 +52,6 @@ namespace SereneMarine_Web.Controllers
             model.PetitionsViewModel.OrderBy(a => a.created_date);
 
             return View(model);
-        }
-
-        public ActionResult Create()
-        {
-          
-            return View();
         }
 
         [HttpPost]
@@ -118,7 +116,7 @@ namespace SereneMarine_Web.Controllers
             //initalize variables petitions table
             PetitionDetailViewModel model = new PetitionDetailViewModel();
 
-          
+
 
             //build the url for petitions table request
             string baseUrl = SD.PetitionsPath;
@@ -152,7 +150,7 @@ namespace SereneMarine_Web.Controllers
             model.petitionsSigned = JsonConvert.DeserializeObject<List<PetitionsSignedViewModel>>(jsonString);
             model.petitionsSigned = model.petitionsSigned.Take(5).OrderBy(x => x.signed_date).ToList();
 
-            ViewBag.Percent = Convert.ToString(Math.Round(((double)model.current_signatures / (double)model.required_signatures) * 100, 2)).Replace(",",".");
+            ViewBag.Percent = Convert.ToString(Math.Round(((double)model.current_signatures / (double)model.required_signatures) * 100, 2)).Replace(",", ".");
 
             return View(model);
         }
@@ -369,6 +367,7 @@ namespace SereneMarine_Web.Controllers
             return RedirectToAction("Index");
         }
 
+        #endregion
 
     }
 }

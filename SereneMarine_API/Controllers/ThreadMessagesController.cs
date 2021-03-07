@@ -1,15 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Claims;
-using System.Threading.Tasks;
-using AutoMapper;
+﻿using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
+using System;
+using System.Collections.Generic;
+using System.Security.Claims;
 using WebApi.Entities;
 using WebApi.Helpers;
-using WebApi.Models.PetitionsSigned;
 using WebApi.Models.ThreadMessages;
 using WebApi.Services;
 
@@ -161,6 +158,5 @@ namespace WebApi.Controllers
             _threadMessagesService.DeleteByThreadAndUser(thread_id, user_id);
             return Ok();
         }
-
     }
 }

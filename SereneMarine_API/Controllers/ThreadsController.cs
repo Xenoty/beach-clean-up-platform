@@ -1,12 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Claims;
-using System.Threading.Tasks;
-using AutoMapper;
+﻿using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
+using System;
+using System.Collections.Generic;
+using System.Security.Claims;
 using WebApi.Entities;
 using WebApi.Helpers;
 using WebApi.Models.Threads;
@@ -22,16 +20,13 @@ namespace WebApi.Controllers
     {
         private IThreadsService _threadService;
         private IMapper _mapper;
-        private readonly AppSettings _appSettings;
 
         public ThreadsController(
             IThreadsService threadService,
-            IMapper mapper,
-            IOptions<AppSettings> appSettings)
+            IMapper mapper)
         {
             _threadService = threadService;
             _mapper = mapper;
-            _appSettings = appSettings.Value;
         }
 
         /// <summary>
@@ -134,6 +129,7 @@ namespace WebApi.Controllers
             _threadService.DeleteByThread(thread_id);
             return Ok();
         }
+
         /// <summary>
         /// Deletes thread by user_id
         /// </summary>
@@ -145,6 +141,5 @@ namespace WebApi.Controllers
             _threadService.DeleteByUser(user_id);
             return Ok();
         }
-
     }
 }

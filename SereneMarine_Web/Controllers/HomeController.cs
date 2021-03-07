@@ -1,17 +1,24 @@
-﻿using System.Diagnostics;
-using System.Net.Http;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using SereneMarine_Web.Helpers;
 using SereneMarine_Web.Models;
+using System.Diagnostics;
+using System.Threading.Tasks;
 
 namespace SereneMarine_Web.Controllers
 {
-    public class HomeController : Controller
+    public class HomeController : BaseController
     {
-        private HttpClient client = new HttpClient();
-        private HttpResponseMessage response = null;
+        #region Views
+
+        public IActionResult Privacy() => View();
+
+        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+        public IActionResult Error() => View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+
+        #endregion
+
+        #region Task Methods
 
         public async Task<IActionResult> Index()
         {
@@ -35,15 +42,6 @@ namespace SereneMarine_Web.Controllers
             return View(model);
         }
 
-        public IActionResult Privacy()
-        {
-            return View();
-        }
-
-        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        public IActionResult Error()
-        {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
-        }
+        #endregion
     }
 }

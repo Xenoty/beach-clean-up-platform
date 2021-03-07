@@ -1,10 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using AutoMapper;
+﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
+using System;
+using System.Collections.Generic;
 using WebApi.Entities;
 using WebApi.Helpers;
 using WebApi.Models.PetitionsSigned;
@@ -19,16 +17,13 @@ namespace WebApi.Controllers
     {
         private IPetitionsSignedService _petitionSignedService;
         private IMapper _mapper;
-        private readonly AppSettings _appSettings;
 
         public PetitionsSignedController(
             IPetitionsSignedService petitionsSignedService,
-            IMapper mapper,
-            IOptions<AppSettings> appSettings)
+            IMapper mapper)
         {
             _petitionSignedService = petitionsSignedService;
             _mapper = mapper;
-            _appSettings = appSettings.Value;
         }
 
         [HttpGet]
@@ -96,6 +91,7 @@ namespace WebApi.Controllers
             _petitionSignedService.DeleteByPetition(petition_id);
             return Ok();
         }
+
         /// <summary>
         /// Deletes petitions signed by user_id
         /// </summary>
@@ -119,6 +115,5 @@ namespace WebApi.Controllers
             _petitionSignedService.DeleteByPetitionAndUser(petition_id, user_id);
             return Ok();
         }
-
     }
 }

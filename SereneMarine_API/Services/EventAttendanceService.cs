@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using WebApi.Entities;
 using WebApi.Helpers;
 using WebApi.Models;
@@ -26,8 +25,8 @@ namespace WebApi.Services
 
         public EventAttendanceService(IUserDatabseSettings settings)
         {
-            var client = new MongoClient(settings.ConnectionString);
-            var database = client.GetDatabase(settings.DatabaseName);
+            MongoClient client = new MongoClient(settings.ConnectionString);
+            IMongoDatabase database = client.GetDatabase(settings.DatabaseName);
 
             _ea = database.GetCollection<EventAttendance>(settings.EventAttendanceCollectionName);
             _events = database.GetCollection<Event>(settings.EventsCollectionName);
@@ -36,20 +35,17 @@ namespace WebApi.Services
         public List<EventAttendance> GetAll() =>
        _ea.Find(ea => true).ToList();
 
-        public List<EventAttendance> GetAttendanceByEvent(string id)
-        {
-            return _ea.Find<EventAttendance>(ea => ea.event_id == id).ToList();
-        } 
-        
+        public List<EventAttendance> GetAttendanceByEvent(string id) => _ea.Find(ea => ea.event_id == id).ToList();
+
         public List<EventAttendance> GetAttendanceByUser(string id, bool value)
         {
             //check bool value returned
             if (value == null)
             {
                 value = false;
-            }         
+            }
 
-            return _ea.Find<EventAttendance>(ea => ea.User_Id == id && ea.event_attended == value).ToList();
+            return _ea.Find(ea => ea.User_Id == id && ea.event_attended == value).ToList();
         }
 
         public EventAttendance Create(EventAttendance ea)
@@ -75,7 +71,7 @@ namespace WebApi.Services
                 throw new AppException($"Event {ea.event_id} does not exist");
 
             // throw error if the user has already accepted an event abd event exists
-            if (_ea.Find<EventAttendance>(x => x.User_Id == ea.User_Id && x.event_id == ea.event_id).FirstOrDefault() != null)
+            if (_ea.Find(x => x.User_Id == ea.User_Id && x.event_id == ea.event_id).FirstOrDefault() != null)
                 throw new AppException("User has already participated in event");
 
             if (ea.date_accepted == null || string.IsNullOrEmpty(Convert.ToString(ea.date_accepted)) || ea.date_accepted == default(DateTime))
@@ -87,15 +83,15 @@ namespace WebApi.Services
         }
         public void DeleteByEvent(string id)
         {
-            var ea = _ea.Find<EventAttendance>(ea => ea.event_id == id).FirstOrDefault();
+            EventAttendance ea = _ea.Find(ea => ea.event_id == id).FirstOrDefault();
             if (ea != null)
             {
                 _ea.DeleteMany(ea => ea.event_id == id);
             }
-        }      
+        }
         public void DeleteByUser(string id)
         {
-            var ea = _ea.Find<EventAttendance>(ea => ea.User_Id == id).FirstOrDefault();
+            EventAttendance ea = _ea.Find(ea => ea.User_Id == id).FirstOrDefault();
             if (ea != null)
             {
                 _ea.DeleteMany(ea => ea.User_Id == id);
@@ -104,12 +100,11 @@ namespace WebApi.Services
 
         public void DeleteByEventAndUser(string event_id, string user_id)
         {
-            var ea = _ea.Find<EventAttendance>(ea => ea.event_id == event_id && ea.User_Id == user_id).FirstOrDefault();
+            EventAttendance ea = _ea.Find(ea => ea.event_id == event_id && ea.User_Id == user_id).FirstOrDefault();
             if (ea != null)
             {
                 _ea.DeleteOne(ea => ea.event_id == event_id && ea.User_Id == user_id);
             }
         }
-
     }
 }

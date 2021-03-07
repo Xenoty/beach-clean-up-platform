@@ -1,25 +1,21 @@
-﻿using System.Threading.Tasks;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Hosting;
-using WebApi.Helpers;
-using WebApi.Services;
-using AutoMapper;
-using Microsoft.IdentityModel.Tokens;
-using System.Text;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using System;
-using WebApi.Models;
-using System.Configuration;
 using Microsoft.Extensions.Options;
-using System.Reflection;
-using System.IO;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using Swashbuckle.AspNetCore.Filters;
+using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Reflection;
+using System.Text;
+using System.Threading.Tasks;
+using WebApi.Helpers;
+using WebApi.Models;
+using WebApi.Services;
 
 namespace WebApi
 {
@@ -27,13 +23,6 @@ namespace WebApi
     {
         private readonly IWebHostEnvironment _env;
         private readonly IConfiguration _configuration;
-
-        //public Startup(IConfiguration configuration)
-        //{
-        //    Configuration = configuration;
-        //}
-
-        //public IConfiguration Configuration { get; }
 
         public Startup(IWebHostEnvironment env, IConfiguration configuration)
         {
@@ -73,7 +62,7 @@ namespace WebApi
                 //for token authorisation
                 c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
                 {
-                    Description = "JWT Authorization header using the Bearer scheme. \r\n\r\n" 
+                    Description = "JWT Authorization header using the Bearer scheme. \r\n\r\n"
                       + "Enter 'Bearer' [space] and then your token in the text input below."
                       + "\r\n\r\nExample: 'Bearer 12345abcdef'",
                     Name = "Authorization",

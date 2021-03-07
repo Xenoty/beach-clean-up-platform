@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace SereneMarine_Web.ViewModels.Threads
 {
@@ -11,6 +7,7 @@ namespace SereneMarine_Web.ViewModels.Threads
         [Required]
         [Display(Name = "Topic")]
         public string thread_topic { get; set; }
+
         [Required]
         [Display(Name = "Description")]
         [DataType(DataType.MultilineText)]

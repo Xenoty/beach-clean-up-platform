@@ -2,7 +2,7 @@
 
 namespace SereneMarine_Web.Controllers
 {
-    public class DonationsController : Controller
+    public class DonationsController : BaseController
     {
         public IActionResult Index()
         {

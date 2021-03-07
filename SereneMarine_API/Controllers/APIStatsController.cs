@@ -1,12 +1,7 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
-using WebApi.Entities;
-using WebApi.Helpers;
-using WebApi.Services;
-using System;
-using System.Collections.Generic;
 using WebApi.Models.ApiStats;
+using WebApi.Services;
 
 namespace WebApi.Controllers
 {
@@ -17,16 +12,13 @@ namespace WebApi.Controllers
     {
         private IAPIStatsService _apiStatsService;
         private IMapper _mapper;
-        private readonly AppSettings _appSettings;
 
         public APIStatsController(
             IAPIStatsService apiStatsService,
-            IMapper mapper,
-            IOptions<AppSettings> appSettings)
+            IMapper mapper)
         {
             _apiStatsService = apiStatsService;
             _mapper = mapper;
-            _appSettings = appSettings.Value;
         }
 
         [HttpGet]
@@ -54,7 +46,5 @@ namespace WebApi.Controllers
         {
             return Ok(_apiStatsService.CountPetitionsSigned());
         }
-
-
     }
 }

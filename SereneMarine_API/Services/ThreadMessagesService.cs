@@ -1,14 +1,10 @@
-﻿using System;
+﻿using MongoDB.Driver;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using WebApi.Entities;
 using WebApi.Helpers;
 using WebApi.Models;
-using MongoDB.Driver;
-using System.Runtime.CompilerServices;
-using WebApi.Models.ThreadMessages;
-using System.Threading.Tasks.Dataflow;
 
 namespace WebApi.Services
 {
@@ -31,11 +27,10 @@ namespace WebApi.Services
         private readonly IMongoCollection<Thread> _threads;
         private readonly IMongoCollection<User> _users;
 
-
         public ThreadMessagesService(IUserDatabseSettings settings)
         {
-            var client = new MongoClient(settings.ConnectionString);
-            var database = client.GetDatabase(settings.DatabaseName);
+            MongoClient client = new MongoClient(settings.ConnectionString);
+            IMongoDatabase database = client.GetDatabase(settings.DatabaseName);
 
             _tm = database.GetCollection<ThreadMessage>(settings.ThreadMessagesCollectionName);
             _threads = database.GetCollection<Thread>(settings.ThreadsCollectionName);
@@ -49,35 +44,32 @@ namespace WebApi.Services
         public List<ThreadMessage> GetByThread(string id)
         {
             //use linq standard for inner join between two collecitons
-            var query = from x in _tm.AsQueryable()
-                        join y in _users.AsQueryable() on x.User_Id equals y.User_Id
-                        where x.thread_id == id
-                        select new ThreadMessage()
-                        {
-                            Id = x.Id,
-                            thread_message_id = x.thread_message_id,
-                            thread_id = x.thread_id,
-                            User_Id = x.User_Id,
-                            thread_message = x.thread_message,
-                            replied_date = x.replied_date,
-                            Name = y.FirstName + " " + y.LastName
-                        };
+            IQueryable<ThreadMessage> query = from x in _tm.AsQueryable()
+                                              join y in _users.AsQueryable() on x.User_Id equals y.User_Id
+                                              where x.thread_id == id
+                                              select new ThreadMessage()
+                                              {
+                                                  Id = x.Id,
+                                                  thread_message_id = x.thread_message_id,
+                                                  thread_id = x.thread_id,
+                                                  User_Id = x.User_Id,
+                                                  thread_message = x.thread_message,
+                                                  replied_date = x.replied_date,
+                                                  Name = y.FirstName + " " + y.LastName
+                                              };
 
             return query.ToList();
         }
 
-        public List<ThreadMessage> GetByUser(string id)
-        {
-            return _tm.Find<ThreadMessage>(tm => tm.User_Id == id).ToList();
-        }
+        public List<ThreadMessage> GetByUser(string id) => _tm.Find(tm => tm.User_Id == id).ToList();
 
         public ThreadMessage Create(ThreadMessage tm)
         {
             // validation
             //need to assign userid from bearer token to tm.user_id
             if (string.IsNullOrEmpty(tm.User_Id))
-                throw new AppException("User_id is required"); 
-            
+                throw new AppException("User_id is required");
+
             if (string.IsNullOrEmpty(tm.thread_id))
                 throw new AppException("thread_id is required");
 
@@ -109,7 +101,7 @@ namespace WebApi.Services
 
         public void UpdateMessage(ThreadMessage tmParam)
         {
-            var pet = _tm.Find<ThreadMessage>(pet => pet.thread_message_id == tmParam.thread_message_id).SingleOrDefault();
+            ThreadMessage pet = _tm.Find(pet => pet.thread_message_id == tmParam.thread_message_id).SingleOrDefault();
 
             if (pet == null)
                 throw new AppException("ThreadMessage not found");
@@ -118,7 +110,7 @@ namespace WebApi.Services
             if (!string.IsNullOrWhiteSpace(tmParam.thread_message) && tmParam.thread_message != pet.thread_message)
             {
                 // throw error if the new petition thread_message is already taken
-                if (_tm.Find<ThreadMessage>(x => x.thread_message == tmParam.thread_message).FirstOrDefault() != null)
+                if (_tm.Find(x => x.thread_message == tmParam.thread_message).FirstOrDefault() != null)
                     throw new AppException("ThreadMessage " + tmParam.thread_message + " is already taken");
 
                 //assign event thread_message to model
@@ -128,7 +120,7 @@ namespace WebApi.Services
         }
         public void DeleteByThread(string id)
         {
-            var tm = _tm.Find<ThreadMessage>(tm => tm.thread_id == id).FirstOrDefault();
+            ThreadMessage tm = _tm.Find(tm => tm.thread_id == id).FirstOrDefault();
             if (tm != null)
             {
                 _tm.DeleteMany(tm => tm.thread_id == id);
@@ -136,7 +128,7 @@ namespace WebApi.Services
         }
         public void DeleteByMessage(string id)
         {
-            var tm = _tm.Find<ThreadMessage>(tm => tm.thread_message_id == id).FirstOrDefault();
+            ThreadMessage tm = _tm.Find(tm => tm.thread_message_id == id).FirstOrDefault();
             if (tm != null)
             {
                 _tm.DeleteMany(tm => tm.thread_message_id == id);
@@ -144,7 +136,7 @@ namespace WebApi.Services
         }
         public void DeleteByUser(string id)
         {
-            var tm = _tm.Find<ThreadMessage>(tm => tm.User_Id == id).FirstOrDefault();
+            ThreadMessage tm = _tm.Find(tm => tm.User_Id == id).FirstOrDefault();
             if (tm != null)
             {
                 _tm.DeleteMany(tm => tm.User_Id == id);
@@ -152,12 +144,11 @@ namespace WebApi.Services
         }
         public void DeleteByThreadAndUser(string thread_id, string user_id)
         {
-            var tm = _tm.Find<ThreadMessage>(tm => tm.thread_id == thread_id && tm.User_Id == user_id).FirstOrDefault();
+            ThreadMessage tm = _tm.Find(tm => tm.thread_id == thread_id && tm.User_Id == user_id).FirstOrDefault();
             if (tm != null)
             {
                 _tm.DeleteMany(tm => tm.thread_id == thread_id && tm.User_Id == user_id);
             }
         }
-
     }
 }

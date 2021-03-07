@@ -1,28 +1,23 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using SereneMarine_Web.Models;
-using SereneMarine_Web.Helpers;
-using System.Net.Http;
-using Newtonsoft.Json;
-using System.Net;
-using Microsoft.AspNetCore.Authorization;
-using SereneMarine_Web.ViewModels.Threads;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
+using SereneMarine_Web.Helpers;
+using SereneMarine_Web.Models;
+using SereneMarine_Web.ViewModels.ThreadMessages;
+using System;
+using System.Collections.Generic;
+using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
-using System;
-using System.Diagnostics.CodeAnalysis;
-using SereneMarine_Web.ViewModels.ThreadMessages;
-using Microsoft.Extensions.DependencyInjection;
+using System.Threading.Tasks;
 
 namespace SereneMarine_Web.Controllers
 {
-    public class ThreadMessagesController : Controller
+    public class ThreadMessagesController : BaseController
     {
-        HttpClient client = new HttpClient();
-        HttpResponseMessage response = null;
+        #region Tasks
+
         public async Task<IActionResult> Index(string id)
         {
             //thread no longer exists
@@ -49,7 +44,7 @@ namespace SereneMarine_Web.Controllers
                     Content = await response.Content.ReadAsStringAsync()
                 };
 
-               ViewBag.ApiError = exception;
+                ViewBag.ApiError = exception;
                 return View();
             }
 
@@ -89,6 +84,7 @@ namespace SereneMarine_Web.Controllers
             {
                 ViewBag.ApiError = JsonConvert.DeserializeObject(TempData["ApiError"].ToString());
             }
+
             return View(model);
         }
 
@@ -177,6 +173,7 @@ namespace SereneMarine_Web.Controllers
                     StatusCode = (int)response.StatusCode,
                     Content = await response.Content.ReadAsStringAsync()
                 };
+
                 TempData["ApiError"] = exception;
                 //need to redirect to get response with new id?
                 //model.threadc.Thread_id
@@ -225,5 +222,8 @@ namespace SereneMarine_Web.Controllers
             TempData["response"] = $"Thread message {message_id} successfully deleted on {DateTime.Now}.";
             return RedirectToAction("Index", new { id = thread_id });
         }
+
+        #endregion
+
     }
 }

@@ -4,9 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Security.Claims;
-using System.Threading.Tasks;
 using WebApi.Entities;
 using WebApi.Helpers;
 using WebApi.Models.Petitions;
@@ -22,16 +20,13 @@ namespace WebApi.Controllers
     {
         private IPetitionService _petitionService;
         private IMapper _mapper;
-        private readonly AppSettings _appSettings;
 
         public PetitionsController(
            IPetitionService petitionService,
-           IMapper mapper,
-           IOptions<AppSettings> appSettings)
+           IMapper mapper)
         {
             _petitionService = petitionService;
             _mapper = mapper;
-            _appSettings = appSettings.Value;
         }
 
 
@@ -84,8 +79,8 @@ namespace WebApi.Controllers
             var pet = _petitionService.GetById(id);
             var model = _mapper.Map<PetitionsModel>(pet);
             return Ok(model);
-        }     
-        
+        }
+
         /// <summary>
         /// Gets petition by completion
         /// </summary>
@@ -97,8 +92,8 @@ namespace WebApi.Controllers
             var pet = _petitionService.GetByCompletion(val);
             var model = _mapper.Map<IList<PetitionsModel>>(pet);
             return Ok(model);
-        }  
-        
+        }
+
         /// <summary>
         /// Gets petition by user id
         /// </summary>
@@ -110,8 +105,8 @@ namespace WebApi.Controllers
             var pet = _petitionService.GetByUser(id);
             var model = _mapper.Map<PetitionsModel>(pet);
             return Ok(model);
-        } 
-        
+        }
+
 
         /// <summary>
         /// Updates petition by id
@@ -149,7 +144,5 @@ namespace WebApi.Controllers
             _petitionService.Delete(id);
             return Ok();
         }
-
-
     }
 }

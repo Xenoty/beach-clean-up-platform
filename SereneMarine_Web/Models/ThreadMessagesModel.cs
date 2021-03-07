@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace SereneMarine_Web.Models
 {
@@ -19,6 +16,5 @@ namespace SereneMarine_Web.Models
         [StringLength(200, MinimumLength = 3, ErrorMessage = "Please enter an Event address between 3 and 200 characters in length")]
         public string thread_message { get; set; }
         public DateTime replied_date { get; set; }
-       
     }
 }

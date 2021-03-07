@@ -18,20 +18,20 @@ namespace WebApi.Helpers
             CreateMap<User, UserModel>();
             CreateMap<RegisterModel, User>();
             CreateMap<UpdateModel, User>();
-            
+
             //events
             CreateMap<Event, EventsModel>();
             CreateMap<EventRegisterModel, Event>();
-            CreateMap<EventUpdateModel, Event>();      
-            
+            CreateMap<EventUpdateModel, Event>();
+
             //petitions
             CreateMap<Petition, PetitionsModel>();
             CreateMap<PetitionRegisterModel, Petition>();
-            CreateMap<PetitionUpdateModel, Petition>(); 
-            
+            CreateMap<PetitionUpdateModel, Petition>();
+
             //petitions_signed
             CreateMap<PetitionSigned, PetitionsSignedModel>();
-            CreateMap<PetitionsSignedRegisterModel, PetitionSigned>();    
+            CreateMap<PetitionsSignedRegisterModel, PetitionSigned>();
 
             //threads
             CreateMap<Thread, ThreadsModel>();

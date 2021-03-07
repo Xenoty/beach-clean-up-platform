@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace SereneMarine_Web.ViewModels.Petitions
 {
@@ -38,11 +36,11 @@ namespace SereneMarine_Web.ViewModels.Petitions
     {
         public string petition_id { get; set; }
         public string User_Id { get; set; }
+
         [Display(Name = "Date Signed")]
         [DataType(DataType.Date)]
         [DisplayFormat(DataFormatString = "{0:ddd, MMM, yyyy}")]
         public string signed_date { get; set; }
         public string Name { get; set; }
-
     }
 }

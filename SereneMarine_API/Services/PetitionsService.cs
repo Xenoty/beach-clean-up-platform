@@ -1,9 +1,7 @@
 ﻿using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
-using System.Threading.Tasks;
 using WebApi.Entities;
 using WebApi.Helpers;
 using WebApi.Models;
@@ -28,8 +26,8 @@ namespace WebApi.Services
 
         public PetitionsSevice(IUserDatabseSettings settings)
         {
-            var client = new MongoClient(settings.ConnectionString);
-            var database = client.GetDatabase(settings.DatabaseName);
+            MongoClient client = new MongoClient(settings.ConnectionString);
+            IMongoDatabase database = client.GetDatabase(settings.DatabaseName);
 
             _petitions = database.GetCollection<Petition>(settings.PetitionsCollectionName);
             _ps = database.GetCollection<PetitionSigned>(settings.PetitionsSignedCollectionName);
@@ -37,11 +35,11 @@ namespace WebApi.Services
 
         public List<Petition> GetAll()
         {
-            var pt = _petitions.Find(x => true).ToList();
+            List<Petition> pt = _petitions.Find(x => true).ToList();
 
-            var signatures = (from x in _petitions.AsQueryable()
-                       join y in _ps.AsQueryable() on x.petition_id equals y.petition_id
-                       select y).ToList();
+            List<PetitionSigned> signatures = (from x in _petitions.AsQueryable()
+                                               join y in _ps.AsQueryable() on x.petition_id equals y.petition_id
+                                               select y).ToList();
 
             //for loop is x2 faster than linq
             for (int i = 0; i < pt.Count; i++)
@@ -62,19 +60,19 @@ namespace WebApi.Services
 
         public Petition GetById(string id)
         {
-            var pt = _petitions.Find<Petition>(pet => pet.petition_id == id).FirstOrDefault();
-            var signatures = _ps.Find(x => x.petition_id == id).ToList().Count();
+            Petition pt = _petitions.Find(pet => pet.petition_id == id).FirstOrDefault();
+            int signatures = _ps.Find(x => x.petition_id == id).ToList().Count();
             pt.current_signatures = signatures;
             return pt;
         }
         public List<Petition> GetByCompletion(bool val)
         {
-            return _petitions.Find<Petition>(pet => pet.completed == val).ToList();
+            return _petitions.Find(pet => pet.completed == val).ToList();
         }
 
         public Petition GetByUser(string id)
         {
-            return _petitions.Find<Petition>(pet => pet.User_Id == id).FirstOrDefault();
+            return _petitions.Find(pet => pet.User_Id == id).FirstOrDefault();
         }
 
         public Petition Create(Petition pet)
@@ -85,7 +83,7 @@ namespace WebApi.Services
                 throw new AppException("User_id is required");
             //check if event name has been taken
             // throw error if the new username is already taken
-            if (_petitions.Find<Petition>(x => x.name == pet.name).FirstOrDefault() != null)
+            if (_petitions.Find(x => x.name == pet.name).FirstOrDefault() != null)
                 throw new AppException("Petition " + pet.name + " is already taken");
 
             if (string.IsNullOrEmpty(pet.name))
@@ -107,7 +105,7 @@ namespace WebApi.Services
 
         public void Update(Petition petParam)
         {
-            var pet = _petitions.Find<Petition>(pet => pet.petition_id == petParam.petition_id).SingleOrDefault();
+            Petition pet = _petitions.Find(pet => pet.petition_id == petParam.petition_id).SingleOrDefault();
 
             if (pet == null)
                 throw new AppException("Petition not found");
@@ -116,7 +114,7 @@ namespace WebApi.Services
             if (!string.IsNullOrWhiteSpace(petParam.name) && petParam.name != pet.name)
             {
                 // throw error if the new petition name is already taken
-                if (_petitions.Find<Petition>(x => x.name == petParam.name).FirstOrDefault() != null)
+                if (_petitions.Find(x => x.name == petParam.name).FirstOrDefault() != null)
                     throw new AppException("Petition " + petParam.name + " is already taken");
 
                 //assign event name to model
@@ -138,7 +136,7 @@ namespace WebApi.Services
 
         public void Delete(string id)
         {
-            var pet = _petitions.Find<Petition>(pet => pet.petition_id == id).FirstOrDefault();
+            Petition pet = _petitions.Find(pet => pet.petition_id == id).FirstOrDefault();
             if (pet != null)
             {
                 _petitions.DeleteOne(pet => pet.petition_id == id);
@@ -146,5 +144,4 @@ namespace WebApi.Services
         }
 
     }
-
 }

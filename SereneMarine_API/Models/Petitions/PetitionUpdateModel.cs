@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
-namespace WebApi.Models.Petitions
+﻿namespace WebApi.Models.Petitions
 {
     public class PetitionUpdateModel
     {

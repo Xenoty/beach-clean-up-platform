@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace SereneMarine_Web.Models
 {
@@ -20,7 +17,5 @@ namespace SereneMarine_Web.Models
         public DateTime event_createddate { get; set; }
         public int max_attendance { get; set; }
         public bool event_completed { get; set; }
-
-
     }
 }
