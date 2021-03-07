@@ -20,16 +20,13 @@ namespace WebApi.Controllers
     {
         private IThreadMessagesService _threadMessagesService;
         private IMapper _mapper;
-        private readonly AppSettings _appSettings;
 
         public ThreadMessagesController(
             IThreadMessagesService threadMessagesService,
-            IMapper mapper,
-            IOptions<AppSettings> appSettings)
+            IMapper mapper)
         {
             _threadMessagesService = threadMessagesService;
             _mapper = mapper;
-            _appSettings = appSettings.Value;
         }
 
         [AllowAnonymous]
