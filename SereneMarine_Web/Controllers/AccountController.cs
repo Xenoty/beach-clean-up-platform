@@ -1,16 +1,11 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SereneMarine_Web.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Configuration;
 using System.Net.Http;
 using Newtonsoft.Json;
 using System.Text;
 using SereneMarine_Web.Helpers;
-using System.Net;
 using Microsoft.AspNetCore.Http;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -21,12 +16,8 @@ namespace SereneMarine_Web.Controllers
     [Authorize]
     public class AccountController : Controller
     {
-        private IConfiguration configuration;
 
-        public AccountController(IConfiguration iConfig)
-        {
-            configuration = iConfig;
-        }
+        #region Views
 
         [AllowAnonymous]
         public ActionResult Login(string returnUrl)
@@ -34,6 +25,19 @@ namespace SereneMarine_Web.Controllers
             ViewBag.ReturnUrl = returnUrl;
             return View();
         }
+
+        //
+        // GET: /Account/Register
+        [AllowAnonymous]
+        public ActionResult Register(string returnUrl)
+        {
+            ViewBag.ReturnUrl = returnUrl;
+            return View();
+        }
+
+        #endregion
+
+        #region Task Methods
 
         //
         // POST: /Account/Login
@@ -49,9 +53,8 @@ namespace SereneMarine_Web.Controllers
 
             // <post web api>
             //httpPost /users/authenticate
-            //string registerUserAPI_Url = configuration.GetSection("APIConnection").GetSection("URL").Value + "users/authenticate";
-            string url = SD.UserPath + "authenticate" ;
-            HttpResponseMessage response = null;       
+            string url = SD.UserPath + "authenticate";
+            HttpResponseMessage response = null;
             HttpClient client = new HttpClient();
 
             //LOADING DATA TO JSON OBJECT
@@ -62,7 +65,6 @@ namespace SereneMarine_Web.Controllers
 
             //<upload>
             //Http Response
-            //client.DefaultRequestHeaders.Add("token", token);
             response = await client.PostAsync(url, content);
             //</upload>
 
@@ -101,7 +103,6 @@ namespace SereneMarine_Web.Controllers
 
             //assign token to session
             HttpContext.Session.SetString("JWToken", uservm.Token);
-            //TempData["alert"] = "Welcome " + uservm.Email_address;
 
             if (!string.IsNullOrEmpty(returnUrl))
             {
@@ -109,15 +110,6 @@ namespace SereneMarine_Web.Controllers
             }
 
             return RedirectToAction("Index", "Home");
-        }
-
-        //
-        // GET: /Account/Register
-        [AllowAnonymous]
-        public ActionResult Register(string returnUrl)
-        {
-            ViewBag.ReturnUrl = returnUrl;
-            return View();
         }
 
         //
@@ -142,8 +134,6 @@ namespace SereneMarine_Web.Controllers
                 //</upload contents>
 
                 //<upload>
-                //Http Response
-                //client.DefaultRequestHeaders.Add("token", token);
                 response = await client.PostAsync(url, content);
                 //</upload>
 
@@ -159,16 +149,17 @@ namespace SereneMarine_Web.Controllers
 
                     return View();
                 }
-                //if register is sucessful, require user to login with credentials
-                //tempdata for profile successfully created
+
                 TempData["registerResult"] = $"Your profile was succesfully created.\nPlease Login to your account";
 
-                return RedirectToAction("Login", "Account", new {returnUrl});
+                return RedirectToAction("Login", "Account", new { returnUrl });
             }
 
             // If we got this far, something failed, redisplay form
             return View(model);
         }
+
+        #endregion
 
         public async Task<IActionResult> Logout()
         {

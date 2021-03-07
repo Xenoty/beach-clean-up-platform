@@ -21,15 +21,24 @@ namespace SereneMarine_Web.Controllers
     [Authorize(Roles = "Admin")]
     public class EventsController : Controller
     {
-        //no authorize
-        //anyone can see all events
-        HttpClient client = new HttpClient();
-        HttpResponseMessage response = null;
+        private HttpClient client = new HttpClient();
+        private HttpResponseMessage response = null;
+
+        #region Views
+
+        public ActionResult Create()
+        {
+            return View();
+        }
+
+        #endregion
+
+        #region Task Methods
+
         [AllowAnonymous]
         [HttpGet]
         public async Task<IActionResult> Index(EventsIndexViewModel filter, string submit, string clear)
         {
-
             if (!string.IsNullOrEmpty(clear))
             {
                 ModelState.Clear();
@@ -53,8 +62,6 @@ namespace SereneMarine_Web.Controllers
             var jsonString = await response.Content.ReadAsStringAsync();
             //deserialize it and assign to list model
             eventsIndexViewModel.EventsViewModel = JsonConvert.DeserializeObject<List<EventsViewModel>>(jsonString);
-
-   
 
             //build url for event_attendance
             if (User.Identity.IsAuthenticated)
@@ -155,7 +162,6 @@ namespace SereneMarine_Web.Controllers
                 }
             }
 
-
             return View(eventsIndexViewModel);
         }
 
@@ -194,7 +200,6 @@ namespace SereneMarine_Web.Controllers
 
             ViewBag.Attending = Math.Round((((double)evm.current_attendance / (double)evm.max_attendance) * 100), 1);
 
-
             return View(evm);
         }
 
@@ -215,7 +220,7 @@ namespace SereneMarine_Web.Controllers
             {
                 //use the userdetails in the form
                 //need to add if statement for onclick of Join button in view
-                user_id = email;            
+                user_id = email;
             }
 
             //assign variables to model
@@ -246,19 +251,14 @@ namespace SereneMarine_Web.Controllers
 
                 TempData["ApiError"] = JsonConvert.SerializeObject(exception);
 
-                return RedirectToAction("Details", "Events", new {id});
+                return RedirectToAction("Details", "Events", new { id });
             }
-          
+
             //maybe add tempdata or return url 
             //maybe redirect to EventsPage with tempdata showing joining event was successful
             TempData["response"] = $"Successfully joined Event {event_name} on {DateTime.Now}";
-      
-            return RedirectToAction("Index", "Events");
-        }
 
-        public ActionResult Create()
-        {
-            return View();
+            return RedirectToAction("Index", "Events");
         }
 
         [HttpPost]
@@ -332,7 +332,7 @@ namespace SereneMarine_Web.Controllers
             {
                 //create new api error code
                 //create tempdata to store and display
-                RedirectToAction("Details", "Events", new {id});
+                RedirectToAction("Details", "Events", new { id });
             }
 
             //now get event details by id and add to model to display
@@ -363,7 +363,6 @@ namespace SereneMarine_Web.Controllers
             return View(eventUpdate);
         }
 
-  
         [HttpPost]
         public async Task<IActionResult> Update(EventUpdateModel model)
         {
@@ -478,6 +477,6 @@ namespace SereneMarine_Web.Controllers
             return RedirectToAction("Index");
         }
 
-
+        #endregion   
     }
 }

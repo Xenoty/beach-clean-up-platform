@@ -1,11 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
+﻿using System.Diagnostics;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using SereneMarine_Web.Helpers;
 using SereneMarine_Web.Models;
@@ -14,14 +10,8 @@ namespace SereneMarine_Web.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly ILogger<HomeController> _logger;
-        HttpClient client = new HttpClient();
-        HttpResponseMessage response = null;
-
-        public HomeController(ILogger<HomeController> logger)
-        {
-            _logger = logger;
-        }
+        private HttpClient client = new HttpClient();
+        private HttpResponseMessage response = null;
 
         public async Task<IActionResult> Index()
         {
