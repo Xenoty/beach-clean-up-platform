@@ -25,7 +25,7 @@ namespace WebApi.Helpers
 
             //UPLOAD URL
             string access_token = _configuration.GetValue<string>("AppSettings:MapboxAPIkey");
-            string baseUrl = "https://api.mapbox.com/geocoding/v5/mapbox.places/";
+            string baseUrl = _configuration.GetValue<string>("AppSettings:MapBoxPlacesUrl");
             string jsonExt = ".json?access_token=";
             string url = baseUrl + address + jsonExt + access_token;
 
