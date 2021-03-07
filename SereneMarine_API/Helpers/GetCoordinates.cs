@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using Microsoft.Extensions.Configuration;
+using Newtonsoft.Json;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -8,6 +9,13 @@ namespace WebApi.Helpers
 {
     public class GetCoordinates
     {
+        private readonly IConfiguration _configuration;
+
+        public GetCoordinates(IConfiguration configuration)
+        {
+            _configuration = configuration;
+        }
+
         public async Task<EventCoordinatesModel> GetLongLatMapBox(string address)
         {
             //initalize variables required
@@ -16,7 +24,7 @@ namespace WebApi.Helpers
             EventCoordinatesModel ecm = new EventCoordinatesModel();
 
             //UPLOAD URL
-            string access_token = "pk.eyJ1IjoieGVub3R5IiwiYSI6ImNrNmc5aDJ6NDF0Z3IzbG12cXJqOTdhenkifQ.bUvMdh0ICYpAjs5Vi0_3Bw";
+            string access_token = _configuration.GetValue<string>("AppSettings:MapboxAPIkey");
             string baseUrl = "https://api.mapbox.com/geocoding/v5/mapbox.places/";
             string jsonExt = ".json?access_token=";
             string url = baseUrl + address + jsonExt + access_token;
