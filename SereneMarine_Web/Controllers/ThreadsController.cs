@@ -20,10 +20,7 @@ namespace SereneMarine_Web.Controllers
     {
         #region Views
 
-        public ActionResult Create()
-        {
-            return View();
-        }
+        public ActionResult Create() => View();
 
         #endregion
 

@@ -15,7 +15,6 @@ namespace WebApi.Helpers
         {
             _configuration = configuration;
         }
-
         public async Task<EventCoordinatesModel> GetLongLatMapBox(string address)
         {
             //initalize variables required

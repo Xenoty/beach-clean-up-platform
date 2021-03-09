@@ -166,7 +166,5 @@ namespace SereneMarine_Web.Controllers
         }
 
         #endregion
-
-
     }
 }

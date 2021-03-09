@@ -1,4 +1,5 @@
-﻿using MongoDB.Driver;
+﻿using Microsoft.Extensions.Configuration;
+using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,14 +22,17 @@ namespace WebApi.Services
     {
         private readonly IMongoCollection<EventAttendance> _ea;
         private readonly IMongoCollection<Event> _events;
+        private readonly IConfiguration _configuration;
 
-        public EventsService(IUserDatabseSettings settings)
+        public EventsService(IUserDatabseSettings settings, IConfiguration configuration)
         {
             MongoClient client = new MongoClient(settings.ConnectionString);
             IMongoDatabase database = client.GetDatabase(settings.DatabaseName);
 
             _ea = database.GetCollection<EventAttendance>(settings.EventAttendanceCollectionName);
             _events = database.GetCollection<Event>(settings.EventsCollectionName);
+
+            _configuration = configuration;
         }
 
         public List<Event> GetAll() => _events.Find(ev => true).ToList();
@@ -74,13 +78,12 @@ namespace WebApi.Services
 
             if (ev.latitude == 0 || ev.longitude == 0)
             {
-                GetCoordinates gc = new GetCoordinates();
+                GetCoordinates gc = new GetCoordinates(_configuration);
                 //get coordinates by address
                 EventCoordinatesModel ecm = gc.GetLongLatMapBox(ev.address).Result;
                 ev.latitude = ecm.latitude;
                 ev.longitude = ecm.longitude;
             }
-
 
             _events.InsertOne(ev);
 
@@ -122,7 +125,7 @@ namespace WebApi.Services
                 if (eventParam.latitude == 0 || eventParam.longitude == 0)
                 {
                     //get coordinates by address
-                    GetCoordinates gc = new GetCoordinates();
+                    GetCoordinates gc = new GetCoordinates(_configuration);
                     EventCoordinatesModel ecm = gc.GetLongLatMapBox(ev.address).Result;
                     ev.latitude = ecm.latitude;
                     ev.longitude = ecm.longitude;

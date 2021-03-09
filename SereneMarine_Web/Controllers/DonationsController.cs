@@ -4,9 +4,6 @@ namespace SereneMarine_Web.Controllers
 {
     public class DonationsController : BaseController
     {
-        public IActionResult Index()
-        {
-            return View();
-        }
+        public IActionResult Index() => View();
     }
 }
