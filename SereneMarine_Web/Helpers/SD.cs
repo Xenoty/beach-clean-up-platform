@@ -1,8 +1,10 @@
-﻿namespace SereneMarine_Web.Helpers
+﻿using Microsoft.Extensions.Configuration;
+
+namespace SereneMarine_Web.Helpers
 {
     public static class SD
     {
-        public static string apiBaseURL = "http://localhost:4000/";
+        public static string apiBaseURL = Startup.staticConfiguration.GetValue<string>("APIConnection:URL");
         public static string UserPath = apiBaseURL + "users/";
         public static string EventsPath = apiBaseURL + "Events/";
         public static string EventAttendancePath = apiBaseURL + "EventAttendance/";
