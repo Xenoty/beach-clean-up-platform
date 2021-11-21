@@ -1,11 +1,14 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.30907.101
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31912.275
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebApi", "SereneMarine_API\WebApi.csproj", "{E548330E-AF8D-4B66-BF79-52718E66D421}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SereneMarine_Web", "SereneMarine_Web\SereneMarine_Web.csproj", "{DC3EA1EE-1B93-4C05-8844-8FDA20AA0829}"
+	ProjectSection(ProjectDependencies) = postProject
+		{E548330E-AF8D-4B66-BF79-52718E66D421} = {E548330E-AF8D-4B66-BF79-52718E66D421}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
