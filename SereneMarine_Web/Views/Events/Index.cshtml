@@ -2,17 +2,10 @@
 @{
     ViewData["Title"] = "Events";
     int x = 0;
-    bool filter = false;
-    var authenticated = false;
 
-    if (string.IsNullOrEmpty(ViewBag.Filter))
-    {
-        filter = true;
-    }
-    if (User.Identity.IsAuthenticated && User.IsInRole("Admin"))
-    {
-        authenticated = true;
-    }
+    bool filter = string.IsNullOrEmpty(ViewBag.Filter);
+    bool userIsAdmin = User.Identity.IsAuthenticated 
+                       && User.IsInRole("Admin");
 }
 
 <script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v4.5.1/mapbox-gl-geocoder.min.js"></script>
@@ -20,6 +13,7 @@
 <!-- Promise polyfill script required to use Mapbox GL Geocoder in IE 11 -->
 <script src="https://cdn.jsdelivr.net/npm/es6-promise@4/dist/es6-promise.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/es6-promise@4/dist/es6-promise.auto.min.js"></script>
+
 <style>
     .events-grid {
         display: grid;
@@ -250,7 +244,7 @@
     </div>
 }
 
-@if (authenticated == true)
+@if (userIsAdmin)
 {
     <div class="floating-btn">
         @Html.ActionLink("Create New Event", "Create", "Events", null, new { @id = "eventCreate", @class = "btn btn-success float" })
@@ -262,11 +256,12 @@
     <div class="item map-wrapper">
         <div id='map' style='width: auto; height: 800px;position:relative'></div>
     </div>
-    <div class="events-table-wrapper">
 
+    <div class="events-table-wrapper">
         <div class="filter-btn" onclick="DisplayId('filter', 'exit');">
             Filter <span id="exit" style="display:none;">x</span>
         </div>
+
         <div id="filter" class="filter-contents" style="display:none;">
             @using (Html.BeginForm("Index", "Events", FormMethod.Get))
             {
@@ -338,149 +333,167 @@
                     <input type="submit" class="btn btn-default" value="Clear" name="clear" />
                     <input type="submit" class="btn btn-success" value="Search" name="submit" />
                 </div>
-
             }
-
         </div>
+
         <table class="table table-bordered" style=" height: 100%; overflow-y: scroll;">
             @if (Model.EventsViewModel.Count == 0)
             {
                 <tr>
                     <td style="text-align:center; padding:1rem;">No Events found.</td>
                 </tr>
-            }
-            else
-            {
-                @foreach (var item in Model.EventsViewModel)
-                {
 
-                    <tr>
-                        <td @if (item.matching_user == true) { @: class="matchingRow"
-                            } id="@item.event_id">
-                            <div class="events-details-grid">
-                                <div class="section-info">
-                                    <p class="detail_row">
-                                        @if (item.matching_user != true)
-                                        {
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="512.002" height="488.41" viewBox="0 0 512.002 488.41">
-                                                <g id="star" transform="translate(0 -11.796)">
-                                                    <g id="Group_27" data-name="Group 27">
-                                                        <path id="Path_100" data-name="Path 100" d="M511.267,197.258a15,15,0,0,0-12.107-10.209L340.437,163.984,269.452,20.157a15,15,0,0,0-26.9,0L171.563,163.984,12.843,187.049a15,15,0,0,0-8.312,25.585L119.379,324.588,92.271,482.671a15,15,0,0,0,21.763,15.812L256,423.845l141.961,74.637a15,15,0,0,0,21.766-15.813L392.611,324.588,507.472,212.633A14.994,14.994,0,0,0,511.267,197.258Z"
-                                                              class="svg" />
+                return;
+            }
+
+            @foreach (var item in Model.EventsViewModel)
+            {
+                <tr>
+                    <td @if (item.matching_user) 
+                        { 
+                            @: class="matchingRow"
+                        } 
+                        id="@item.event_id">
+                        <div class="events-details-grid">
+                            <div class="section-info">
+                                <p class="detail_row">
+                                    @if (!item.matching_user)
+                                    {
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="512.002" height="488.41" viewBox="0 0 512.002 488.41">
+                                            <g id="star" transform="translate(0 -11.796)">
+                                                <g id="Group_27" data-name="Group 27">
+                                                    <path id="Path_100" data-name="Path 100" d="M511.267,197.258a15,15,0,0,0-12.107-10.209L340.437,163.984,269.452,20.157a15,15,0,0,0-26.9,0L171.563,163.984,12.843,187.049a15,15,0,0,0-8.312,25.585L119.379,324.588,92.271,482.671a15,15,0,0,0,21.763,15.812L256,423.845l141.961,74.637a15,15,0,0,0,21.766-15.813L392.611,324.588,507.472,212.633A14.994,14.994,0,0,0,511.267,197.258Z"
+                                                            class="svg" />
+                                                </g>
+                                            </g>
+                                        </svg>
+                                    }
+                                    else
+                                    {
+                                        <svg version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+                                                viewBox="0 0 468.293 468.293" style="enable-background:new 0 0 468.293 468.293;" xml:space="preserve">
+                                        <circle style="fill:#44C4A1;" cx="234.146" cy="234.146" r="234.146" />
+
+                                        <polygon style="fill:#EBF0F3;" points="357.52,110.145 191.995,275.67 110.773,194.451 69.534,235.684 191.995,358.148
+	                                    398.759,151.378 " />
+                                        </svg>
+                                    }
+
+                                    <span class="event_name" 
+                                        @if (item.matching_user) 
+                                        { 
+                                            @: style="color:grey;"
+                                        }>
+                                        @item.event_name
+                                    </span>
+                                </p>
+
+                                <p class="detail_row">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="352.065" height="512" viewBox="0 0 352.065 512">
+                                        <g id="pin" transform="translate(-79.968 0)">
+                                            <path id="Path_99" data-name="Path 99" d="M407.579,87.677C376.506,34.053,321.314,1.292,259.939.04c-2.62-.054-5.257-.054-7.878,0C190.687,1.292,135.5,34.053,104.421,87.677,72.659,142.489,71.79,208.329,102.1,263.8L229.059,496.187c.057.1.114.206.173.308a30.86,30.86,0,0,0,53.538,0c.059-.1.116-.2.173-.308L409.906,263.8c30.3-55.471,29.435-121.311-2.327-176.123ZM256,232a72,72,0,1,1,72-72A72.081,72.081,0,0,1,256,232Z"
+                                                @if (item.matching_user) 
+                                                { 
+                                                    @: class="matchingSvg"
+                                                } 
+                                                else 
+                                                { 
+                                                    @: fill="#d1dbff"
+                                                } />
+                                        </g>
+                                    </svg>
+                                    @item.address
+                                </p>
+
+                                <p class="detail_row">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" id="clock_svg">
+                                        <path id="clock" d="M256,0C114.836,0,0,114.836,0,256S114.836,512,256,512,512,397.164,512,256,397.164,0,256,0ZM377.75,388.414a21.313,21.313,0,0,1-30.164,0L240.918,281.75a21.237,21.237,0,0,1-6.25-15.082V128a21.332,21.332,0,1,1,42.664,0V257.836L377.75,358.25a21.311,21.311,0,0,1,0,30.164Zm0,0" 
+                                        @if (item.matching_user) 
+                                        { 
+                                            @: class="matchingSvg"
+                                        } 
+                                        else 
+                                        { 
+                                                @: fill="#d1dbff"
+                                        } />
+                                    </svg>
+                                    @item.event_startdate
+                                </p>
+
+                                @if (item.latitude != 0)
+                                {
+                                    <button onclick="ShowOnMap(@x)">&#8592; Show on Map</button>
+                                }
+
+                                @if (userIsAdmin)
+                                {
+                                    var update_id = "/Events/Update/" + item.event_id;
+                                    var delete_id = "/Events/Delete/" + item.event_id;
+                                    <div class="thread-actions">
+
+                                        <a href="@update_id">
+                                            <svg id="editSvg" xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 27.067 27.067" class="edit-svg">
+                                                <g id="Group_29" data-name="Group 29" transform="translate(0 1.933)">
+                                                    <g id="Group_28" data-name="Group 28">
+                                                        <path id="Path_101" data-name="Path 101" d="M22.233,45.737a.967.967,0,0,0-.967.967V56.37a.967.967,0,0,1-.967.967H2.9a.967.967,0,0,1-.967-.967V37.037A.967.967,0,0,1,2.9,36.07H14.5a.967.967,0,1,0,0-1.933H2.9a2.9,2.9,0,0,0-2.9,2.9V56.37a2.9,2.9,0,0,0,2.9,2.9H20.3a2.9,2.9,0,0,0,2.9-2.9V46.7A.967.967,0,0,0,22.233,45.737Z" transform="translate(0 -34.137)" fill="#d1dbff" />
+                                                    </g>
+                                                </g>
+                                                <g id="Group_31" data-name="Group 31" transform="translate(5.8)">
+                                                    <g id="Group_30" data-name="Group 30">
+                                                        <path id="Path_102" data-name="Path 102" d="M122.591,1.088a3.7,3.7,0,0,0-5.234,0L104.625,13.82a.977.977,0,0,0-.233.378L102.458,20a.967.967,0,0,0,.916,1.272.982.982,0,0,0,.305-.049l5.8-1.933a.967.967,0,0,0,.378-.234L122.591,6.321A3.7,3.7,0,0,0,122.591,1.088Z" transform="translate(-102.409 -0.004)" fill="#d1dbff" />
                                                     </g>
                                                 </g>
                                             </svg>
 
-                                        }
-                                        else
-                                        {
-                                            <svg version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
-                                                 viewBox="0 0 468.293 468.293" style="enable-background:new 0 0 468.293 468.293;" xml:space="preserve">
-                                            <circle style="fill:#44C4A1;" cx="234.146" cy="234.146" r="234.146" />
 
-                                            <polygon style="fill:#EBF0F3;" points="357.52,110.145 191.995,275.67 110.773,194.451 69.534,235.684 191.995,358.148
-	                                        398.759,151.378 " />
-
-                                        </svg>
-                                        }
-
-                                        <span class="event_name" @if (item.matching_user == true) { @: style="color:grey;"
-                                              }>
-                                            @item.event_name
-                                        </span>
-                                    </p>
-                                    <p class="detail_row">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="352.065" height="512" viewBox="0 0 352.065 512">
-                                            <g id="pin" transform="translate(-79.968 0)">
-                                                <path id="Path_99" data-name="Path 99" d="M407.579,87.677C376.506,34.053,321.314,1.292,259.939.04c-2.62-.054-5.257-.054-7.878,0C190.687,1.292,135.5,34.053,104.421,87.677,72.659,142.489,71.79,208.329,102.1,263.8L229.059,496.187c.057.1.114.206.173.308a30.86,30.86,0,0,0,53.538,0c.059-.1.116-.2.173-.308L409.906,263.8c30.3-55.471,29.435-121.311-2.327-176.123ZM256,232a72,72,0,1,1,72-72A72.081,72.081,0,0,1,256,232Z"
-                                                      @if (item.matching_user == true) { @: class="matchingSvg"
-                                                      } else { @: fill="#d1dbff"
-                                                      } />
-                                            </g>
-                                        </svg>
-                                        @item.address
-                                    </p>
-                                    <p class="detail_row">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" id="clock_svg">
-                                            <path id="clock" d="M256,0C114.836,0,0,114.836,0,256S114.836,512,256,512,512,397.164,512,256,397.164,0,256,0ZM377.75,388.414a21.313,21.313,0,0,1-30.164,0L240.918,281.75a21.237,21.237,0,0,1-6.25-15.082V128a21.332,21.332,0,1,1,42.664,0V257.836L377.75,358.25a21.311,21.311,0,0,1,0,30.164Zm0,0" @if (item.matching_user == true) { @: class="matchingSvg"
-                                                  } else { @: fill="#d1dbff"
-                                                  } />
-                                        </svg>
-                                        @item.event_startdate
-                                    </p>
-                                    @if (item.latitude != null && item.latitude != 0)
-                                    {
-                                        <button onclick="ShowOnMap(@x)">&#8592; Show on Map</button>
-                                    }
-
-                                    @if (authenticated == true)
-                                    {
-                                        var update_id = "/Events/Update/" + item.event_id;
-                                        var delete_id = "/Events/Delete/" + item.event_id;
-                                        <div class="thread-actions">
-
-                                            <a href="@update_id">
-                                                <svg id="editSvg" xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 27.067 27.067" class="edit-svg">
-                                                    <g id="Group_29" data-name="Group 29" transform="translate(0 1.933)">
-                                                        <g id="Group_28" data-name="Group 28">
-                                                            <path id="Path_101" data-name="Path 101" d="M22.233,45.737a.967.967,0,0,0-.967.967V56.37a.967.967,0,0,1-.967.967H2.9a.967.967,0,0,1-.967-.967V37.037A.967.967,0,0,1,2.9,36.07H14.5a.967.967,0,1,0,0-1.933H2.9a2.9,2.9,0,0,0-2.9,2.9V56.37a2.9,2.9,0,0,0,2.9,2.9H20.3a2.9,2.9,0,0,0,2.9-2.9V46.7A.967.967,0,0,0,22.233,45.737Z" transform="translate(0 -34.137)" fill="#d1dbff" />
-                                                        </g>
-                                                    </g>
-                                                    <g id="Group_31" data-name="Group 31" transform="translate(5.8)">
-                                                        <g id="Group_30" data-name="Group 30">
-                                                            <path id="Path_102" data-name="Path 102" d="M122.591,1.088a3.7,3.7,0,0,0-5.234,0L104.625,13.82a.977.977,0,0,0-.233.378L102.458,20a.967.967,0,0,0,.916,1.272.982.982,0,0,0,.305-.049l5.8-1.933a.967.967,0,0,0,.378-.234L122.591,6.321A3.7,3.7,0,0,0,122.591,1.088Z" transform="translate(-102.409 -0.004)" fill="#d1dbff" />
-                                                        </g>
-                                                    </g>
-                                                </svg>
-
-
-                                            </a>
-                                            <a href="@delete_id" class="action-link">
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 20.968 31.039" class="delete-svg">
-                                                    <g id="trash-can" transform="translate(-83.057)">
-                                                        <path id="XMLID_1089_" d="M103.988,93.243l-.677-2.029a1,1,0,0,0-.949-.684H84.72a1,1,0,0,0-.949.684l-.677,2.029a.71.71,0,0,0,.673.934h19.548A.71.71,0,0,0,103.988,93.243Z" transform="translate(0 -85.043)" fill="#ffd1d1" />
-                                                        <path id="XMLID_835_" d="M103.145,199.548a1.379,1.379,0,0,0,1.37,1.227h11.744a1.379,1.379,0,0,0,1.37-1.227l2.1-18.858H101.05Z" transform="translate(-16.902 -169.736)" fill="#ffd1d1" />
-                                                        <path id="XMLID_831_" d="M197.709,2.607a.789.789,0,0,1,.788-.788h2.679a.789.789,0,0,1,.788.788V3.67h1.819V2.607A2.61,2.61,0,0,0,201.175,0H198.5a2.61,2.61,0,0,0-2.607,2.607V3.67h1.819Z" transform="translate(-105.993)" fill="#ffd1d1" />
-                                                    </g>
-                                                </svg>
-                                            </a>
-                                        </div>
-                                    }
-
-                                </div>
-                                <div class="section-links">
-                                    @if (item.matching_user == true)
-                                    {
-                                        @Html.ActionLink("View", "Details", "Events", new { id = item.event_id })
-                                    }
-                                    else if (item.event_enddate < DateTime.Now)
-                                    {
-                                        @Html.ActionLink("Finished", "Details", "Events", new { id = item.event_id })
-                                    }
-                                    else
-                                    {
-                                        @Html.ActionLink("Join", "Details", "Events", new { id = item.event_id })
-                                    }
-
-
-
-                                </div>
+                                        </a>
+                                        <a href="@delete_id" class="action-link">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 20.968 31.039" class="delete-svg">
+                                                <g id="trash-can" transform="translate(-83.057)">
+                                                    <path id="XMLID_1089_" d="M103.988,93.243l-.677-2.029a1,1,0,0,0-.949-.684H84.72a1,1,0,0,0-.949.684l-.677,2.029a.71.71,0,0,0,.673.934h19.548A.71.71,0,0,0,103.988,93.243Z" transform="translate(0 -85.043)" fill="#ffd1d1" />
+                                                    <path id="XMLID_835_" d="M103.145,199.548a1.379,1.379,0,0,0,1.37,1.227h11.744a1.379,1.379,0,0,0,1.37-1.227l2.1-18.858H101.05Z" transform="translate(-16.902 -169.736)" fill="#ffd1d1" />
+                                                    <path id="XMLID_831_" d="M197.709,2.607a.789.789,0,0,1,.788-.788h2.679a.789.789,0,0,1,.788.788V3.67h1.819V2.607A2.61,2.61,0,0,0,201.175,0H198.5a2.61,2.61,0,0,0-2.607,2.607V3.67h1.819Z" transform="translate(-105.993)" fill="#ffd1d1" />
+                                                </g>
+                                            </svg>
+                                        </a>
+                                    </div>
+                                }
                             </div>
 
-                        </td>
-                    </tr>
-                    x++;
-                }
+                            <div class="section-links">
+                                @if (item.matching_user)
+                                {
+                                    @Html.ActionLink("View", "Details", "Events", new { id = item.event_id })
+                                }
+                                else if (item.event_enddate < DateTime.Now)
+                                {
+                                    @Html.ActionLink("Finished", "Details", "Events", new { id = item.event_id })
+                                }
+                                else
+                                {
+                                    @Html.ActionLink("Join", "Details", "Events", new { id = item.event_id })
+                                }
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+                x++;
             }
-
         </table>
     </div>
+
 </div>
 
+@section scripts{
 
-<script type="text/javascript">
+    <script type="text/javascript">
 
-
+    $(document).ready(function () {
+        $(function () {
+            $('#datetimepicker1').datetimepicker();
+            $('#datetimepicker2').datetimepicker();
+        });
+    });
 
     mapboxgl.accessToken = 'pk.eyJ1IjoiZGF5bmU5NSIsImEiOiJjazZnOWhpYmUweWVsM2xtdmZvemxxZ3RmIn0.CCVZlLeLo_gsyIMA5iX08w';
 
@@ -491,68 +504,49 @@
         zoom: 10 // starting zoom
 
     });
-        map.addControl(
-            new MapboxGeocoder({
-                accessToken: mapboxgl.accessToken,
-                mapboxgl: mapboxgl
-            })
+
+    map.addControl(
+        new MapboxGeocoder({
+            accessToken: mapboxgl.accessToken,
+            mapboxgl: mapboxgl
+        })
     );
 
     var lat_List = [];
     var long_List = []
     var eventNames_List = []
 
-
-     @foreach (var item in Model.EventsViewModel)
-     {
+    @foreach (var item in Model.EventsViewModel)
+    {
         @:lat_List.push("@item.latitude");
         @:long_List.push("@item.longitude");
         @:eventNames_List.push("@item.event_name");
     }
 
     for (var i = 0; i < lat_List.length; i++) {
-
         var latC = lat_List[i].toString().replace(/,/, '.');
         var longC = long_List[i].toString().replace(/,/, '.');
 
         window["Marker" + i] = new mapboxgl.Marker()
             .setLngLat([latC, longC]).addTo(map).setPopup(new mapboxgl.Popup().setHTML(eventNames_List[i]));
-
     }
 
     function ShowOnMap(x) {
-
         var point = window["Marker" + x]
         point.togglePopup();
     }
 
     function DisplayId(id, span) {
         var elm = document.getElementById(id).style.display;
-        //console.log(elm);
+
         if (elm == "none") {
-            //console.log("None");
             document.getElementById(id).style.display = "Block";
             document.getElementById(span).style.display = "Block";
         } else {
-            //console.log("Block");
             document.getElementById(id).style.display = "None";
             document.getElementById(span).style.display = "None";
         }
     }
 
-
-
-
-</script>
-@section scripts{
-    <script type="text/javascript">
-        $(document).ready(function () {
-            $(function () {
-                $('#datetimepicker1').datetimepicker();
-                $('#datetimepicker2').datetimepicker();
-            });
-        });
-
     </script>
 }
-

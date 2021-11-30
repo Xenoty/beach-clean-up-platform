@@ -21,127 +21,148 @@ namespace WebApi.Services
 
     public class PetitionsSevice : IPetitionService
     {
-        private readonly IMongoCollection<Petition> _petitions;
-        private readonly IMongoCollection<PetitionSigned> _ps;
+        private readonly IMongoCollection<Petition> _petitionCollection;
+        private readonly IMongoCollection<PetitionSigned> _petitionSignedCollection;
 
         public PetitionsSevice(IUserDatabseSettings settings)
         {
             MongoClient client = new MongoClient(settings.ConnectionString);
             IMongoDatabase database = client.GetDatabase(settings.DatabaseName);
 
-            _petitions = database.GetCollection<Petition>(settings.PetitionsCollectionName);
-            _ps = database.GetCollection<PetitionSigned>(settings.PetitionsSignedCollectionName);
+            _petitionCollection = database.GetCollection<Petition>(settings.PetitionsCollectionName);
+            _petitionSignedCollection = database.GetCollection<PetitionSigned>(settings.PetitionsSignedCollectionName);
         }
 
         public List<Petition> GetAll()
         {
-            List<Petition> pt = _petitions.Find(x => true).ToList();
+            List<Petition> petitionList = _petitionCollection.Find(x => true).ToList();
 
-            List<PetitionSigned> signatures = (from x in _petitions.AsQueryable()
-                                               join y in _ps.AsQueryable() on x.petition_id equals y.petition_id
-                                               select y).ToList();
+            List<PetitionSigned> petitionSignedList = (from x in _petitionCollection.AsQueryable()
+                                                       join y in _petitionSignedCollection.AsQueryable() on x.petition_id equals y.petition_id
+                                                       select y).ToList();
 
-            //for loop is x2 faster than linq
-            for (int i = 0; i < pt.Count; i++)
+            // for loop is x2 faster than linq
+            for (int i = 0; i < petitionList.Count; i++)
             {
                 int count = 0;
-                for (int j = 0; j < signatures.Count; j++)
+                for (int j = 0; j < petitionSignedList.Count; j++)
                 {
-                    if (pt[i].petition_id == signatures[j].petition_id)
+                    if (petitionList[i].petition_id == petitionSignedList[j].petition_id)
                     {
                         count++;
                     }
                 }
-                pt[i].current_signatures = count;
+                petitionList[i].current_signatures = count;
             }
 
-            return pt;
+            return petitionList;
         }
 
         public Petition GetById(string id)
         {
-            Petition pt = _petitions.Find(pet => pet.petition_id == id).FirstOrDefault();
-            int signatures = _ps.Find(x => x.petition_id == id).ToList().Count();
-            pt.current_signatures = signatures;
-            return pt;
+            Petition petition = _petitionCollection.Find(pet => pet.petition_id == id).FirstOrDefault();
+            int signatures = _petitionSignedCollection.Find(x => x.petition_id == id).ToList().Count();
+            petition.current_signatures = signatures;
+
+            return petition;
         }
-        public List<Petition> GetByCompletion(bool val)
+
+        public List<Petition> GetByCompletion(bool isComplete)
         {
-            return _petitions.Find(pet => pet.completed == val).ToList();
+            return _petitionCollection.Find(pet => pet.completed == isComplete).ToList();
         }
 
         public Petition GetByUser(string id)
         {
-            return _petitions.Find(pet => pet.User_Id == id).FirstOrDefault();
+            return _petitionCollection.Find(pet => pet.User_Id == id).FirstOrDefault();
         }
 
-        public Petition Create(Petition pet)
+        public Petition Create(Petition petition)
         {
-            // validation
             //need to assign userid from bearer token to pet.user_id
-            if (string.IsNullOrEmpty(pet.User_Id))
-                throw new AppException("User_id is required");
-            //check if event name has been taken
-            // throw error if the new username is already taken
-            if (_petitions.Find(x => x.name == pet.name).FirstOrDefault() != null)
-                throw new AppException("Petition " + pet.name + " is already taken");
-
-            if (string.IsNullOrEmpty(pet.name))
-                throw new AppException("Petition Name is required");
-
-            if (string.IsNullOrEmpty(pet.description))
-                throw new AppException("Petition Description is required");
-
-            if (pet.created_date == null || string.IsNullOrEmpty(Convert.ToString(pet.created_date)))
-                throw new AppException("Petition Start Date is required");
-
-            if (string.IsNullOrEmpty(pet.required_signatures.ToString()) || pet.required_signatures == 0)
-                throw new AppException("Max attendance is required");
-
-            _petitions.InsertOne(pet);
-
-            return pet;
-        }
-
-        public void Update(Petition petParam)
-        {
-            Petition pet = _petitions.Find(pet => pet.petition_id == petParam.petition_id).SingleOrDefault();
-
-            if (pet == null)
-                throw new AppException("Petition not found");
-
-            // update event name if it has changed
-            if (!string.IsNullOrWhiteSpace(petParam.name) && petParam.name != pet.name)
+            if (string.IsNullOrEmpty(petition.User_Id))
             {
-                // throw error if the new petition name is already taken
-                if (_petitions.Find(x => x.name == petParam.name).FirstOrDefault() != null)
-                    throw new AppException("Petition " + petParam.name + " is already taken");
-
-                //assign event name to model
-                pet.name = petParam.name;
+                throw new AppException("User_id is required");
             }
 
-            // update pet properties if provided
-            if (!string.IsNullOrEmpty(petParam.description))
-                pet.description = petParam.description;
+            // throw error if the new username is already taken
+            if (_petitionCollection.Find(x => x.name == petition.name).FirstOrDefault() != null)
+            {
+                throw new AppException("Petition " + petition.name + " is already taken");
+            }
 
-            if (!string.IsNullOrWhiteSpace(petParam.required_signatures.ToString()) && petParam.required_signatures != 0)
-                pet.required_signatures = petParam.required_signatures;
+            if (string.IsNullOrEmpty(petition.name))
+            {
+                throw new AppException("Petition Name is required");
+            }
 
-            if (petParam.completed != pet.completed)
-                pet.completed = petParam.completed;
+            if (string.IsNullOrEmpty(petition.description))
+            {
+                throw new AppException("Petition Description is required");
+            }
 
-            _petitions.ReplaceOne(pet => pet.petition_id == petParam.petition_id, pet);
+            if (petition.created_date == default(DateTime))
+            {
+                throw new AppException("Petition Start Date is required");
+            }
+
+            if (petition.required_signatures == default(int) || petition.required_signatures == 0)
+            {
+                throw new AppException("Max attendance is required");
+            }
+
+            _petitionCollection.InsertOne(petition);
+
+            return petition;
+        }
+
+        public void Update(Petition petition)
+        {
+            Petition petitionToUpdate = _petitionCollection.Find(pet => pet.petition_id == petition.petition_id).SingleOrDefault();
+
+            if (petitionToUpdate == null)
+            {
+                throw new AppException("Petition not found");
+            }
+
+            // update event name if it has changed
+            if (!string.IsNullOrWhiteSpace(petition.name))
+            {
+                // throw error if the new petition name is already taken
+                if (_petitionCollection.Find(x => x.name == petition.name).FirstOrDefault() != null)
+                {
+                    throw new AppException("Petition " + petition.name + " is already taken");
+                }
+
+                //assign event name to model
+                petitionToUpdate.name = petition.name;
+            }
+
+            if (!string.IsNullOrEmpty(petition.description))
+            {
+                petitionToUpdate.description = petition.description;
+            }
+
+            if (petition.required_signatures != default(int))
+            {
+                petitionToUpdate.required_signatures = petition.required_signatures;
+            }
+
+            if (petition.completed != petitionToUpdate.completed)
+            {
+                petitionToUpdate.completed = petition.completed;
+            }
+
+            _petitionCollection.ReplaceOne(pet => pet.petition_id == petition.petition_id, petitionToUpdate);
         }
 
         public void Delete(string id)
         {
-            Petition pet = _petitions.Find(pet => pet.petition_id == id).FirstOrDefault();
+            Petition pet = _petitionCollection.Find(pet => pet.petition_id == id).FirstOrDefault();
             if (pet != null)
             {
-                _petitions.DeleteOne(pet => pet.petition_id == id);
+                _petitionCollection.DeleteOne(pet => pet.petition_id == id);
             }
         }
-
     }
 }

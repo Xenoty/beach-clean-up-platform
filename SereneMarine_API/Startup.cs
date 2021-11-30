@@ -57,14 +57,14 @@ namespace WebApi
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
             // Register the Swagger generator, defining 1 or more Swagger documents
-            services.AddSwaggerGen(c =>
+            services.AddSwaggerGen(swaggerGenOptions =>
             {
                 //for token authorisation
-                c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+                swaggerGenOptions.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
                 {
                     Description = "JWT Authorization header using the Bearer scheme. \r\n\r\n"
-                      + "Enter 'Bearer' [space] and then your token in the text input below."
-                      + "\r\n\r\nExample: 'Bearer 12345abcdef'",
+                                  + "Enter 'Bearer' [space] and then your token in the text input below."
+                                  + "\r\n\r\nExample: 'Bearer 12345abcdef'",
                     Name = "Authorization",
                     In = ParameterLocation.Header,
                     Type = SecuritySchemeType.ApiKey,
@@ -72,15 +72,15 @@ namespace WebApi
                 });
 
                 //tell swashbuckle which actions require authorisation
-                c.AddSecurityRequirement(new OpenApiSecurityRequirement()
+                swaggerGenOptions.AddSecurityRequirement(new OpenApiSecurityRequirement()
                 {
                     {
                         new OpenApiSecurityScheme
                         {
                         Reference = new OpenApiReference
                             {
-                            Type = ReferenceType.SecurityScheme,
-                            Id = "Bearer"
+                                Type = ReferenceType.SecurityScheme,
+                                Id = "Bearer"
                             },
                             Scheme = "oauth2",
                             Name = "Bearer",
@@ -91,7 +91,7 @@ namespace WebApi
                     }
                 });
 
-                c.SwaggerDoc("v1", new OpenApiInfo
+                swaggerGenOptions.SwaggerDoc("v1", new OpenApiInfo
                 {
                     Version = "v1",
                     Title = "SereneMarine API",
@@ -113,7 +113,7 @@ namespace WebApi
                 // Set the comments path for the Swagger JSON and UI.
                 var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
                 var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
-                c.IncludeXmlComments(xmlPath);
+                swaggerGenOptions.IncludeXmlComments(xmlPath);
             });
 
             // configure strongly typed settings objects
@@ -123,14 +123,15 @@ namespace WebApi
             // configure jwt authentication
             var appSettings = appSettingsSection.Get<AppSettings>();
             var key = Encoding.ASCII.GetBytes(appSettings.Secret);
-            services.AddAuthentication(x =>
+
+            services.AddAuthentication(authenticationOptions =>
             {
-                x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                authenticationOptions.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                authenticationOptions.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
             })
-            .AddJwtBearer(x =>
+            .AddJwtBearer(jwtBearerOptions =>
             {
-                x.Events = new JwtBearerEvents
+                jwtBearerOptions.Events = new JwtBearerEvents
                 {
                     OnTokenValidated = context =>
                     {
@@ -145,9 +146,9 @@ namespace WebApi
                         return Task.CompletedTask;
                     }
                 };
-                x.RequireHttpsMetadata = false;
-                x.SaveToken = true;
-                x.TokenValidationParameters = new TokenValidationParameters
+                jwtBearerOptions.RequireHttpsMetadata = false;
+                jwtBearerOptions.SaveToken = true;
+                jwtBearerOptions.TokenValidationParameters = new TokenValidationParameters
                 {
                     ValidateIssuerSigningKey = true,
                     IssuerSigningKey = new SymmetricSecurityKey(key),
@@ -175,17 +176,17 @@ namespace WebApi
 
             // Enable middleware to serve swagger-ui (HTML, JS, CSS, etc.),
             // specifying the Swagger JSON endpoint.
-            app.UseSwaggerUI(c =>
+            app.UseSwaggerUI(swaggerUIOptions =>
             {
-                c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
+                swaggerUIOptions.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
                 //serve swagger ui at top root
-                c.RoutePrefix = string.Empty;
+                swaggerUIOptions.RoutePrefix = string.Empty;
             });
 
             app.UseRouting();
 
             // global cors policy
-            app.UseCors(x => x
+            app.UseCors(corsPolicyBuiler => corsPolicyBuiler
                 .AllowAnyOrigin()
                 .AllowAnyMethod()
                 .AllowAnyHeader());
