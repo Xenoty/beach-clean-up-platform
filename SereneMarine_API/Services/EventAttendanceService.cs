@@ -13,11 +13,12 @@ namespace WebApi.Services
         List<EventAttendance> GetAll();
         List<EventAttendance> GetAttendanceByEvent(string id);
         List<EventAttendance> GetAttendanceByUser(string id, bool attended);
-        EventAttendance Create(EventAttendance ea);
+        EventAttendance Create(EventAttendance eventAttendance);
         void DeleteByEvent(string id);
         void DeleteByUser(string id);
         void DeleteByEventAndUser(string event_id, string user_id);
     }
+
     public class EventAttendanceService : IEventAttendanceService
     {
         private readonly IMongoCollection<EventAttendance> _eventAttendanceCollection;
@@ -30,8 +31,8 @@ namespace WebApi.Services
 
             _eventAttendanceCollection = database.GetCollection<EventAttendance>(settings.EventAttendanceCollectionName);
             _eventCollection = database.GetCollection<Event>(settings.EventsCollectionName);
-
         }
+
         public List<EventAttendance> GetAll() 
         {
             return _eventAttendanceCollection.Find(ea => true).ToList();
@@ -47,10 +48,10 @@ namespace WebApi.Services
             return _eventAttendanceCollection.Find(ea => ea.User_Id == id && ea.event_attended == value).ToList();
         }
 
-        public EventAttendance Create(EventAttendance ea)
+        public EventAttendance Create(EventAttendance eventAttendance)
         {
             // need to assign userid from bearer token to ea.user_id
-            if (string.IsNullOrEmpty(ea.User_Id))
+            if (string.IsNullOrEmpty(eventAttendance.User_Id))
             {
                 throw new AppException("User_id is required");
             }
@@ -60,7 +61,7 @@ namespace WebApi.Services
             var query = from x in _eventCollection.AsQueryable()
                         join y in _eventAttendanceCollection.AsQueryable() on x.event_id equals y.event_id
                         into MatchedEvents
-                        where (x.event_id == ea.event_id)
+                        where (x.event_id == eventAttendance.event_id)
                         select new
                         {
                             event_id = x.event_id
@@ -69,29 +70,29 @@ namespace WebApi.Services
             //see if query has any results
             if (!query.Any())
             {
-                throw new AppException($"Event {ea.event_id} does not exist");
+                throw new AppException("Event '" + eventAttendance.event_id + "' does not exist");
             }
 
-            bool userHasAlreadyAcceptedEvent = _eventAttendanceCollection.Find(x => x.User_Id == ea.User_Id && x.event_id == ea.event_id).FirstOrDefault() != null;
+            bool userHasAlreadyAcceptedEvent = _eventAttendanceCollection.Find(x => x.User_Id == eventAttendance.User_Id && x.event_id == eventAttendance.event_id).FirstOrDefault() != null;
             if (userHasAlreadyAcceptedEvent)
             {
                 throw new AppException("User has already participated in event");
             }
 
-            if (ea.date_accepted == default(DateTime))
+            if (eventAttendance.date_accepted == default(DateTime))
             {
-                throw new AppException("EventAttendance Start Date is required");
+                throw new AppException("EventAttendance property 'Start Date' is required");
             }
 
-            _eventAttendanceCollection.InsertOne(ea);
+            _eventAttendanceCollection.InsertOne(eventAttendance);
 
-            return ea;
+            return eventAttendance;
         }
 
         public void DeleteByEvent(string id)
         {
-            EventAttendance ea = _eventAttendanceCollection.Find(ea => ea.event_id == id).FirstOrDefault();
-            if (ea != null)
+            EventAttendance eventAttendance = _eventAttendanceCollection.Find(ea => ea.event_id == id).FirstOrDefault();
+            if (eventAttendance != null)
             {
                 _eventAttendanceCollection.DeleteMany(ea => ea.event_id == id);
             }
@@ -99,8 +100,8 @@ namespace WebApi.Services
 
         public void DeleteByUser(string id)
         {
-            EventAttendance ea = _eventAttendanceCollection.Find(ea => ea.User_Id == id).FirstOrDefault();
-            if (ea != null)
+            EventAttendance evenAttendance = _eventAttendanceCollection.Find(ea => ea.User_Id == id).FirstOrDefault();
+            if (evenAttendance != null)
             {
                 _eventAttendanceCollection.DeleteMany(ea => ea.User_Id == id);
             }
@@ -108,8 +109,8 @@ namespace WebApi.Services
 
         public void DeleteByEventAndUser(string event_id, string user_id)
         {
-            EventAttendance ea = _eventAttendanceCollection.Find(ea => ea.event_id == event_id && ea.User_Id == user_id).FirstOrDefault();
-            if (ea != null)
+            EventAttendance eventAttendance = _eventAttendanceCollection.Find(ea => ea.event_id == event_id && ea.User_Id == user_id).FirstOrDefault();
+            if (eventAttendance != null)
             {
                 _eventAttendanceCollection.DeleteOne(ea => ea.event_id == event_id && ea.User_Id == user_id);
             }

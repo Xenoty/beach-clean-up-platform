@@ -13,9 +13,7 @@ namespace WebApi.Controllers
         private IAPIStatsService _apiStatsService;
         private IMapper _mapper;
 
-        public APIStatsController(
-            IAPIStatsService apiStatsService,
-            IMapper mapper)
+        public APIStatsController(IAPIStatsService apiStatsService, IMapper mapper)
         {
             _apiStatsService = apiStatsService;
             _mapper = mapper;

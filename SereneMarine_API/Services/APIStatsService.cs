@@ -1,6 +1,7 @@
 ﻿using MongoDB.Driver;
 using System.Linq;
 using WebApi.Entities;
+using WebApi.Helpers;
 using WebApi.Models;
 
 namespace WebApi.Services
@@ -23,6 +24,12 @@ namespace WebApi.Services
         {
             var client = new MongoClient(settings.ConnectionString);
             var database = client.GetDatabase(settings.DatabaseName);
+            // TODO: Look into client settings
+            // Set timeout session
+            // If database/client is null, return error?
+            //client.Settings.ConnectionMode;
+            //client.StartSessionAsync();
+            //client.Settings.ConnectTimeout;
 
             _petitionsSignedCollection = database.GetCollection<PetitionSigned>(settings.PetitionsSignedCollectionName);
             _threadMessagesCollection = database.GetCollection<ThreadMessage>(settings.ThreadMessagesCollectionName);
@@ -32,9 +39,16 @@ namespace WebApi.Services
         public Statistics GetAllStats()
         {
             Statistics stats = new Statistics();
-            stats.PetitionsSigned = _petitionsSignedCollection.Find(x => true).ToList().Count();
-            stats.ThreadMessages = _threadMessagesCollection.Find(x => true).ToList().Count();
-            stats.EventsAttended = _eventAttendanceCollection.Find(x => true).ToList().Count();
+            try
+            {
+                stats.PetitionsSigned = _petitionsSignedCollection.Find(x => true).ToList().Count();
+                stats.ThreadMessages = _threadMessagesCollection.Find(x => true).ToList().Count();
+                stats.EventsAttended = _eventAttendanceCollection.Find(x => true).ToList().Count();
+            }
+            catch (System.Exception ex)
+            {
+                throw new AppException(ex.Message);
+            }
 
             return stats;
         }

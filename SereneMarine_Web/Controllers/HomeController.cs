@@ -31,7 +31,7 @@ namespace SereneMarine_Web.Controllers
 
             if (response.IsSuccessStatusCode == false)
             {
-                //set defualt values
+                //set default values
                 return View();
             }
 
