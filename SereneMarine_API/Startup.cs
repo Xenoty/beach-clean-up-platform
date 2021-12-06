@@ -7,6 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using MongoDB.Bson;
 using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
@@ -40,7 +41,17 @@ namespace WebApi
             services.AddSingleton<IUserDatabseSettings>(sp =>
                 sp.GetRequiredService<IOptions<UserDatabaseSettings>>().Value);
 
-            //var client = new MongoClient(settings.ConnectionString);
+            string mongoDBConnectionString = _configuration.GetValue<string>("UserDatabaseSettings:ConnectionString");
+            string mongoDBDatabaseName= _configuration.GetValue<string>("UserDatabaseSettings:DatabaseName");
+
+            MongoClient client = new MongoClient(mongoDBConnectionString);
+            IMongoDatabase mongoDatabase = client.GetDatabase(mongoDBDatabaseName);
+
+            bool isMongoLive = mongoDatabase.RunCommandAsync((Command<BsonDocument>)"{ping:1}").Wait(1000);
+            if (!isMongoLive)
+            {
+                Console.Error.WriteLine("Could not connect to MongoDB '" + mongoDBDatabaseName + "' using connection string '" + mongoDBConnectionString + "'.");
+            }
 
             //reference to user service
             services.AddSingleton<UserService>();
