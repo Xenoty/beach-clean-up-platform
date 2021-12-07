@@ -48,6 +48,7 @@ namespace WebApi
             IMongoDatabase mongoDatabase = client.GetDatabase(mongoDBDatabaseName);
 
             bool isMongoLive = mongoDatabase.RunCommandAsync((Command<BsonDocument>)"{ping:1}").Wait(1000);
+
             if (!isMongoLive)
             {
                 Console.Error.WriteLine("Could not connect to MongoDB '" + mongoDBDatabaseName + "' using connection string '" + mongoDBConnectionString + "'.");
