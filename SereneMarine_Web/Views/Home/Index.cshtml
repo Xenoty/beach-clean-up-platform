@@ -1,9 +1,18 @@
 ﻿@model SereneMarine_Web.Models.ApiStatisticsModel;
 @{
     ViewData["Title"] = "Home Page";
-    var eventsCount = Model.EventsAttended;
-    var petitionsCount = Model.PetitionsSigned;
-    var msgsCount = Model.ThreadMessages;
+    int eventsCount;
+    int petitionsCount;
+    int msgsCount;
+
+    if(Model == null)
+    {
+        return;
+    }
+
+    eventsCount = Model.EventsAttended;
+    petitionsCount = Model.PetitionsSigned;
+    msgsCount = Model.ThreadMessages;
 }
 <div class="bold">
     <br />
@@ -16,6 +25,11 @@
             </form>
         </div>*@
     </div>
+
+   @* @if(Model == null)
+    {
+        // TODO: 
+    }*@
 
     <div class="landingGrid">
         <div id="events" class="item">
@@ -57,6 +71,7 @@
 
 @section scripts{ 
     <script type="text/javascript">
+
         $(document).ready(function () {
             //alert("Document loaded successful!");
             animateValue("eventsCount", 0, @eventsCount, 500);
@@ -104,7 +119,5 @@
             }, stepTime);
         }
 
-       
     </script>
 }
-

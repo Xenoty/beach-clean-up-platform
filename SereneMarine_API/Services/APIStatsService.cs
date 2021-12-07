@@ -1,7 +1,8 @@
-﻿using MongoDB.Driver;
-using System.Linq;
+﻿using System.Linq;
+
+using MongoDB.Driver;
+using MongoDB.Driver.Core.Clusters;
 using WebApi.Entities;
-using WebApi.Helpers;
 using WebApi.Models;
 
 namespace WebApi.Services
@@ -20,16 +21,12 @@ namespace WebApi.Services
         private readonly IMongoCollection<ThreadMessage> _threadMessagesCollection;
         private readonly IMongoCollection<EventAttendance> _eventAttendanceCollection;
 
-        public APIStatsService(IUserDatabseSettings settings)
+        private readonly IMongoClient _client;
+
+        public APIStatsService(IMongoClient client, IUserDatabseSettings settings)
         {
-            var client = new MongoClient(settings.ConnectionString);
-            var database = client.GetDatabase(settings.DatabaseName);
-            // TODO: Look into client settings
-            // Set timeout session
-            // If database/client is null, return error?
-            //client.Settings.ConnectionMode;
-            //client.StartSessionAsync();
-            //client.Settings.ConnectTimeout;
+            _client = client;
+            IMongoDatabase database = client.GetDatabase(settings.DatabaseName);
 
             _petitionsSignedCollection = database.GetCollection<PetitionSigned>(settings.PetitionsSignedCollectionName);
             _threadMessagesCollection = database.GetCollection<ThreadMessage>(settings.ThreadMessagesCollectionName);
@@ -38,25 +35,53 @@ namespace WebApi.Services
 
         public Statistics GetAllStats()
         {
-            Statistics stats = new Statistics();
-            try
+            if (_client.Cluster.Description.State == ClusterState.Disconnected)
             {
-                stats.PetitionsSigned = _petitionsSignedCollection.Find(x => true).ToList().Count();
-                stats.ThreadMessages = _threadMessagesCollection.Find(x => true).ToList().Count();
-                stats.EventsAttended = _eventAttendanceCollection.Find(x => true).ToList().Count();
+                System.Console.Error.WriteLine("Connection to MongoDB Database failed.");
+                return null;
             }
-            catch (System.Exception ex)
+
+            Statistics stats = new Statistics()
             {
-                throw new AppException(ex.Message);
-            }
+                PetitionsSigned = _petitionsSignedCollection.Find(x => true).ToList().Count(),
+                ThreadMessages = _threadMessagesCollection.Find(x => true).ToList().Count(),
+                EventsAttended = _eventAttendanceCollection.Find(x => true).ToList().Count()
+            };
 
             return stats;
         }
 
-        public int CountPetitionsSigned() => _petitionsSignedCollection.Find(x => true).ToList().Count();
+        public int CountPetitionsSigned() 
+        {
+            if (_client.Cluster.Description.State == ClusterState.Disconnected)
+            {
+                System.Console.Error.WriteLine("Connection to MongoDB Database failed.");
+                return -1;
+            }
 
-        public int CountEventsAttended() => _eventAttendanceCollection.Find(x => true).ToList().Count();
+            return _petitionsSignedCollection.Find(x => true).ToList().Count();
+        }
 
-        public int CountThreadMessages() => _threadMessagesCollection.Find(x => true).ToList().Count();
+        public int CountEventsAttended()
+        {
+            if (_client.Cluster.Description.State == ClusterState.Disconnected)
+            {
+                System.Console.Error.WriteLine("Connection to MongoDB Database failed.");
+                return -1;
+            }
+
+            return _eventAttendanceCollection.Find(x => true).ToList().Count();
+        }
+
+        public int CountThreadMessages() 
+        {
+            if (_client.Cluster.Description.State == ClusterState.Disconnected)
+            {
+                System.Console.Error.WriteLine("Connection to MongoDB Database failed.");
+                return -1;
+            }
+
+            return _threadMessagesCollection.Find(x => true).ToList().Count();
+        } 
     }
 }

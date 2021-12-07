@@ -18,6 +18,12 @@ namespace SereneMarine_Web.Controllers
 
         #endregion
 
+        #region Private Variables
+
+        private ApiStatisticsModel previousStaticsModel = new ApiStatisticsModel();
+
+        #endregion
+
         #region Task Methods
 
         public async Task<IActionResult> Index()
@@ -31,13 +37,17 @@ namespace SereneMarine_Web.Controllers
 
             if (response.IsSuccessStatusCode == false)
             {
-                //set default values
-                return View();
+                // TODO: log error message on web. Look at Library Dewey App for example.
+                //var content = response.StatusCode;
+                //var testing = response.Content.ReadAsStringAsync();
+
+                return View(previousStaticsModel);
             }
 
             var jsonString = await response.Content.ReadAsStringAsync();
 
             model = JsonConvert.DeserializeObject<ApiStatisticsModel>(jsonString);
+            previousStaticsModel = model;
 
             return View(model);
         }

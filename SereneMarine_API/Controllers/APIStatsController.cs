@@ -23,26 +23,50 @@ namespace WebApi.Controllers
         public IActionResult GetAllStats()
         {
             var statistics = _apiStatsService.GetAllStats();
+            if (statistics == null)
+            {
+                return StatusCode(500, "Could not make connection to database.");
+            }
+
             var model = _mapper.Map<StatisticsModel>(statistics);
+
             return Ok(model);
         }
 
         [HttpGet("petitionsSigned")]
         public IActionResult CountPetitionsSigned()
         {
-            return Ok(_apiStatsService.CountPetitionsSigned());
+            int result = _apiStatsService.CountPetitionsSigned();
+            if (result <= -1)
+            {
+                return StatusCode(500, "Could not make connection to database.");
+            }
+
+            return Ok(result);
         }
 
         [HttpGet("eventsAttended")]
         public IActionResult CountEventsAttended()
         {
-            return Ok(_apiStatsService.CountEventsAttended());
+            int result = _apiStatsService.CountEventsAttended();
+            if (result <= -1)
+            {
+                return StatusCode(500, "Could not make connection to database.");
+            }
+
+            return Ok(result);
         }
 
         [HttpGet("threadMessages")]
         public IActionResult CountThreadMessages()
         {
-            return Ok(_apiStatsService.CountPetitionsSigned());
+            int result = _apiStatsService.CountThreadMessages();
+            if (result <= -1)
+            {
+                return StatusCode(500, "Could not make connection to database.");
+            }
+
+            return Ok(result);
         }
     }
 }

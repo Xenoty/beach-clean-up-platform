@@ -7,7 +7,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using MongoDB.Bson;
 using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
@@ -35,24 +34,31 @@ namespace WebApi
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            //string mongoDBConnectionString = _configuration.GetValue<string>("UserDatabaseSettings:ConnectionString");
+            //MongoClient mongoClient = new MongoClient(mongoDBConnectionString);
+
+            //if (mongoClient.Cluster.Description.State == MongoDB.Driver.Core.Clusters.ClusterState.Disconnected)
+            //{
+            //    throw new Exception("Could not connect to MongoDB using connection string '" + mongoDBConnectionString + "'." +
+            //                        "\n If you are using a on-premise MongoDB, make sure your Mongod server is running." +
+            //                        "\n If you are using  MongoDB Atlas, make sure your connection string is correct, including username and password.");
+            //}
+
+            services.AddSingleton<IMongoClient, MongoClient>(s =>
+            {
+                string mongoDBConnectionString = s.GetRequiredService<IConfiguration>()["UserDatabaseSettings:ConnectionString"];
+                return new MongoClient(mongoDBConnectionString);
+            });
+
             services.Configure<UserDatabaseSettings>(
                 _configuration.GetSection(nameof(UserDatabaseSettings)));
 
             services.AddSingleton<IUserDatabseSettings>(sp =>
                 sp.GetRequiredService<IOptions<UserDatabaseSettings>>().Value);
 
-            string mongoDBConnectionString = _configuration.GetValue<string>("UserDatabaseSettings:ConnectionString");
-            string mongoDBDatabaseName= _configuration.GetValue<string>("UserDatabaseSettings:DatabaseName");
-
-            MongoClient client = new MongoClient(mongoDBConnectionString);
-            IMongoDatabase mongoDatabase = client.GetDatabase(mongoDBDatabaseName);
-
-            bool isMongoLive = mongoDatabase.RunCommandAsync((Command<BsonDocument>)"{ping:1}").Wait(1000);
-
-            if (!isMongoLive)
-            {
-                Console.Error.WriteLine("Could not connect to MongoDB '" + mongoDBDatabaseName + "' using connection string '" + mongoDBConnectionString + "'.");
-            }
+            // configure strongly typed settings objects
+            var appSettingsSection = _configuration.GetSection("AppSettings");
+            services.Configure<AppSettings>(appSettingsSection);
 
             //reference to user service
             services.AddSingleton<UserService>();
@@ -67,6 +73,16 @@ namespace WebApi
             //configure mapping
             services.AddAutoMapper(typeof(SereneMarineMappings));
 
+            // configure DI for application services
+            services.AddScoped<IUserService, UserService>();
+            services.AddScoped<IEventService, EventsService>();
+            services.AddScoped<IEventAttendanceService, EventAttendanceService>();
+            services.AddScoped<IPetitionService, PetitionsSevice>();
+            services.AddScoped<IPetitionsSignedService, PetitionsSignedService>();
+            services.AddScoped<IThreadsService, ThreadsService>();
+            services.AddScoped<IThreadMessagesService, ThreadMessagesService>();
+            services.AddScoped<IAPIStatsService, APIStatsService>();
+
             services.AddCors();
             services.AddControllers();
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
@@ -74,7 +90,7 @@ namespace WebApi
             // Register the Swagger generator, defining 1 or more Swagger documents
             services.AddSwaggerGen(swaggerGenOptions =>
             {
-                //for token authorisation
+                //for token authorization
                 swaggerGenOptions.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
                 {
                     Description = "JWT Authorization header using the Bearer scheme. \r\n\r\n"
@@ -86,7 +102,7 @@ namespace WebApi
                     Scheme = "Bearer"
                 });
 
-                //tell swashbuckle which actions require authorisation
+                //tell swashbuckle which actions require authorization
                 swaggerGenOptions.AddSecurityRequirement(new OpenApiSecurityRequirement()
                 {
                     {
@@ -131,10 +147,6 @@ namespace WebApi
                 swaggerGenOptions.IncludeXmlComments(xmlPath);
             });
 
-            // configure strongly typed settings objects
-            var appSettingsSection = _configuration.GetSection("AppSettings");
-            services.Configure<AppSettings>(appSettingsSection);
-
             // configure jwt authentication
             var appSettings = appSettingsSection.Get<AppSettings>();
             var key = Encoding.ASCII.GetBytes(appSettings.Secret);
@@ -171,16 +183,6 @@ namespace WebApi
                     ValidateAudience = false
                 };
             });
-
-            // configure DI for application services
-            services.AddScoped<IUserService, UserService>();
-            services.AddScoped<IEventService, EventsService>();
-            services.AddScoped<IEventAttendanceService, EventAttendanceService>();
-            services.AddScoped<IPetitionService, PetitionsSevice>();
-            services.AddScoped<IPetitionsSignedService, PetitionsSignedService>();
-            services.AddScoped<IThreadsService, ThreadsService>();
-            services.AddScoped<IThreadMessagesService, ThreadMessagesService>();
-            services.AddScoped<IAPIStatsService, APIStatsService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
