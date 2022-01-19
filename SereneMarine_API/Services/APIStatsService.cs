@@ -37,7 +37,6 @@ namespace WebApi.Services
         {
             if (_client.Cluster.Description.State == ClusterState.Disconnected)
             {
-                System.Console.Error.WriteLine("Connection to MongoDB Database failed.");
                 return null;
             }
 
@@ -55,7 +54,6 @@ namespace WebApi.Services
         {
             if (_client.Cluster.Description.State == ClusterState.Disconnected)
             {
-                System.Console.Error.WriteLine("Connection to MongoDB Database failed.");
                 return -1;
             }
 
@@ -66,7 +64,6 @@ namespace WebApi.Services
         {
             if (_client.Cluster.Description.State == ClusterState.Disconnected)
             {
-                System.Console.Error.WriteLine("Connection to MongoDB Database failed.");
                 return -1;
             }
 
@@ -77,11 +74,10 @@ namespace WebApi.Services
         {
             if (_client.Cluster.Description.State == ClusterState.Disconnected)
             {
-                System.Console.Error.WriteLine("Connection to MongoDB Database failed.");
                 return -1;
             }
 
             return _threadMessagesCollection.Find(x => true).ToList().Count();
-        } 
+        }
     }
 }

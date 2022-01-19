@@ -29,13 +29,11 @@ namespace SereneMarine_Web.Controllers
         public async Task<IActionResult> Index()
         {
             //get all the totals from the api
-            ApiStatisticsModel model = new ApiStatisticsModel();
-            string baseUrl = SD.ApiStatsPath;
-            string url = baseUrl;
+            string url = SD.ApiStatsPath;
 
             response = await client.GetAsync(url);
 
-            if (response.IsSuccessStatusCode == false)
+            if (!response.IsSuccessStatusCode)
             {
                 // TODO: log error message on web. Look at Library Dewey App for example.
                 //var content = response.StatusCode;
@@ -46,7 +44,7 @@ namespace SereneMarine_Web.Controllers
 
             var jsonString = await response.Content.ReadAsStringAsync();
 
-            model = JsonConvert.DeserializeObject<ApiStatisticsModel>(jsonString);
+            ApiStatisticsModel model = JsonConvert.DeserializeObject<ApiStatisticsModel>(jsonString);
             previousStaticsModel = model;
 
             return View(model);

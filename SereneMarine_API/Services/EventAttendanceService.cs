@@ -1,4 +1,5 @@
 ﻿using MongoDB.Driver;
+using MongoDB.Driver.Core.Clusters;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -23,10 +24,11 @@ namespace WebApi.Services
     {
         private readonly IMongoCollection<EventAttendance> _eventAttendanceCollection;
         private readonly IMongoCollection<Event> _eventCollection;
+        private readonly IMongoClient _client;
 
-        public EventAttendanceService(IUserDatabseSettings settings)
+        public EventAttendanceService(IMongoClient client, IUserDatabseSettings settings)
         {
-            MongoClient client = new MongoClient(settings.ConnectionString);
+            _client = client;
             IMongoDatabase database = client.GetDatabase(settings.DatabaseName);
 
             _eventAttendanceCollection = database.GetCollection<EventAttendance>(settings.EventAttendanceCollectionName);
@@ -35,6 +37,11 @@ namespace WebApi.Services
 
         public List<EventAttendance> GetAll() 
         {
+            if (_client.Cluster.Description.State == ClusterState.Disconnected)
+            {
+                return null;
+            }
+
             return _eventAttendanceCollection.Find(ea => true).ToList();
         }
 
