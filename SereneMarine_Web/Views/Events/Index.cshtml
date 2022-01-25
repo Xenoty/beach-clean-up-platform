@@ -244,6 +244,13 @@
     </div>
 }
 
+@if (TempData["ApiError"] != null)
+{
+    <div class="alert-danger">
+        <strong>@TempData["ApiError"].ToString()</strong>
+    </div>
+}
+
 @if (userIsAdmin)
 {
     <div class="floating-btn">
@@ -337,7 +344,7 @@
         </div>
 
         <table class="table table-bordered" style=" height: 100%; overflow-y: scroll;">
-            @if (Model.EventsViewModel.Count == 0)
+            @if (Model == null || Model.EventsViewModel.Count == 0)
             {
                 <tr>
                     <td style="text-align:center; padding:1rem;">No Events found.</td>

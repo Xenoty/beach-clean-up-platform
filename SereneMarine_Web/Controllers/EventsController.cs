@@ -42,13 +42,18 @@ namespace SereneMarine_Web.Controllers
 
             //build the url for request
             string baseUrl = SD.EventsPath;
-            string url = baseUrl;
+            response = await client.GetAsync(baseUrl);
 
-            response = await client.GetAsync(url);
-
-            if (response.StatusCode != HttpStatusCode.OK)
+            if (!response.IsSuccessStatusCode)
             {
                 //create alert for error
+                ApiException exception = new ApiException
+                {
+                    StatusCode = (int)response.StatusCode,
+                    Content = await response.Content.ReadAsStringAsync()
+                };
+
+                TempData["ApiError"] = "ERROR: Status Code: " + exception.StatusCode + " " + exception.Content;
                 return View();
             }
 
@@ -110,14 +115,14 @@ namespace SereneMarine_Web.Controllers
                 bool userCompleted = false;
                 bool end_date = false;
 
-                if (filter.filterEvents.UserCompleted == true)
+                if (filter.filterEvents.UserCompleted)
                 {
                     userCompleted = true;
-                    eventsIndexViewModel.EventsViewModel = eventsIndexViewModel.EventsViewModel.Where(x => true && x.matching_user == true).OrderBy(x => x.event_startdate).ToList();
+                    eventsIndexViewModel.EventsViewModel = eventsIndexViewModel.EventsViewModel.Where(x => true && x.matching_user).OrderBy(x => x.event_startdate).ToList();
                 }
-                if (filter.filterEvents.Completed == true && userCompleted == false)
+                if (filter.filterEvents.Completed && !userCompleted)
                 {
-                    if (filter.filterEvents.Current == true)
+                    if (filter.filterEvents.Current)
                     {
                         upcomming = true;
                         eventsIndexViewModel.EventsViewModel = eventsIndexViewModel.EventsViewModel.Where(x => true).OrderBy(x => x.event_startdate).ToList();
@@ -128,9 +133,9 @@ namespace SereneMarine_Web.Controllers
                         eventsIndexViewModel.EventsViewModel = eventsIndexViewModel.EventsViewModel.Where(x => x.event_enddate <= DateTime.Now /*|| x.event_completed == false*/).OrderBy(x => x.event_startdate).ToList();
                     }
                 }
-                if (filter.filterEvents.Current == true && upcomming == false && userCompleted == false)
+                if (filter.filterEvents.Current && upcomming == false && !userCompleted)
                 {
-                    eventsIndexViewModel.EventsViewModel = eventsIndexViewModel.EventsViewModel.Where(x => x.event_enddate >= DateTime.Now || x.event_completed == true).OrderBy(x => x.event_startdate).ToList();
+                    eventsIndexViewModel.EventsViewModel = eventsIndexViewModel.EventsViewModel.Where(x => x.event_enddate >= DateTime.Now || x.event_completed).OrderBy(x => x.event_startdate).ToList();
                 }
 
                 if (filter.filterEvents.event_startdate != null && filter.filterEvents.event_startdate != default(DateTime))
@@ -181,7 +186,7 @@ namespace SereneMarine_Web.Controllers
 
             response = await client.GetAsync(url);
 
-            if (response.IsSuccessStatusCode == false)
+            if (!response.IsSuccessStatusCode)
             {
                 //create alert for error
                 return View();
@@ -235,7 +240,7 @@ namespace SereneMarine_Web.Controllers
             //Http Response
             response = await client.PostAsync(url, content);
             //</upload>
-            if (response.IsSuccessStatusCode == false)
+            if (!response.IsSuccessStatusCode)
             {
                 ApiException exception = new ApiException
                 {
@@ -282,7 +287,7 @@ namespace SereneMarine_Web.Controllers
             //check response
             response = await client.PostAsync(url, content);
 
-            if (response.IsSuccessStatusCode == false)
+            if (!response.IsSuccessStatusCode)
             {
                 //display api error message
                 //create alert for error
@@ -322,7 +327,7 @@ namespace SereneMarine_Web.Controllers
 
             response = await client.GetAsync(url);
 
-            if (response.IsSuccessStatusCode == false)
+            if (!response.IsSuccessStatusCode)
             {
                 //create new api error code
                 //create tempdata to store and display
@@ -336,7 +341,7 @@ namespace SereneMarine_Web.Controllers
 
             response = await client.GetAsync(apiUrl);
 
-            if (response.IsSuccessStatusCode == false)
+            if (!response.IsSuccessStatusCode)
             {
                 //create alert for error
                 ApiException exception = new ApiException
@@ -383,7 +388,7 @@ namespace SereneMarine_Web.Controllers
             //check response
             response = await client.PutAsync(url, content);
 
-            if (response.IsSuccessStatusCode == false)
+            if (!response.IsSuccessStatusCode)
             {
                 //display api error message
                 //create alert for error
@@ -419,7 +424,7 @@ namespace SereneMarine_Web.Controllers
 
             response = await client.GetAsync(apiUrl);
 
-            if (response.IsSuccessStatusCode == false)
+            if (!response.IsSuccessStatusCode)
             {
                 //create alert for error
                 ApiException exception = new ApiException
@@ -453,7 +458,7 @@ namespace SereneMarine_Web.Controllers
 
             response = await client.DeleteAsync(apiUrl);
 
-            if (response.IsSuccessStatusCode == false)
+            if (!response.IsSuccessStatusCode)
             {
                 //create alert for error
                 ApiException exception = new ApiException

@@ -39,6 +39,14 @@ namespace SereneMarine_Web.Controllers
                 //var content = response.StatusCode;
                 //var testing = response.Content.ReadAsStringAsync();
 
+                ApiException exception = new ApiException
+                {
+                    StatusCode = (int)response.StatusCode,
+                    Content = await response.Content.ReadAsStringAsync()
+                };
+
+                TempData["ApiError"] = JsonConvert.SerializeObject(exception);
+
                 return View(previousStaticsModel);
             }
 

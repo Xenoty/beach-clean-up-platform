@@ -28,7 +28,6 @@ namespace WebApi.Controllers
             _mapper = mapper;
         }
 
-
         //[AllowAnonymous]
         [HttpPost("create")]
         public IActionResult Create([FromBody] EventRegisterModel model)
@@ -63,6 +62,10 @@ namespace WebApi.Controllers
         public IActionResult GetAll()
         {
             var events = _eventService.GetAll();
+            if (events == null)
+            {
+                return StatusCode(500, "Could not make connection to database.");
+            }
             var model = _mapper.Map<IList<EventsModel>>(events);
             return Ok(model);
         }
@@ -76,6 +79,11 @@ namespace WebApi.Controllers
         public IActionResult GetById(string id)
         {
             var ev = _eventService.GetById(id);
+            if (ev == null)
+            {
+                return StatusCode(500, "Could not make connection to database.");
+            }
+
             var model = _mapper.Map<EventsModel>(ev);
             return Ok(model);
         }
@@ -115,8 +123,16 @@ namespace WebApi.Controllers
         [HttpDelete("delete/{id}")]
         public IActionResult Delete(string id)
         {
-            _eventService.Delete(id);
-            return Ok();
+            try
+            {
+                _eventService.Delete(id);
+                return Ok();
+            }
+            catch (AppException ex)
+            {
+                // return error message if there was an exception
+                return BadRequest(new { message = ex.Message });
+            }
         }
     }
 }
