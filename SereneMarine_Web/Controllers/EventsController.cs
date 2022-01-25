@@ -53,7 +53,7 @@ namespace SereneMarine_Web.Controllers
                     Content = await response.Content.ReadAsStringAsync()
                 };
 
-                TempData["ApiError"] = "ERROR: Status Code: " + exception.StatusCode + " " + exception.Content;
+                TempData["ApiError"] = exception.GetApiErrorMessage();
                 return View();
             }
 
@@ -248,13 +248,11 @@ namespace SereneMarine_Web.Controllers
                     Content = await response.Content.ReadAsStringAsync()
                 };
 
-                TempData["ApiError"] = JsonConvert.SerializeObject(exception);
+                TempData["ApiError"] = exception.GetApiErrorMessage();
 
                 return RedirectToAction("Details", "Events", new { id });
             }
 
-            //maybe add tempdata or return url 
-            //maybe redirect to EventsPage with tempdata showing joining event was successful
             TempData["response"] = $"Successfully joined Event {event_name} on {DateTime.Now}";
 
             return RedirectToAction("Index", "Events");
@@ -350,7 +348,7 @@ namespace SereneMarine_Web.Controllers
                     Content = await response.Content.ReadAsStringAsync()
                 };
 
-                TempData["ApiError"] = JsonConvert.SerializeObject(exception);
+                TempData["ApiError"] = exception.GetApiErrorMessage();
                 return View();
             }
             //read data from json response
@@ -397,7 +395,7 @@ namespace SereneMarine_Web.Controllers
                     StatusCode = (int)response.StatusCode,
                     Content = await response.Content.ReadAsStringAsync()
                 };
-                ViewBag.ApiError = JsonConvert.SerializeObject(exception);
+                ViewBag.ApiError = exception.GetApiErrorMessage();
 
                 return View();
             }
@@ -433,7 +431,7 @@ namespace SereneMarine_Web.Controllers
                     Content = await response.Content.ReadAsStringAsync()
                 };
 
-                TempData["ApiError"] = JsonConvert.SerializeObject(exception);
+                TempData["ApiError"] = exception.GetApiErrorMessage();
                 return View();
             }
 
@@ -467,7 +465,7 @@ namespace SereneMarine_Web.Controllers
                     Content = await response.Content.ReadAsStringAsync()
                 };
 
-                TempData["ApiError"] = JsonConvert.SerializeObject(exception);
+                TempData["ApiError"] = exception.GetApiErrorMessage();
                 return RedirectToAction("Delete", "Events", new { id });
             }
 
