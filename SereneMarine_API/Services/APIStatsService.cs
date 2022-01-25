@@ -13,7 +13,7 @@ namespace WebApi.Services
         int CountPetitionsSigned();
         int CountEventsAttended();
         int CountThreadMessages();
-        Statistics GetAllStats();
+       Statistics GetAllStats();
     }
 
     public class APIStatsService : IAPIStatsService
@@ -22,25 +22,21 @@ namespace WebApi.Services
         private readonly IMongoCollection<ThreadMessage> _threadMessagesCollection;
         private readonly IMongoCollection<EventAttendance> _eventAttendanceCollection;
 
-        private readonly IMongoClient _client;
-
-        private ClusterState _clusterState;
+        private ICluster _iCluster;
 
         public APIStatsService(IMongoClient client, IUserDatabseSettings settings)
         {
-            _client = client;
             IMongoDatabase database = client.GetDatabase(settings.DatabaseName);
+            _iCluster = client.Cluster;
 
             _petitionsSignedCollection = database.GetCollection<PetitionSigned>(settings.PetitionsSignedCollectionName);
             _threadMessagesCollection = database.GetCollection<ThreadMessage>(settings.ThreadMessagesCollectionName);
             _eventAttendanceCollection = database.GetCollection<EventAttendance>(settings.EventAttendanceCollectionName);
-
-            _clusterState = _client.Cluster.Description.State;
         }
 
         public Statistics GetAllStats()
         {
-            if (!_clusterState.IsConnected())
+            if (!_iCluster.Description.State.IsConnected())
             {
                 return null;
             }
@@ -57,7 +53,7 @@ namespace WebApi.Services
 
         public int CountPetitionsSigned() 
         {
-            if (!_clusterState.IsConnected())
+            if (!_iCluster.Description.State.IsConnected())
             {
                 return -1;
             }
@@ -67,7 +63,7 @@ namespace WebApi.Services
 
         public int CountEventsAttended()
         {
-            if (!_clusterState.IsConnected())
+            if (!_iCluster.Description.State.IsConnected())
             {
                 return -1;
             }
@@ -77,7 +73,7 @@ namespace WebApi.Services
 
         public int CountThreadMessages() 
         {
-            if (!_clusterState.IsConnected())
+            if (!_iCluster.Description.State.IsConnected())
             {
                 return -1;
             }
