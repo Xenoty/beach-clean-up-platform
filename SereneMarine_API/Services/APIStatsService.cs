@@ -13,7 +13,7 @@ namespace WebApi.Services
         int CountPetitionsSigned();
         int CountEventsAttended();
         int CountThreadMessages();
-       Statistics GetAllStats();
+        Statistics GetAllStats();
     }
 
     public class APIStatsService : IAPIStatsService
@@ -22,12 +22,12 @@ namespace WebApi.Services
         private readonly IMongoCollection<ThreadMessage> _threadMessagesCollection;
         private readonly IMongoCollection<EventAttendance> _eventAttendanceCollection;
 
-        private ICluster _iCluster;
+        private ICluster _ICluster;
 
         public APIStatsService(IMongoClient client, IUserDatabseSettings settings)
         {
             IMongoDatabase database = client.GetDatabase(settings.DatabaseName);
-            _iCluster = client.Cluster;
+            _ICluster = client.Cluster;
 
             _petitionsSignedCollection = database.GetCollection<PetitionSigned>(settings.PetitionsSignedCollectionName);
             _threadMessagesCollection = database.GetCollection<ThreadMessage>(settings.ThreadMessagesCollectionName);
@@ -36,7 +36,7 @@ namespace WebApi.Services
 
         public Statistics GetAllStats()
         {
-            if (!_iCluster.Description.State.IsConnected())
+            if (!_ICluster.Description.State.IsConnected())
             {
                 return null;
             }
@@ -53,7 +53,7 @@ namespace WebApi.Services
 
         public int CountPetitionsSigned() 
         {
-            if (!_iCluster.Description.State.IsConnected())
+            if (!_ICluster.Description.State.IsConnected())
             {
                 return -1;
             }
@@ -63,7 +63,7 @@ namespace WebApi.Services
 
         public int CountEventsAttended()
         {
-            if (!_iCluster.Description.State.IsConnected())
+            if (!_ICluster.Description.State.IsConnected())
             {
                 return -1;
             }
@@ -73,7 +73,7 @@ namespace WebApi.Services
 
         public int CountThreadMessages() 
         {
-            if (!_iCluster.Description.State.IsConnected())
+            if (!_ICluster.Description.State.IsConnected())
             {
                 return -1;
             }

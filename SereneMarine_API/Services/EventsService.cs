@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Configuration;
 using MongoDB.Driver;
+using MongoDB.Driver.Core.Clusters;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -25,10 +26,12 @@ namespace WebApi.Services
         private readonly IMongoCollection<Event> _eventCollection;
         private readonly IConfiguration _configuration;
 
-        public EventsService(IUserDatabseSettings settings, IConfiguration configuration)
+        private ICluster _ICluster;
+
+        public EventsService(IMongoClient client, IUserDatabseSettings settings, IConfiguration configuration)
         {
-            MongoClient client = new MongoClient(settings.ConnectionString);
             IMongoDatabase database = client.GetDatabase(settings.DatabaseName);
+            _ICluster = client.Cluster;
 
             _eventAttendanceCollection = database.GetCollection<EventAttendance>(settings.EventAttendanceCollectionName);
             _eventCollection = database.GetCollection<Event>(settings.EventsCollectionName);
@@ -37,10 +40,23 @@ namespace WebApi.Services
         }
 
         // TODO : Connection timed out
-        public List<Event> GetAll() => _eventCollection.Find(ev => true).ToList();
+        public List<Event> GetAll()
+        {
+            if (!_ICluster.Description.State.IsConnected())
+            {
+                return null;
+            }
+
+            return _eventCollection.Find(ev => true).ToList();
+        }
 
         public Event GetById(string id)
         {
+            if (!_ICluster.Description.State.IsConnected())
+            {
+                return null;
+            }
+
             Event ev = _eventCollection.Find(e => e.event_id == id).FirstOrDefault();
             ev.current_attendance = _eventAttendanceCollection.Find(ea => ea.event_id == id).ToList().Count();
 
@@ -49,6 +65,11 @@ namespace WebApi.Services
 
         public Event Create(Event ev)
         {
+            if (!_ICluster.Description.State.IsConnected())
+            {
+                return null;
+            }
+
             // Need to assign userid from bearer token to ev.user_id
             if (string.IsNullOrEmpty(ev.User_Id))
             {
@@ -106,6 +127,11 @@ namespace WebApi.Services
 
         public void Update(Event eventParam)
         {
+            if (!_ICluster.Description.State.IsConnected())
+            {
+                throw new AppException("Database is disconnected");
+            }
+
             Event ev = _eventCollection.Find(ev => ev.event_id == eventParam.event_id).SingleOrDefault();
 
             if (ev == null)
@@ -182,6 +208,11 @@ namespace WebApi.Services
 
         public void Delete(string id)
         {
+            if (!_ICluster.Description.State.IsConnected())
+            {
+                throw new AppException("Database is disconnected");
+            }
+
             Event ev = _eventCollection.Find(ev => ev.event_id == id).FirstOrDefault();
             if (ev != null)
             {
