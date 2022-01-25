@@ -36,6 +36,7 @@ namespace WebApi.Services
             _configuration = configuration;
         }
 
+        // TODO : Connection timed out
         public List<Event> GetAll() => _eventCollection.Find(ev => true).ToList();
 
         public Event GetById(string id)

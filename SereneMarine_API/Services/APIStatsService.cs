@@ -3,6 +3,7 @@
 using MongoDB.Driver;
 using MongoDB.Driver.Core.Clusters;
 using WebApi.Entities;
+using WebApi.Helpers;
 using WebApi.Models;
 
 namespace WebApi.Services
@@ -23,6 +24,8 @@ namespace WebApi.Services
 
         private readonly IMongoClient _client;
 
+        private ClusterState _clusterState;
+
         public APIStatsService(IMongoClient client, IUserDatabseSettings settings)
         {
             _client = client;
@@ -31,11 +34,13 @@ namespace WebApi.Services
             _petitionsSignedCollection = database.GetCollection<PetitionSigned>(settings.PetitionsSignedCollectionName);
             _threadMessagesCollection = database.GetCollection<ThreadMessage>(settings.ThreadMessagesCollectionName);
             _eventAttendanceCollection = database.GetCollection<EventAttendance>(settings.EventAttendanceCollectionName);
+
+            _clusterState = _client.Cluster.Description.State;
         }
 
         public Statistics GetAllStats()
         {
-            if (_client.Cluster.Description.State == ClusterState.Disconnected)
+            if (!_clusterState.IsConnected())
             {
                 return null;
             }
@@ -52,7 +57,7 @@ namespace WebApi.Services
 
         public int CountPetitionsSigned() 
         {
-            if (_client.Cluster.Description.State == ClusterState.Disconnected)
+            if (!_clusterState.IsConnected())
             {
                 return -1;
             }
@@ -62,7 +67,7 @@ namespace WebApi.Services
 
         public int CountEventsAttended()
         {
-            if (_client.Cluster.Description.State == ClusterState.Disconnected)
+            if (!_clusterState.IsConnected())
             {
                 return -1;
             }
@@ -72,7 +77,7 @@ namespace WebApi.Services
 
         public int CountThreadMessages() 
         {
-            if (_client.Cluster.Description.State == ClusterState.Disconnected)
+            if (!_clusterState.IsConnected())
             {
                 return -1;
             }
