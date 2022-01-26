@@ -38,9 +38,16 @@ namespace SereneMarine_Web.Controllers
 
             response = await client.GetAsync(url);
 
-            if (response.IsSuccessStatusCode == false)
+            if (!response.IsSuccessStatusCode)
             {
                 //create alert for error
+                ApiException exception = new ApiException
+                {
+                    StatusCode = (int)response.StatusCode,
+                    Content = await response.Content.ReadAsStringAsync()
+                };
+
+                TempData["ApiError"] = exception.GetApiErrorMessage();
                 return View();
             }
 
@@ -78,16 +85,16 @@ namespace SereneMarine_Web.Controllers
             //check response
             response = await client.PostAsync(url, content);
 
-            if (response.IsSuccessStatusCode == false)
+            if (!response.IsSuccessStatusCode)
             {
-                //display api error message
                 //create alert for error
                 ApiException exception = new ApiException
                 {
                     StatusCode = (int)response.StatusCode,
                     Content = await response.Content.ReadAsStringAsync()
                 };
-                ViewBag.ApiError = exception;
+
+                TempData["ApiError"] = exception.GetApiErrorMessage();
                 return View();
             }
 
@@ -108,15 +115,9 @@ namespace SereneMarine_Web.Controllers
             {
                 return BadRequest();
             }
-            if (TempData["ApiError"] != null)
-            {
-                ApiException exception = JsonConvert.DeserializeObject<ApiException>((string)TempData["ApiError"]);
-                ViewBag.ApiError = exception;
-            }
+
             //initalize variables petitions table
             PetitionDetailViewModel model = new PetitionDetailViewModel();
-
-
 
             //build the url for petitions table request
             string baseUrl = SD.PetitionsPath;
@@ -124,9 +125,16 @@ namespace SereneMarine_Web.Controllers
 
             response = await client.GetAsync(url);
 
-            if (response.IsSuccessStatusCode == false)
+            if (!response.IsSuccessStatusCode)
             {
                 //create alert for error
+                ApiException exception = new ApiException
+                {
+                    StatusCode = (int)response.StatusCode,
+                    Content = await response.Content.ReadAsStringAsync()
+                };
+
+                TempData["ApiError"] = exception.GetApiErrorMessage();
                 return View();
             }
 
@@ -141,8 +149,16 @@ namespace SereneMarine_Web.Controllers
 
             response = await client.GetAsync(urlPs);
 
-            if (response.IsSuccessStatusCode == false)
+            if (!response.IsSuccessStatusCode)
             {
+                //create alert for error
+                ApiException exception = new ApiException
+                {
+                    StatusCode = (int)response.StatusCode,
+                    Content = await response.Content.ReadAsStringAsync()
+                };
+
+                TempData["ApiError"] = exception.GetApiErrorMessage();
                 return View();
             }
 
@@ -200,7 +216,7 @@ namespace SereneMarine_Web.Controllers
                     Content = await response.Content.ReadAsStringAsync()
                 };
 
-                TempData["ApiError"] = JsonConvert.SerializeObject(exception);
+                TempData["ApiError"] = exception.GetApiErrorMessage();
 
                 return RedirectToAction("Details", "Petitions", new { model.petition_id });
             }
@@ -232,7 +248,7 @@ namespace SereneMarine_Web.Controllers
 
             response = await client.GetAsync(apiUrl);
 
-            if (response.IsSuccessStatusCode == false)
+            if (!response.IsSuccessStatusCode)
             {
                 //create alert for error
                 ApiException exception = new ApiException
@@ -241,9 +257,10 @@ namespace SereneMarine_Web.Controllers
                     Content = await response.Content.ReadAsStringAsync()
                 };
 
-                TempData["ApiError"] = JsonConvert.SerializeObject(exception);
+                TempData["ApiError"] = exception.GetApiErrorMessage();
                 return View();
             }
+
             //read data from json response
             var jsonString = await response.Content.ReadAsStringAsync();
 
@@ -278,17 +295,16 @@ namespace SereneMarine_Web.Controllers
             //check response
             response = await client.PutAsync(url, content);
 
-            if (response.IsSuccessStatusCode == false)
+            if (!response.IsSuccessStatusCode)
             {
-                //display api error message
                 //create alert for error
                 ApiException exception = new ApiException
                 {
                     StatusCode = (int)response.StatusCode,
                     Content = await response.Content.ReadAsStringAsync()
                 };
-                ViewBag.ApiError = JsonConvert.SerializeObject(exception);
 
+                TempData["ApiError"] = exception.GetApiErrorMessage();
                 return View();
             }
 
@@ -315,7 +331,7 @@ namespace SereneMarine_Web.Controllers
 
             response = await client.GetAsync(apiUrl);
 
-            if (response.IsSuccessStatusCode == false)
+            if (!response.IsSuccessStatusCode)
             {
                 //create alert for error
                 ApiException exception = new ApiException
@@ -324,7 +340,7 @@ namespace SereneMarine_Web.Controllers
                     Content = await response.Content.ReadAsStringAsync()
                 };
 
-                TempData["ApiError"] = JsonConvert.SerializeObject(exception);
+                TempData["ApiError"] = exception.GetApiErrorMessage();
                 return View();
             }
 
@@ -358,7 +374,7 @@ namespace SereneMarine_Web.Controllers
                     Content = await response.Content.ReadAsStringAsync()
                 };
 
-                TempData["ApiError"] = JsonConvert.SerializeObject(exception);
+                TempData["ApiError"] = exception.GetApiErrorMessage();
                 return RedirectToAction("Delete", "Petitions", new { id });
             }
 

@@ -12,6 +12,13 @@
     <a asp-action="Index">Back to List</a>
 </div>
 
+@if (TempData["ApiError"] != null)
+{
+    <div class="alert-danger">
+        <strong>@TempData["ApiError"].ToString()</strong>
+    </div>
+}
+
 <hr />
 
 @using (Html.BeginForm("Create", "Petitions", FormMethod.Post))

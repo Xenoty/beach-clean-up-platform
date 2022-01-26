@@ -64,6 +64,10 @@ namespace WebApi.Controllers
         public IActionResult GetAll()
         {
             var petitions = _petitionService.GetAll();
+            if (petitions == null)
+            {
+                return StatusCode(500, "Could not make connection to database.");
+            }
             var model = _mapper.Map<IList<PetitionsModel>>(petitions);
             return Ok(model);
         }
@@ -77,6 +81,10 @@ namespace WebApi.Controllers
         public IActionResult GetById(string id)
         {
             var pet = _petitionService.GetById(id);
+            if (pet == null)
+            {
+                return StatusCode(500, "Could not make connection to database");
+            }
             var model = _mapper.Map<PetitionsModel>(pet);
             return Ok(model);
         }
@@ -90,6 +98,10 @@ namespace WebApi.Controllers
         public IActionResult GetByCompletion(bool val)
         {
             var pet = _petitionService.GetByCompletion(val);
+            if (pet == null)
+            {
+                return StatusCode(500, "Could not make connection to database.");
+            }
             var model = _mapper.Map<IList<PetitionsModel>>(pet);
             return Ok(model);
         }
@@ -103,6 +115,10 @@ namespace WebApi.Controllers
         public IActionResult GetByUser(string id)
         {
             var pet = _petitionService.GetByUser(id);
+            if (pet == null)
+            {
+                return StatusCode(500, "Could not make connection to database");
+            }
             var model = _mapper.Map<PetitionsModel>(pet);
             return Ok(model);
         }
@@ -141,8 +157,16 @@ namespace WebApi.Controllers
         [HttpDelete("delete/{id}")]
         public IActionResult Delete(string id)
         {
-            _petitionService.Delete(id);
-            return Ok();
+            try
+            {
+                _petitionService.Delete(id);
+                return Ok();
+            }
+            catch (AppException ex)
+            {
+                // return error message if there was an exception
+                return BadRequest(new { message = ex.Message });
+            }
         }
     }
 }

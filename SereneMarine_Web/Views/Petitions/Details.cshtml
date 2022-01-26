@@ -166,6 +166,13 @@
 
 <div class="petition-container">
 
+@if (TempData["ApiError"] != null)
+{
+    <div class="alert-danger">
+        <strong>@TempData["ApiError"].ToString()</strong>
+    </div>
+}
+
     <a href="@Url.Action("Index", "Petitions")" class="back-btn">
         <svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 35.301 17.099">
             <g id="left-arrow" transform="translate(-185 -162)">
