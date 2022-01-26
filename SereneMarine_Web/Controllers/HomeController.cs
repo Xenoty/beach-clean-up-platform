@@ -35,17 +35,13 @@ namespace SereneMarine_Web.Controllers
 
             if (!response.IsSuccessStatusCode)
             {
-                // TODO: log error message on web. Look at Library Dewey App for example.
-                //var content = response.StatusCode;
-                //var testing = response.Content.ReadAsStringAsync();
-
                 ApiException exception = new ApiException
                 {
                     StatusCode = (int)response.StatusCode,
                     Content = await response.Content.ReadAsStringAsync()
                 };
 
-                TempData["ApiError"] = JsonConvert.SerializeObject(exception);
+                TempData["ApiError"] = exception.GetApiErrorMessage();
 
                 return View(previousStaticsModel);
             }

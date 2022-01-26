@@ -14,6 +14,7 @@
     petitionsCount = Model.PetitionsSigned;
     msgsCount = Model.ThreadMessages;
 }
+
 <div class="bold">
     <br />
     <div class="text-center" id="event_search">
@@ -26,10 +27,12 @@
         </div>*@
     </div>
 
-   @* @if(Model == null)
+    @if (TempData["ApiError"] != null)
     {
-        // TODO: 
-    }*@
+        <div class="alert-danger">
+            <strong>@TempData["ApiError"].ToString()</strong>
+        </div>
+    }
 
     <div class="landingGrid">
         <div id="events" class="item">
