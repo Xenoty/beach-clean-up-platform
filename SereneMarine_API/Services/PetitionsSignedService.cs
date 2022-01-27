@@ -1,4 +1,5 @@
 ﻿using MongoDB.Driver;
+using MongoDB.Driver.Core.Clusters;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -25,23 +26,54 @@ namespace WebApi.Services
         private readonly IMongoCollection<PetitionSigned> _petitionSignedCollection;
         private readonly IMongoCollection<Petition> _petitionCollection;
 
-        public PetitionsSignedService(IUserDatabseSettings settings)
+        private ICluster _ICluster;
+
+        public PetitionsSignedService(IMongoClient client, IUserDatabseSettings settings)
         {
-            var client = new MongoClient(settings.ConnectionString);
             var database = client.GetDatabase(settings.DatabaseName);
+            _ICluster = client.Cluster;
 
             _petitionSignedCollection = database.GetCollection<PetitionSigned>(settings.PetitionsSignedCollectionName);
             _petitionCollection = database.GetCollection<Petition>(settings.PetitionsCollectionName);
         }
 
-        public List<PetitionSigned> GetAll() => _petitionSignedCollection.Find(ps => true).ToList();
+        public List<PetitionSigned> GetAll() 
+        {
+            if (!_ICluster.Description.State.IsConnected())
+            {
+                return null;
+            }
 
-        public List<PetitionSigned> GetByPetition(string id) => _petitionSignedCollection.Find(ps => ps.petition_id == id).ToList();
+            return _petitionSignedCollection.Find(ps => true).ToList();
+        }
 
-        public List<PetitionSigned> GetByUser(string id) => _petitionSignedCollection.Find(ps => ps.User_Id == id).ToList();
+        public List<PetitionSigned> GetByPetition(string id)
+        {
+            if (!_ICluster.Description.State.IsConnected())
+            {
+                return null;
+            }
+
+            return _petitionSignedCollection.Find(ps => ps.petition_id == id).ToList();
+        }
+
+        public List<PetitionSigned> GetByUser(string id)
+        {
+            if (!_ICluster.Description.State.IsConnected())
+            {
+                return null;
+            }
+
+            return _petitionSignedCollection.Find(ps => ps.User_Id == id).ToList();
+        } 
 
         public PetitionSigned Create(PetitionSigned petitionSigned)
         {
+            if (!_ICluster.Description.State.IsConnected())
+            {
+                throw null;
+            }
+
             if (string.IsNullOrEmpty(petitionSigned.User_Id))
             {
                 throw new AppException("User_id is required");
@@ -78,6 +110,11 @@ namespace WebApi.Services
         }
         public void DeleteByPetition(string id)
         {
+            if (!_ICluster.Description.State.IsConnected())
+            {
+                throw new AppException("Database is disconnected");
+            }
+
             PetitionSigned petitionSigned = _petitionSignedCollection.Find(ps => ps.petition_id == id).FirstOrDefault();
             if (petitionSigned != null)
             {
@@ -87,6 +124,11 @@ namespace WebApi.Services
 
         public void DeleteByUser(string id)
         {
+            if (!_ICluster.Description.State.IsConnected())
+            {
+                throw new AppException("Database is disconnected");
+            }
+
             PetitionSigned petitionSigned = _petitionSignedCollection.Find(ps => ps.User_Id == id).FirstOrDefault();
             if (petitionSigned != null)
             {
@@ -96,6 +138,11 @@ namespace WebApi.Services
 
         public void DeleteByPetitionAndUser(string petition_id, string user_id)
         {
+            if (!_ICluster.Description.State.IsConnected())
+            {
+                throw new AppException("Database is disconnected");
+            }
+
             PetitionSigned petitionSigned = _petitionSignedCollection.Find(ps => ps.petition_id == petition_id && ps.User_Id == user_id).FirstOrDefault();
             if (petitionSigned != null)
             {

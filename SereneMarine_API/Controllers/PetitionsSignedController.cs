@@ -30,6 +30,11 @@ namespace WebApi.Controllers
         public IActionResult GetAll()
         {
             var petitionsSigned = _petitionSignedService.GetAll();
+            if (petitionsSigned == null)
+            {
+                return StatusCode(500, "Could not make connection to database.");
+            }
+
             var model = _mapper.Map<IList<PetitionsSignedModel>>(petitionsSigned);
             return Ok(model);
         }
@@ -64,6 +69,11 @@ namespace WebApi.Controllers
         public IActionResult GetByPetition(string petition_id)
         {
             var ps = _petitionSignedService.GetByPetition(petition_id);
+            if (ps == null)
+            {
+                return StatusCode(500, "Could not connect to database");
+            } 
+
             var model = _mapper.Map<IList<PetitionsSignedModel>>(ps);
             return Ok(model);
         }
@@ -76,6 +86,11 @@ namespace WebApi.Controllers
         public IActionResult GetByUser(string user_id)
         {
             var ps = _petitionSignedService.GetByUser(user_id);
+            if (ps == null)
+            {
+                return StatusCode(500, "Could not connect to database");
+            }
+
             var model = _mapper.Map<IList<PetitionsSignedModel>>(ps);
             return Ok(model);
         }
@@ -88,8 +103,16 @@ namespace WebApi.Controllers
         [HttpDelete("delete/signature/{petition_id}")]
         public IActionResult DeleteByPetition(string petition_id)
         {
-            _petitionSignedService.DeleteByPetition(petition_id);
-            return Ok();
+            try
+            {
+                _petitionSignedService.DeleteByPetition(petition_id);
+                return Ok();
+            }
+            catch (AppException ex)
+            {
+                // return error message if there was an exception
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
         /// <summary>
@@ -100,8 +123,16 @@ namespace WebApi.Controllers
         [HttpDelete("delete/user/{user_id}")]
         public IActionResult DeleteByUser(string user_id)
         {
-            _petitionSignedService.DeleteByUser(user_id);
-            return Ok();
+            try
+            {
+                _petitionSignedService.DeleteByUser(user_id);
+                return Ok();
+            }
+            catch (AppException ex)
+            {
+                // return error message if there was an exception
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
         /// <summary>
@@ -112,8 +143,16 @@ namespace WebApi.Controllers
         [HttpDelete("delete/signature/{petition_id}/user/{user_id}")]
         public IActionResult DeleteByPetitionAndUser(string petition_id, string user_id)
         {
-            _petitionSignedService.DeleteByPetitionAndUser(petition_id, user_id);
-            return Ok();
+            try
+            {
+                _petitionSignedService.DeleteByPetitionAndUser(petition_id, user_id);
+                return Ok();
+            }
+            catch (AppException ex)
+            {
+                // return error message if there was an exception
+                return BadRequest(new { message = ex.Message });
+            }
         }
     }
 }
