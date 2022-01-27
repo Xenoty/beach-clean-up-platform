@@ -34,6 +34,11 @@ namespace WebApi.Controllers
         public IActionResult GetAll()
         {
             var threadMessages = _threadMessagesService.GetAll();
+            if (threadMessages == null)
+            {
+                return StatusCode(500, "Could not make connection to database.");
+            }
+
             var model = _mapper.Map<IList<ThreadMessagesModel>>(threadMessages);
             return Ok(model);
         }
@@ -70,6 +75,10 @@ namespace WebApi.Controllers
         public IActionResult GetByThread(string thread_id)
         {
             var tm = _threadMessagesService.GetByThread(thread_id);
+            if (tm == null)
+            {
+                return StatusCode(500, "Could not make connection to database.");
+            }
             var model = _mapper.Map<IList<ThreadMessagesModel>>(tm);
             return Ok(model);
         }
@@ -81,6 +90,10 @@ namespace WebApi.Controllers
         public IActionResult GetByUser(string user_id)
         {
             var tm = _threadMessagesService.GetByUser(user_id);
+            if (tm == null)
+            {
+                return StatusCode(500, "Could not make connection to database.");
+            }
             var model = _mapper.Map<IList<ThreadMessagesModel>>(tm);
             return Ok(model);
         }
@@ -120,8 +133,15 @@ namespace WebApi.Controllers
         [HttpDelete("delete/thread/{thread_id}")]
         public IActionResult DeleteByThread(string thread_id)
         {
-            _threadMessagesService.DeleteByThread(thread_id);
-            return Ok();
+            try
+            {
+                _threadMessagesService.DeleteByThread(thread_id);
+                return Ok();
+            }
+            catch (AppException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
         /// <summary>
@@ -131,8 +151,15 @@ namespace WebApi.Controllers
         [HttpDelete("delete/message/{message_id}")]
         public IActionResult DeleteByMessage(string message_id)
         {
-            _threadMessagesService.DeleteByMessage(message_id);
-            return Ok();
+            try
+            {
+                _threadMessagesService.DeleteByMessage(message_id);
+                return Ok();
+            }
+            catch (AppException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
         /// <summary>
         /// Deletes messages by user_id
@@ -141,8 +168,15 @@ namespace WebApi.Controllers
         [HttpDelete("delete/user/{user_id}")]
         public IActionResult DeleteByUser(string user_id)
         {
-            _threadMessagesService.DeleteByUser(user_id);
-            return Ok();
+            try
+            {
+                _threadMessagesService.DeleteByUser(user_id);
+                return Ok();
+            }
+            catch (AppException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
         /// <summary>
@@ -152,8 +186,15 @@ namespace WebApi.Controllers
         [HttpDelete("delete/thread/{thread_id}/user/{user_id}")]
         public IActionResult DeleteByThreadAndUser(string thread_id, string user_id)
         {
-            _threadMessagesService.DeleteByThreadAndUser(thread_id, user_id);
-            return Ok();
+            try
+            {
+                _threadMessagesService.DeleteByThreadAndUser(thread_id, user_id);
+                return Ok();
+            }
+            catch (AppException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
     }
 }

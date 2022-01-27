@@ -139,6 +139,19 @@
     
 </style>
 
+@if (TempData["response"] != null)
+{
+    <div class="alert-success">
+        <strong>@TempData["response"].ToString()</strong>
+    </div>
+}
+
+@if (TempData["ApiError"] != null)
+{
+    <div class="alert-danger">
+        <strong>@TempData["ApiError"].ToString()</strong>
+    </div>
+}
 
 @if (Model == null)
 {
@@ -227,21 +240,6 @@ else
 
         </div>
     </div>
-
-    @if (TempData["response"] != null)
-    {
-        <div class="alert-success">
-            <strong>@TempData["response"].ToString()</strong>
-        </div>
-    }
-
-    @if (ViewBag.ApiError != null)
-    {
-        <div class="alert-danger">
-            <strong>@ViewBag.ApiError.StatusCode.ToString()</strong>
-            <strong>@ViewBag.ApiError.Content.ToString()</strong>
-        </div>
-    }
 
     @if (Model.threadMsgsList.Count == 0)
     {

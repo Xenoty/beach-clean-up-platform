@@ -38,6 +38,11 @@ namespace WebApi.Services
 
         public List<Petition> GetAll()
         {
+            if (!_ICluster.Description.State.IsConnected())
+            {
+                return null;
+            }
+
             List<Petition> petitionList = _petitionCollection.Find(x => true).ToList();
 
             List<PetitionSigned> petitionSignedList = (from x in _petitionCollection.AsQueryable()

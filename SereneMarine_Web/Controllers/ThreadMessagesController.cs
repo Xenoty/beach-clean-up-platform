@@ -35,7 +35,7 @@ namespace SereneMarine_Web.Controllers
 
             response = await client.GetAsync(apiUrl);
 
-            if (response.IsSuccessStatusCode == false)
+            if (!response.IsSuccessStatusCode)
             {
                 //create alert for error
                 ApiException exception = new ApiException
@@ -44,7 +44,7 @@ namespace SereneMarine_Web.Controllers
                     Content = await response.Content.ReadAsStringAsync()
                 };
 
-                ViewBag.ApiError = exception;
+                TempData["ApiError"] = exception.GetApiErrorMessage();
                 return View();
             }
 
@@ -61,7 +61,7 @@ namespace SereneMarine_Web.Controllers
 
             response = await client.GetAsync(messagesUrl);
 
-            if (response.IsSuccessStatusCode == false)
+            if (!response.IsSuccessStatusCode)
             {
                 //create alert for error
                 ApiException exception = new ApiException
@@ -70,7 +70,7 @@ namespace SereneMarine_Web.Controllers
                     Content = await response.Content.ReadAsStringAsync()
                 };
 
-                ViewBag.ApiError = exception;
+                TempData["ApiError"] = exception.GetApiErrorMessage();
                 return View();
             }
 
@@ -119,16 +119,15 @@ namespace SereneMarine_Web.Controllers
             //check response
             response = await client.PostAsync(url, content);
 
-            if (response.IsSuccessStatusCode == false)
+            if (!response.IsSuccessStatusCode)
             {
                 ApiException exception = new ApiException
                 {
                     StatusCode = (int)response.StatusCode,
                     Content = await response.Content.ReadAsStringAsync()
                 };
-                ViewBag.ApiError = exception;
-                //need to redirect to get response with new id?
-                //model.threadc.Thread_id
+                TempData["ApiError"] = exception.GetApiErrorMessage();
+
                 return RedirectToAction("Index", new { id = messagesModel.thread_id });
             }
 
@@ -166,7 +165,7 @@ namespace SereneMarine_Web.Controllers
             //check response
             response = await client.PutAsync(url, content);
 
-            if (response.IsSuccessStatusCode == false)
+            if (!response.IsSuccessStatusCode)
             {
                 ApiException exception = new ApiException
                 {
@@ -175,8 +174,6 @@ namespace SereneMarine_Web.Controllers
                 };
 
                 TempData["ApiError"] = exception;
-                //need to redirect to get response with new id?
-                //model.threadc.Thread_id
                 return RedirectToAction("Index", new { id = thread_id });
             }
 
@@ -206,7 +203,7 @@ namespace SereneMarine_Web.Controllers
             //get response
             response = await client.DeleteAsync(url);
 
-            if (response.IsSuccessStatusCode == false)
+            if (!response.IsSuccessStatusCode)
             {
                 ApiException exception = new ApiException
                 {
