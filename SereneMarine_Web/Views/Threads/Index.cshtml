@@ -115,7 +115,12 @@
     }
 </div>
 
-
+@if (TempData["ApiError"] != null)
+{
+    <div class="alert-danger">
+        <strong>@TempData["ApiError"].ToString()</strong>
+    </div>
+}
 
 @if (TempData["response"] != null)
 {
@@ -130,8 +135,6 @@
         <strong>@TempData["RoutingError"].ToString()</strong>
     </div>
 }
-
-
 
 @if (Model != null)
 {

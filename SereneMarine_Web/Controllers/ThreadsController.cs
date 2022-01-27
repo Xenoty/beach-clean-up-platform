@@ -37,10 +37,15 @@ namespace SereneMarine_Web.Controllers
 
             response = await client.GetAsync(url);
 
-            if (response.IsSuccessStatusCode == false)
+            if (!response.IsSuccessStatusCode)
             {
-                //create alert for error
-                //api error
+                ApiException exception = new ApiException
+                {
+                    StatusCode = (int)response.StatusCode,
+                    Content = await response.Content.ReadAsStringAsync()
+                };
+                TempData["ApiError"] = exception.GetApiErrorMessage();
+
                 return View();
             }
 
@@ -79,7 +84,7 @@ namespace SereneMarine_Web.Controllers
             //check response
             response = await client.PostAsync(url, content);
 
-            if (response.IsSuccessStatusCode == false)
+            if (!response.IsSuccessStatusCode)
             {
                 //display api error message
                 //create alert for error
@@ -88,7 +93,7 @@ namespace SereneMarine_Web.Controllers
                     StatusCode = (int)response.StatusCode,
                     Content = await response.Content.ReadAsStringAsync()
                 };
-                ViewBag.ApiError = JsonConvert.SerializeObject(exception);
+                TempData["ApiError"] = exception.GetApiErrorMessage();
 
                 return View();
             }
@@ -120,10 +125,15 @@ namespace SereneMarine_Web.Controllers
 
             response = await client.GetAsync(url);
 
-            if (response.IsSuccessStatusCode == false)
+            if (!response.IsSuccessStatusCode)
             {
-                //create new api error code
-                //create tempdata to store and display
+                ApiException exception = new ApiException
+                {
+                    StatusCode = (int)response.StatusCode,
+                    Content = await response.Content.ReadAsStringAsync()
+                };
+                TempData["ApiError"] = exception.GetApiErrorMessage();
+
                 RedirectToAction("Index", "Threads");
             }
 
@@ -134,7 +144,7 @@ namespace SereneMarine_Web.Controllers
 
             response = await client.GetAsync(apiUrl);
 
-            if (response.IsSuccessStatusCode == false)
+            if (!response.IsSuccessStatusCode)
             {
                 //create alert for error
                 ApiException exception = new ApiException
@@ -143,7 +153,7 @@ namespace SereneMarine_Web.Controllers
                     Content = await response.Content.ReadAsStringAsync()
                 };
 
-                TempData["ApiError"] = JsonConvert.SerializeObject(exception);
+                TempData["ApiError"] = exception.GetApiErrorMessage();
                 return View();
             }
             //read data from json response
@@ -179,7 +189,7 @@ namespace SereneMarine_Web.Controllers
             //check response
             response = await client.PutAsync(url, content);
 
-            if (response.IsSuccessStatusCode == false)
+            if (!response.IsSuccessStatusCode)
             {
                 //display api error message
                 //create alert for error
@@ -188,7 +198,7 @@ namespace SereneMarine_Web.Controllers
                     StatusCode = (int)response.StatusCode,
                     Content = await response.Content.ReadAsStringAsync()
                 };
-                ViewBag.ApiError = JsonConvert.SerializeObject(exception);
+                TempData["ApiError"] = exception.GetApiErrorMessage();
 
                 return View();
             }
@@ -215,7 +225,7 @@ namespace SereneMarine_Web.Controllers
 
             response = await client.GetAsync(apiUrl);
 
-            if (response.IsSuccessStatusCode == false)
+            if (!response.IsSuccessStatusCode)
             {
                 //create alert for error
                 ApiException exception = new ApiException
@@ -224,7 +234,7 @@ namespace SereneMarine_Web.Controllers
                     Content = await response.Content.ReadAsStringAsync()
                 };
 
-                TempData["ApiError"] = JsonConvert.SerializeObject(exception);
+                TempData["ApiError"] = exception.GetApiErrorMessage();
                 return View();
             }
 
@@ -249,7 +259,7 @@ namespace SereneMarine_Web.Controllers
 
             response = await client.DeleteAsync(apiUrl);
 
-            if (response.IsSuccessStatusCode == false)
+            if (!response.IsSuccessStatusCode)
             {
                 //create alert for error
                 ApiException exception = new ApiException
@@ -258,7 +268,7 @@ namespace SereneMarine_Web.Controllers
                     Content = await response.Content.ReadAsStringAsync()
                 };
 
-                TempData["ApiError"] = JsonConvert.SerializeObject(exception);
+                TempData["ApiError"] = exception.GetApiErrorMessage();
                 return RedirectToAction("Delete", "Threads", new { id = id });
             }
 

@@ -1,7 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
 using System.Security.Claims;
@@ -38,6 +37,10 @@ namespace WebApi.Controllers
         public IActionResult GetAll()
         {
             var events = _threadService.GetAll();
+            if (events == null)
+            {
+                return StatusCode(500, "Could not connected to database.");
+            }
             var model = _mapper.Map<IList<ThreadsModel>>(events);
             return Ok(model);
         }
@@ -75,6 +78,11 @@ namespace WebApi.Controllers
         public IActionResult GetById(string thread_id)
         {
             var threads = _threadService.GetById(thread_id);
+            if (threads == null)
+            {
+                return StatusCode(500, "Could not connected to database.");
+            }
+
             var model = _mapper.Map<ThreadsModel>(threads);
             return Ok(model);
         }
@@ -87,6 +95,11 @@ namespace WebApi.Controllers
         public IActionResult GetByUser(string User_Id)
         {
             var threads = _threadService.GetByUser(User_Id);
+            if (threads == null)
+            {
+                return StatusCode(500, "Could not connected to database.");
+            }
+
             var model = _mapper.Map<IList<ThreadsModel>>(threads);
             return Ok(model);
         }
@@ -126,8 +139,16 @@ namespace WebApi.Controllers
         [HttpDelete("delete/thread/{thread_id}")]
         public IActionResult DeleteByThread(string thread_id)
         {
-            _threadService.DeleteByThread(thread_id);
-            return Ok();
+            try
+            {
+                _threadService.DeleteByThread(thread_id);
+                return Ok();
+            }
+            catch (AppException ex)
+            {
+
+                return BadRequest(new { message = ex.ToString() });
+            }
         }
 
         /// <summary>
@@ -138,8 +159,15 @@ namespace WebApi.Controllers
         [HttpDelete("delete/user/{user_id}")]
         public IActionResult DeleteByUser(string user_id)
         {
-            _threadService.DeleteByUser(user_id);
-            return Ok();
+            try
+            {
+                _threadService.DeleteByUser(user_id);
+                return Ok();
+            }
+            catch (AppException ex)
+            {
+                return BadRequest(new { message = ex.ToString() });
+            }
         }
     }
 }

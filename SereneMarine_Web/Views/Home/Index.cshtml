@@ -27,12 +27,26 @@
         </div>*@
     </div>
 
-    @if (TempData["ApiError"] != null)
-    {
-        <div class="alert-danger">
-            <strong>@TempData["ApiError"].ToString()</strong>
-        </div>
-    }
+@if (TempData["ApiError"] != null)
+{
+    <div class="alert-danger">
+        <strong>@TempData["ApiError"].ToString()</strong>
+    </div>
+}
+
+@if (TempData["response"] != null)
+{
+    <div class="alert-success">
+        <strong>@TempData["response"].ToString()</strong>
+    </div>
+}
+
+@if (TempData["RoutingError"] != null)
+{
+    <div class="alert-danger">
+        <strong>@TempData["RoutingError"].ToString()</strong>
+    </div>
+}
 
     <div class="landingGrid">
         <div id="events" class="item">

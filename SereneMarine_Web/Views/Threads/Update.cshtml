@@ -8,19 +8,33 @@
     @Html.ActionLink("Back to Threads", "Index")
 </div>
 
+@if (TempData["ApiError"] != null)
+{
+    <div class="alert-danger">
+        <strong>@TempData["ApiError"].ToString()</strong>
+    </div>
+}
+
+@if (TempData["response"] != null)
+{
+    <div class="alert-success">
+        <strong>@TempData["response"].ToString()</strong>
+    </div>
+}
+
+@if (TempData["RoutingError"] != null)
+{
+    <div class="alert-danger">
+        <strong>@TempData["RoutingError"].ToString()</strong>
+    </div>
+}
+
 @using (Html.BeginForm("Update", "Threads", FormMethod.Post))
 {
     @Html.AntiForgeryToken()
 
 <div class="form-horizontal">
     <hr />
-    @if (ViewBag.ApiError != null)
-    {
-        <div class="alert-danger">
-            <strong>@ViewBag.ApiError.StatusCode.ToString()</strong>
-            <strong>@ViewBag.ApiError.Content.ToString()</strong>
-        </div>
-    }
     @Html.HiddenFor(model => model.thread_id)
     @Html.ValidationSummary(true, "", new { @class = "text-danger" })
     @await Html.PartialAsync("_ThreadEditCreatePartial", Model)
