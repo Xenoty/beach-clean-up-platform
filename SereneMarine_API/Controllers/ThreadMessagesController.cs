@@ -33,14 +33,16 @@ namespace WebApi.Controllers
         [HttpGet]
         public IActionResult GetAll()
         {
-            var threadMessages = _threadMessagesService.GetAll();
-            if (threadMessages == null)
+            try
             {
-                return StatusCode(500, "Could not make connection to database.");
+                var threadMessages = _threadMessagesService.GetAll();
+                var model = _mapper.Map<IList<ThreadMessagesModel>>(threadMessages);
+                return Ok(model);
             }
-
-            var model = _mapper.Map<IList<ThreadMessagesModel>>(threadMessages);
-            return Ok(model);
+            catch (AppException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
         [HttpPost("create")]
@@ -74,13 +76,16 @@ namespace WebApi.Controllers
         [HttpGet("thread/{thread_id}")]
         public IActionResult GetByThread(string thread_id)
         {
-            var tm = _threadMessagesService.GetByThread(thread_id);
-            if (tm == null)
+            try
             {
-                return StatusCode(500, "Could not make connection to database.");
+                var tm = _threadMessagesService.GetByThread(thread_id);
+                var model = _mapper.Map<IList<ThreadMessagesModel>>(tm);
+                return Ok(model);
             }
-            var model = _mapper.Map<IList<ThreadMessagesModel>>(tm);
-            return Ok(model);
+            catch (AppException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
         /// <summary>
@@ -89,13 +94,16 @@ namespace WebApi.Controllers
         [HttpGet("user/{user_id}")]
         public IActionResult GetByUser(string user_id)
         {
-            var tm = _threadMessagesService.GetByUser(user_id);
-            if (tm == null)
+            try
             {
-                return StatusCode(500, "Could not make connection to database.");
+                var tm = _threadMessagesService.GetByUser(user_id);
+                var model = _mapper.Map<IList<ThreadMessagesModel>>(tm);
+                return Ok(model);
             }
-            var model = _mapper.Map<IList<ThreadMessagesModel>>(tm);
-            return Ok(model);
+            catch (AppException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
         /// <summary>

@@ -45,7 +45,7 @@ namespace WebApi.Services
         {
             if (!_ICluster.Description.State.IsConnected())
             {
-                return null;
+                throw new AppException(AppSettings.DBDisconnectedMessage);
             }
             return _threadMessageCollection.Find(tm => true).ToList();
         }
@@ -54,7 +54,7 @@ namespace WebApi.Services
         {
             if (!_ICluster.Description.State.IsConnected())
             {
-                return null;
+                throw new AppException(AppSettings.DBDisconnectedMessage);
             }
 
             //use linq standard for inner join between two collections
@@ -79,7 +79,7 @@ namespace WebApi.Services
         {
             if (!_ICluster.Description.State.IsConnected())
             {
-                return null;
+                throw new AppException(AppSettings.DBDisconnectedMessage);
             }
             return _threadMessageCollection.Find(tm => tm.User_Id == id).ToList();
         } 
@@ -88,7 +88,7 @@ namespace WebApi.Services
         {
             if (!_ICluster.Description.State.IsConnected())
             {
-                return null;
+                throw new AppException(AppSettings.DBDisconnectedMessage);
             }
 
             if (string.IsNullOrEmpty(threadMessage.User_Id))
@@ -135,7 +135,7 @@ namespace WebApi.Services
         {
             if (!_ICluster.Description.State.IsConnected())
             {
-                throw new AppException("Database is disconnected");
+                throw new AppException(AppSettings.DBDisconnectedMessage);
             }
 
             ThreadMessage threadMessageToUpdate = _threadMessageCollection.Find(pet => pet.thread_message_id == threadMessage.thread_message_id).SingleOrDefault();
@@ -164,7 +164,7 @@ namespace WebApi.Services
         {
             if (!_ICluster.Description.State.IsConnected()) 
             {
-                throw new AppException("Database is disconnected");
+                throw new AppException(AppSettings.DBDisconnectedMessage);
             }
 
             ThreadMessage threadMessage = _threadMessageCollection.Find(tm => tm.thread_id == id).FirstOrDefault();
@@ -177,7 +177,7 @@ namespace WebApi.Services
         {
             if(!_ICluster.Description.State.IsConnected())
             {
-                throw new AppException("Database is disconnected");
+                throw new AppException(AppSettings.DBDisconnectedMessage);
             }
 
             ThreadMessage threadMessage = _threadMessageCollection.Find(tm => tm.thread_message_id == id).FirstOrDefault();
@@ -190,7 +190,7 @@ namespace WebApi.Services
         {
             if(!_ICluster.Description.State.IsConnected())
             {
-                throw new AppException("Database is disconnected");
+                throw new AppException(AppSettings.DBDisconnectedMessage);
             }
 
             ThreadMessage threadMessage = _threadMessageCollection.Find(tm => tm.User_Id == id).FirstOrDefault();
@@ -203,7 +203,7 @@ namespace WebApi.Services
         {
             if(!_ICluster.Description.State.IsConnected())
             {
-                throw new AppException("Database is disconnected");
+                throw new AppException(AppSettings.DBDisconnectedMessage);
             }
 
             ThreadMessage threadMessage = _threadMessageCollection.Find(tm => tm.thread_id == thread_id && tm.User_Id == user_id).FirstOrDefault();
