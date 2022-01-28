@@ -41,7 +41,7 @@ namespace WebApi.Services
         {
             if (!_ICluster.Description.State.IsConnected())
             {
-                return null;
+                throw new AppException(AppSettings.DBDisconnectedMessage);
             }
 
             return _petitionSignedCollection.Find(ps => true).ToList();
@@ -51,7 +51,7 @@ namespace WebApi.Services
         {
             if (!_ICluster.Description.State.IsConnected())
             {
-                return null;
+                throw new AppException(AppSettings.DBDisconnectedMessage);
             }
 
             return _petitionSignedCollection.Find(ps => ps.petition_id == id).ToList();
@@ -61,7 +61,7 @@ namespace WebApi.Services
         {
             if (!_ICluster.Description.State.IsConnected())
             {
-                return null;
+                throw new AppException(AppSettings.DBDisconnectedMessage);
             }
 
             return _petitionSignedCollection.Find(ps => ps.User_Id == id).ToList();
@@ -71,7 +71,7 @@ namespace WebApi.Services
         {
             if (!_ICluster.Description.State.IsConnected())
             {
-                throw null;
+                throw new AppException(AppSettings.DBDisconnectedMessage);
             }
 
             if (string.IsNullOrEmpty(petitionSigned.User_Id))
@@ -112,7 +112,7 @@ namespace WebApi.Services
         {
             if (!_ICluster.Description.State.IsConnected())
             {
-                throw new AppException("Database is disconnected");
+                throw new AppException(AppSettings.DBDisconnectedMessage);
             }
 
             PetitionSigned petitionSigned = _petitionSignedCollection.Find(ps => ps.petition_id == id).FirstOrDefault();
@@ -126,9 +126,9 @@ namespace WebApi.Services
         {
             if (!_ICluster.Description.State.IsConnected())
             {
-                throw new AppException("Database is disconnected");
+                throw new AppException(AppSettings.DBDisconnectedMessage);
             }
-
+            
             PetitionSigned petitionSigned = _petitionSignedCollection.Find(ps => ps.User_Id == id).FirstOrDefault();
             if (petitionSigned != null)
             {
@@ -140,7 +140,7 @@ namespace WebApi.Services
         {
             if (!_ICluster.Description.State.IsConnected())
             {
-                throw new AppException("Database is disconnected");
+                throw new AppException(AppSettings.DBDisconnectedMessage);
             }
 
             PetitionSigned petitionSigned = _petitionSignedCollection.Find(ps => ps.petition_id == petition_id && ps.User_Id == user_id).FirstOrDefault();
