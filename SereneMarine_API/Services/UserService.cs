@@ -36,7 +36,7 @@ namespace WebApi.Services
         {
             if (!_ICluster.Description.State.IsConnected())
             {
-                throw new AppException("Database is disconnected");
+                throw new AppException();
             }
 
             if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(password))
@@ -67,7 +67,7 @@ namespace WebApi.Services
         {
             if (!_ICluster.Description.State.IsConnected())
             {
-                throw new AppException("Database is disconnected");
+                throw new AppException(AppSettings.DBDisconnectedMessage);
             }
             return _userCollection.Find(user => true).ToList();
         }
@@ -77,7 +77,7 @@ namespace WebApi.Services
         {
             if (!_ICluster.Description.State.IsConnected())
             {
-                throw new AppException("Database is disconnected");
+                throw new AppException(AppSettings.DBDisconnectedMessage);
             }
             return _userCollection.Find(user => user.User_Id == id).FirstOrDefault();                
         }
@@ -87,7 +87,7 @@ namespace WebApi.Services
         {
             if (!_ICluster.Description.State.IsConnected())
             {
-                throw new AppException("Database is disconnected");
+                throw new AppException(AppSettings.DBDisconnectedMessage);
             }
 
             // validation
@@ -126,7 +126,7 @@ namespace WebApi.Services
         {
             if (!_ICluster.Description.State.IsConnected())
             {
-                throw new AppException("Database is disconnected");
+                throw new AppException(AppSettings.DBDisconnectedMessage);
             }
 
             User user = _userCollection.Find(user => user.User_Id == userParam.User_Id).SingleOrDefault();
@@ -196,7 +196,7 @@ namespace WebApi.Services
         {
             if (!_ICluster.Description.State.IsConnected())
             {
-                throw new AppException("Database is disconnected");
+                throw new AppException(AppSettings.DBDisconnectedMessage);
             }
 
             User user = _userCollection.Find(user => user.User_Id == id).FirstOrDefault();

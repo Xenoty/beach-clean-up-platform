@@ -39,7 +39,7 @@ namespace WebApi.Services
         {
             if (!_ICluster.Description.State.IsConnected())
             {
-                return null;
+                throw new AppException(AppSettings.DBDisconnectedMessage);
             }
             return _threadCollection.Find(th => true).ToList();  
         }
@@ -48,7 +48,7 @@ namespace WebApi.Services
         {
             if(!_ICluster.Description.State.IsConnected())
             {
-                return null;
+                throw new AppException(AppSettings.DBDisconnectedMessage);
             }
             return _threadCollection.Find(th => th.thread_id == id).FirstOrDefault(); 
         }
@@ -57,7 +57,7 @@ namespace WebApi.Services
         {
             if(!_ICluster.Description.State.IsConnected())
             {
-                return null;
+                throw new AppException(AppSettings.DBDisconnectedMessage);
             }
             return _threadCollection.Find(th => th.User_Id == id).ToList(); 
         }
@@ -66,7 +66,7 @@ namespace WebApi.Services
         {
             if (!_ICluster.Description.State.IsConnected())
             {
-                return null;
+                throw new AppException(AppSettings.DBDisconnectedMessage);
             }
 
             if (string.IsNullOrEmpty(thread.User_Id))
@@ -115,6 +115,11 @@ namespace WebApi.Services
 
         public void Update(Thread thread)
         {
+            if (!_ICluster.Description.State.IsConnected())
+            {
+                throw new AppException(AppSettings.DBDisconnectedMessage);
+            }
+
             Thread threadToUpdate = _threadCollection.Find(th => th.thread_id == thread.thread_id).SingleOrDefault();
 
             if (threadToUpdate == null)
@@ -156,7 +161,7 @@ namespace WebApi.Services
         {
             if (!_ICluster.Description.State.IsConnected())
             {
-                throw new AppException("Database is disconnected");
+                throw new AppException(AppSettings.DBDisconnectedMessage);
             }
             Thread threadToDelete = _threadCollection.Find(th => th.thread_id == id).FirstOrDefault();
             if (threadToDelete != null)
@@ -169,7 +174,7 @@ namespace WebApi.Services
         {
             if (!_ICluster.Description.State.IsConnected())
             {
-                throw new AppException("Database is disconnected");
+                throw new AppException(AppSettings.DBDisconnectedMessage);
             }
 
             Thread threadToDelete = _threadCollection.Find(th => th.User_Id == id).FirstOrDefault();

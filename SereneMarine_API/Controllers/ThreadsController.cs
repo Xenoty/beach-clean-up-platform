@@ -36,13 +36,16 @@ namespace WebApi.Controllers
         [HttpGet]
         public IActionResult GetAll()
         {
-            var events = _threadService.GetAll();
-            if (events == null)
+            try
             {
-                return StatusCode(500, "Could not connected to database.");
+                var events = _threadService.GetAll();
+                var model = _mapper.Map<IList<ThreadsModel>>(events);
+                return Ok(model);
             }
-            var model = _mapper.Map<IList<ThreadsModel>>(events);
-            return Ok(model);
+            catch (AppException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
         [HttpPost("create")]
@@ -77,14 +80,16 @@ namespace WebApi.Controllers
         [HttpGet("{thread_id}")]
         public IActionResult GetById(string thread_id)
         {
-            var threads = _threadService.GetById(thread_id);
-            if (threads == null)
+            try
             {
-                return StatusCode(500, "Could not connected to database.");
+                var threads = _threadService.GetById(thread_id);
+                var model = _mapper.Map<ThreadsModel>(threads);
+                return Ok(model);
             }
-
-            var model = _mapper.Map<ThreadsModel>(threads);
-            return Ok(model);
+            catch (AppException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
         /// <summary>
@@ -94,14 +99,16 @@ namespace WebApi.Controllers
         [HttpGet("user/{User_Id}")]
         public IActionResult GetByUser(string User_Id)
         {
-            var threads = _threadService.GetByUser(User_Id);
-            if (threads == null)
+            try
             {
-                return StatusCode(500, "Could not connected to database.");
+                var threads = _threadService.GetByUser(User_Id);
+                var model = _mapper.Map<IList<ThreadsModel>>(threads);
+                return Ok(model);
             }
-
-            var model = _mapper.Map<IList<ThreadsModel>>(threads);
-            return Ok(model);
+            catch (AppException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
         /// <summary>
