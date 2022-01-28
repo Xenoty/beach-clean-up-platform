@@ -9,7 +9,6 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Security.Claims;
@@ -188,6 +187,13 @@ namespace SereneMarine_Web.Controllers
 
             if (!response.IsSuccessStatusCode)
             {
+                ApiException exception = new ApiException
+                {
+                    StatusCode = (int)response.StatusCode,
+                    Content = await response.Content.ReadAsStringAsync()
+                };
+
+                TempData["ApiError"] = exception.GetApiErrorMessage();
                 //create alert for error
                 return View();
             }
@@ -287,14 +293,13 @@ namespace SereneMarine_Web.Controllers
 
             if (!response.IsSuccessStatusCode)
             {
-                //display api error message
-                //create alert for error
                 ApiException exception = new ApiException
                 {
                     StatusCode = (int)response.StatusCode,
                     Content = await response.Content.ReadAsStringAsync()
                 };
-                ViewBag.ApiError = exception;
+
+                TempData["ApiError"] = exception.GetApiErrorMessage();
 
                 return View();
             }
@@ -327,7 +332,13 @@ namespace SereneMarine_Web.Controllers
 
             if (!response.IsSuccessStatusCode)
             {
-                //create new api error code
+                ApiException exception = new ApiException
+                {
+                    StatusCode = (int)response.StatusCode,
+                    Content = await response.Content.ReadAsStringAsync()
+                };
+
+                TempData["ApiError"] = exception.GetApiErrorMessage();
                 //create tempdata to store and display
                 RedirectToAction("Details", "Events", new { id });
             }
@@ -395,7 +406,7 @@ namespace SereneMarine_Web.Controllers
                     StatusCode = (int)response.StatusCode,
                     Content = await response.Content.ReadAsStringAsync()
                 };
-                ViewBag.ApiError = exception.GetApiErrorMessage();
+                TempData["ApiError"] = exception.GetApiErrorMessage();
 
                 return View();
             }

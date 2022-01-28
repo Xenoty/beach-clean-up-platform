@@ -44,7 +44,7 @@ namespace WebApi.Services
         {
             if (!_ICluster.Description.State.IsConnected())
             {
-                return null;
+                throw new AppException(AppSettings.DBDisconnectedMessage);
             }
 
             return _eventCollection.Find(ev => true).ToList();
@@ -54,7 +54,7 @@ namespace WebApi.Services
         {
             if (!_ICluster.Description.State.IsConnected())
             {
-                return null;
+                throw new AppException(AppSettings.DBDisconnectedMessage);
             }
 
             Event ev = _eventCollection.Find(e => e.event_id == id).FirstOrDefault();
@@ -67,7 +67,7 @@ namespace WebApi.Services
         {
             if (!_ICluster.Description.State.IsConnected())
             {
-                return null;
+                throw new AppException(AppSettings.DBDisconnectedMessage);
             }
 
             // Need to assign userid from bearer token to ev.user_id
@@ -129,7 +129,7 @@ namespace WebApi.Services
         {
             if (!_ICluster.Description.State.IsConnected())
             {
-                throw new AppException("Database is disconnected");
+                throw new AppException(AppSettings.DBDisconnectedMessage);
             }
 
             Event ev = _eventCollection.Find(ev => ev.event_id == eventParam.event_id).SingleOrDefault();
@@ -210,7 +210,7 @@ namespace WebApi.Services
         {
             if (!_ICluster.Description.State.IsConnected())
             {
-                throw new AppException("Database is disconnected");
+                throw new AppException(AppSettings.DBDisconnectedMessage);
             }
 
             Event ev = _eventCollection.Find(ev => ev.event_id == id).FirstOrDefault();

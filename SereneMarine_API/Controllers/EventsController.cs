@@ -61,13 +61,16 @@ namespace WebApi.Controllers
         [HttpGet]
         public IActionResult GetAll()
         {
-            var events = _eventService.GetAll();
-            if (events == null)
+            try
             {
-                return StatusCode(500, "Could not make connection to database.");
+                var events = _eventService.GetAll();
+                var model = _mapper.Map<IList<EventsModel>>(events);
+                return Ok(model);
             }
-            var model = _mapper.Map<IList<EventsModel>>(events);
-            return Ok(model);
+            catch (AppException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
         /// <summary>
@@ -78,14 +81,16 @@ namespace WebApi.Controllers
         [HttpGet("{id}")]
         public IActionResult GetById(string id)
         {
-            var ev = _eventService.GetById(id);
-            if (ev == null)
+            try
             {
-                return StatusCode(500, "Could not make connection to database.");
+                var ev = _eventService.GetById(id);
+                var model = _mapper.Map<EventsModel>(ev);
+                return Ok(model);
             }
-
-            var model = _mapper.Map<EventsModel>(ev);
-            return Ok(model);
+            catch (AppException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
         /// <summary>
