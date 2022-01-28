@@ -13,6 +13,13 @@
     </div>
 }
 
+@if (TempData["ApiError"] != null)
+{
+    <div class="alert-danger">
+        <strong>@TempData["ApiError"].ToString()</strong>
+    </div>
+}
+
 <div class="row">
     <div class="col-md-8">
         <section id="loginForm">

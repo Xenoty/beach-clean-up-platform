@@ -57,41 +57,48 @@ namespace WebApi.Controllers
         [HttpPost("authenticate")]
         public IActionResult Authenticate([FromBody] AuthenticateModel model)
         {
-            var user = _userService.Authenticate(model.Email_address, model.Password);
-
-            if (user == null)
-                return BadRequest(new { message = "Username or password is incorrect" });
-
-            var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.ASCII.GetBytes(_appSettings.Secret);
-            var tokenDescriptor = new SecurityTokenDescriptor
+            try
             {
-                Subject = new ClaimsIdentity(new Claim[]
+                var user = _userService.Authenticate(model.Email_address, model.Password);
+
+                if (user == null)
+                    return BadRequest(new { message = "Username or password is incorrect" });
+
+                var tokenHandler = new JwtSecurityTokenHandler();
+                var key = Encoding.ASCII.GetBytes(_appSettings.Secret);
+                var tokenDescriptor = new SecurityTokenDescriptor
                 {
+                    Subject = new ClaimsIdentity(new Claim[]
+                    {
                     new Claim(ClaimTypes.Name, user.User_Id.ToString()),
                     new Claim(ClaimTypes.Role, user.Role),
-                }),
-                Expires = DateTime.UtcNow.AddHours(3),
-                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
-            };
-            var token = tokenHandler.CreateToken(tokenDescriptor);
-            var tokenString = tokenHandler.WriteToken(token);
+                    }),
+                    Expires = DateTime.UtcNow.AddHours(3),
+                    SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
+                };
+                var token = tokenHandler.CreateToken(tokenDescriptor);
+                var tokenString = tokenHandler.WriteToken(token);
 
-            // return basic user info and authentication token
-            return Ok(new
+                // return basic user info and authentication token
+                return Ok(new
+                {
+                    Id = user.Id,
+                    User_Id = user.User_Id,
+                    Username = user.Username,
+                    FirstName = user.FirstName,
+                    LastName = user.LastName,
+                    email_address = user.Email_address,
+                    role = user.Role,
+                    ContactNo = user.ContactNo,
+                    Address = user.Address,
+                    Joined = user.Joined,
+                    Token = tokenString
+                });
+            }
+            catch (AppException ex)
             {
-                Id = user.Id,
-                User_Id = user.User_Id,
-                Username = user.Username,
-                FirstName = user.FirstName,
-                LastName = user.LastName,
-                email_address = user.Email_address,
-                role = user.Role,
-                ContactNo = user.ContactNo,
-                Address = user.Address,
-                Joined = user.Joined,
-                Token = tokenString
-            });
+                return BadRequest(new { message = ex.ToString() });
+            }
         }
 
         /// <summary>
@@ -145,9 +152,16 @@ namespace WebApi.Controllers
         [HttpGet]
         public IActionResult GetAll()
         {
-            var users = _userService.GetAll();
-            var model = _mapper.Map<IList<UserModel>>(users);
-            return Ok(model);
+            try
+            {
+                var users = _userService.GetAll();
+                var model = _mapper.Map<IList<UserModel>>(users);
+                return Ok(model);
+            }
+            catch (AppException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
         /// <summary>
@@ -156,9 +170,16 @@ namespace WebApi.Controllers
         [HttpGet("{id}")]
         public IActionResult GetById(string id)
         {
-            var user = _userService.GetById(id);
-            var model = _mapper.Map<UserModel>(user);
-            return Ok(model);
+            try
+            {
+                var user = _userService.GetById(id);
+                var model = _mapper.Map<UserModel>(user);
+                return Ok(model);
+            }
+            catch (AppException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
         /// <summary>
@@ -190,8 +211,15 @@ namespace WebApi.Controllers
         [HttpDelete("delete/{id}")]
         public IActionResult Delete(string id)
         {
-            _userService.Delete(id);
-            return Ok();
+            try
+            {
+                _userService.Delete(id);
+                return Ok();
+            }
+            catch (AppException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
     }
 }

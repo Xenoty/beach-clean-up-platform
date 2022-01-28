@@ -67,7 +67,7 @@ namespace SereneMarine_Web.Controllers
             response = await client.PostAsync(url, content);
             //</upload>
 
-            if (response.IsSuccessStatusCode == false)
+            if (!response.IsSuccessStatusCode)
             {
                 ApiException exception = new ApiException
                 {
@@ -75,7 +75,7 @@ namespace SereneMarine_Web.Controllers
                     Content = await response.Content.ReadAsStringAsync()
                 };
 
-                ViewBag.ApiError = exception;
+                TempData["ApiError"] = exception.GetApiErrorMessage();
 
                 return View();
             }
@@ -136,15 +136,15 @@ namespace SereneMarine_Web.Controllers
                 response = await client.PostAsync(url, content);
                 //</upload>
 
-                if (response.IsSuccessStatusCode == false)
+                if (!response.IsSuccessStatusCode)
                 {
                     ApiException exception = new ApiException
                     {
                         StatusCode = (int)response.StatusCode,
-                        Content = "Email is already taken or invalid, please try again"
+                        Content = await response.Content.ReadAsStringAsync()
                     };
 
-                    ViewBag.ApiError = exception;
+                    TempData["ApiError"] = exception.GetApiErrorMessage();
 
                     return View();
                 }

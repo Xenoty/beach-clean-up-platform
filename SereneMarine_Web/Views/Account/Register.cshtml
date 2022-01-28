@@ -5,7 +5,12 @@
 
 <h2>@ViewBag.Title.</h2>
 
-
+@if (TempData["ApiError"] != null)
+{
+    <div class="alert-danger">
+        <strong>@TempData["ApiError"].ToString()</strong>
+    </div>
+}
 
 @using (Html.BeginForm("Register", "Account", new { ReturnUrl = ViewBag.ReturnUrl }, FormMethod.Post, null, new { @class = "form-horizontal", role = "form" }))
 {
