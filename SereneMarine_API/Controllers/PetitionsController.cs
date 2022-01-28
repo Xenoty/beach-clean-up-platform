@@ -1,7 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
 using System.Security.Claims;
@@ -63,13 +62,16 @@ namespace WebApi.Controllers
         [HttpGet]
         public IActionResult GetAll()
         {
-            var petitions = _petitionService.GetAll();
-            if (petitions == null)
+            try
             {
-                return StatusCode(500, "Could not make connection to database.");
+                var petitions = _petitionService.GetAll();
+                var model = _mapper.Map<IList<PetitionsModel>>(petitions);
+                return Ok(model);
             }
-            var model = _mapper.Map<IList<PetitionsModel>>(petitions);
-            return Ok(model);
+            catch (AppException ex)
+            {
+                return BadRequest(new {message = ex.Message});
+            }
         }
 
         /// <summary>
@@ -80,13 +82,16 @@ namespace WebApi.Controllers
         [HttpGet("{id}")]
         public IActionResult GetById(string id)
         {
-            var pet = _petitionService.GetById(id);
-            if (pet == null)
+            try
             {
-                return StatusCode(500, "Could not make connection to database");
+                var pet = _petitionService.GetById(id);
+                var model = _mapper.Map<PetitionsModel>(pet);
+                return Ok(model);
             }
-            var model = _mapper.Map<PetitionsModel>(pet);
-            return Ok(model);
+            catch (AppException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
         /// <summary>
@@ -97,13 +102,16 @@ namespace WebApi.Controllers
         [HttpGet("completion/{val}")]
         public IActionResult GetByCompletion(bool val)
         {
-            var pet = _petitionService.GetByCompletion(val);
-            if (pet == null)
+            try
             {
-                return StatusCode(500, "Could not make connection to database.");
+                var pet = _petitionService.GetByCompletion(val);
+                var model = _mapper.Map<IList<PetitionsModel>>(pet);
+                return Ok(model);
             }
-            var model = _mapper.Map<IList<PetitionsModel>>(pet);
-            return Ok(model);
+            catch (AppException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
         /// <summary>
@@ -114,13 +122,16 @@ namespace WebApi.Controllers
         [HttpGet("user/{id}")]
         public IActionResult GetByUser(string id)
         {
-            var pet = _petitionService.GetByUser(id);
-            if (pet == null)
+            try
             {
-                return StatusCode(500, "Could not make connection to database");
+                var pet = _petitionService.GetByUser(id);
+                var model = _mapper.Map<PetitionsModel>(pet);
+                return Ok(model);
             }
-            var model = _mapper.Map<PetitionsModel>(pet);
-            return Ok(model);
+            catch (AppException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
 

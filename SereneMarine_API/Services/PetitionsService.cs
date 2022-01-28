@@ -40,7 +40,7 @@ namespace WebApi.Services
         {
             if (!_ICluster.Description.State.IsConnected())
             {
-                return null;
+                throw new AppException(AppSettings.DBDisconnectedMessage);
             }
 
             List<Petition> petitionList = _petitionCollection.Find(x => true).ToList();
@@ -70,7 +70,7 @@ namespace WebApi.Services
         {
             if (!_ICluster.Description.State.IsConnected())
             {
-                return null;
+                throw new AppException(AppSettings.DBDisconnectedMessage);
             }
 
             Petition petition = _petitionCollection.Find(pet => pet.petition_id == id).FirstOrDefault();
@@ -84,7 +84,7 @@ namespace WebApi.Services
         {
             if (!_ICluster.Description.State.IsConnected())
             {
-                return null;
+                throw new AppException(AppSettings.DBDisconnectedMessage);
             }
 
             return _petitionCollection.Find(pet => pet.completed == isComplete).ToList();
@@ -94,7 +94,7 @@ namespace WebApi.Services
         {
             if (!_ICluster.Description.State.IsConnected())
             {
-                return null;
+                throw new AppException(AppSettings.DBDisconnectedMessage);
             }
 
             return _petitionCollection.Find(pet => pet.User_Id == id).FirstOrDefault();
@@ -104,7 +104,7 @@ namespace WebApi.Services
         {
             if (!_ICluster.Description.State.IsConnected())
             {
-                return null;
+                throw new AppException(AppSettings.DBDisconnectedMessage);
             }
 
             //need to assign userid from bearer token to pet.user_id
@@ -148,7 +148,7 @@ namespace WebApi.Services
         {
             if (!_ICluster.Description.State.IsConnected())
             {
-                throw new AppException("Database is disconnected");
+                throw new AppException(AppSettings.DBDisconnectedMessage);
             }
 
             Petition petitionToUpdate = _petitionCollection.Find(pet => pet.petition_id == petition.petition_id).SingleOrDefault();
@@ -193,7 +193,7 @@ namespace WebApi.Services
         {
             if (!_ICluster.Description.State.IsConnected())
             {
-                throw new AppException("Database is disconnected");
+                throw new AppException(AppSettings.DBDisconnectedMessage);
             }
 
             Petition pet = _petitionCollection.Find(pet => pet.petition_id == id).FirstOrDefault();

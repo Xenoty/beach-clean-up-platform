@@ -208,7 +208,7 @@ namespace SereneMarine_Web.Controllers
             //Http Response
             response = await client.PostAsync(url, content);
             //</upload>
-            if (response.IsSuccessStatusCode == false)
+            if (!response.IsSuccessStatusCode)
             {
                 ApiException exception = new ApiException
                 {
@@ -365,7 +365,7 @@ namespace SereneMarine_Web.Controllers
 
             response = await client.DeleteAsync(apiUrl);
 
-            if (response.IsSuccessStatusCode == false)
+            if (!response.IsSuccessStatusCode)
             {
                 //create alert for error
                 ApiException exception = new ApiException
@@ -385,4 +385,4 @@ namespace SereneMarine_Web.Controllers
 
         #endregion
     }
-}
+}   
