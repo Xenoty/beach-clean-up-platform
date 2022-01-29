@@ -171,11 +171,7 @@ namespace SereneMarine_Web.Controllers
             {
                 return BadRequest();
             }
-            if (TempData["ApiError"] != null)
-            {
-                ApiException exception = JsonConvert.DeserializeObject<ApiException>((string)TempData["ApiError"]);
-                ViewBag.ApiError = exception;
-            }
+
             //initalize variables
             EventsViewModel evm = new EventsViewModel();
 

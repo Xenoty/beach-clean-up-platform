@@ -1,6 +1,5 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
 using WebApi.Entities;
@@ -31,10 +30,16 @@ namespace WebApi.Controllers
         [HttpGet]
         public IActionResult GetAll()
         {
-            List<EventAttendance> eventAttendanceList = _attendanceService.GetAll();
-            IList<EventAttendanceModel> eventAttendanceModelIList = _mapper.Map<IList<EventAttendanceModel>>(eventAttendanceList);
-
-            return Ok(eventAttendanceModelIList);
+            try
+            {
+                List<EventAttendance> eventAttendanceList = _attendanceService.GetAll();
+                IList<EventAttendanceModel> eventAttendanceModelIList = _mapper.Map<IList<EventAttendanceModel>>(eventAttendanceList);
+                return Ok(eventAttendanceModelIList);
+            }
+            catch (AppException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
         [HttpPost("create")]
@@ -66,10 +71,16 @@ namespace WebApi.Controllers
         [HttpGet("event/{event_id}")]
         public IActionResult GetAttendanceByEvent(string event_id)
         {
-            List<EventAttendance> eventAttendanceList = _attendanceService.GetAttendanceByEvent(event_id);
-            IList<EventAttendanceModel> eventAttendanceModelIList = _mapper.Map<IList<EventAttendanceModel>>(eventAttendanceList);
-
-            return Ok(eventAttendanceModelIList);
+            try
+            {
+                List<EventAttendance> eventAttendanceList = _attendanceService.GetAttendanceByEvent(event_id);
+                IList<EventAttendanceModel> eventAttendanceModelIList = _mapper.Map<IList<EventAttendanceModel>>(eventAttendanceList);
+                return Ok(eventAttendanceModelIList);
+            }
+            catch (AppException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
         /// <summary>
@@ -82,10 +93,17 @@ namespace WebApi.Controllers
         [HttpGet("user/{User_Id}&{event_attended}")]
         public IActionResult GetAttendanceByUser(string User_Id, bool event_attended)
         {
-            List<EventAttendance> eventAttendanceList = _attendanceService.GetAttendanceByUser(User_Id, event_attended);
-            IList<EventAttendanceModel> eventAttendanceModelIList = _mapper.Map<IList<EventAttendanceModel>>(eventAttendanceList);
+            try
+            {
+                List<EventAttendance> eventAttendanceList = _attendanceService.GetAttendanceByUser(User_Id, event_attended);
+                IList<EventAttendanceModel> eventAttendanceModelIList = _mapper.Map<IList<EventAttendanceModel>>(eventAttendanceList);
 
-            return Ok(eventAttendanceModelIList);
+                return Ok(eventAttendanceModelIList);
+            }
+            catch (AppException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
         /// <summary>
@@ -96,8 +114,15 @@ namespace WebApi.Controllers
         [HttpDelete("delete/event/{event_id}")]
         public IActionResult Delete(string event_id)
         {
-            _attendanceService.DeleteByEvent(event_id);
-            return Ok();
+            try
+            {
+                _attendanceService.DeleteByEvent(event_id);
+                return Ok();
+            }
+            catch (AppException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
         /// <summary>
         /// Deletes attendance by user_id
@@ -107,8 +132,15 @@ namespace WebApi.Controllers
         [HttpDelete("delete/user/{user_id}")]
         public IActionResult DeleteByUser(string user_id)
         {
-            _attendanceService.DeleteByUser(user_id);
-            return Ok();
+            try
+            {
+                _attendanceService.DeleteByUser(user_id);
+                return Ok();
+            }
+            catch (AppException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
         /// <summary>
@@ -119,8 +151,15 @@ namespace WebApi.Controllers
         [HttpDelete("delete/event/{event_id}/user/{user_id}")]
         public IActionResult DeleteByEventAndUser(string event_id, string user_id)
         {
-            _attendanceService.DeleteByEventAndUser(event_id, user_id);
+            try
+            {
+                _attendanceService.DeleteByEventAndUser(event_id, user_id);
             return Ok();
+            }
+            catch (AppException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
     }
 }
