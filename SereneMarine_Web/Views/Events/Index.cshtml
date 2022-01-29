@@ -1,4 +1,7 @@
-﻿@model SereneMarine_Web.ViewModels.Events.EventsIndexViewModel;
+﻿@using Microsoft.Extensions.Configuration
+@inject IConfiguration Configuration
+
+@model SereneMarine_Web.ViewModels.Events.EventsIndexViewModel;
 @{
     ViewData["Title"] = "Events";
     int x = 0;
@@ -502,7 +505,7 @@
         });
     });
 
-    mapboxgl.accessToken = 'pk.eyJ1IjoiZGF5bmU5NSIsImEiOiJjazZnOWhpYmUweWVsM2xtdmZvemxxZ3RmIn0.CCVZlLeLo_gsyIMA5iX08w';
+    mapboxgl.accessToken = '@Configuration["AppSettings:MapboxAPIkey"].ToString()';
 
     var map = new mapboxgl.Map({
         container: 'map',
