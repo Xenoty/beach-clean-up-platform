@@ -36,7 +36,7 @@ namespace WebApi.Services
         {
             if (!_ICluster.Description.State.IsConnected())
             {
-                throw new AppException();
+                throw new AppException(AppSettings.DBDisconnectedMessage);
             }
 
             if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(password))
