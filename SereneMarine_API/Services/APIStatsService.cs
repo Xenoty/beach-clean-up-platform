@@ -1,5 +1,4 @@
 ﻿using System.Linq;
-
 using MongoDB.Driver;
 using MongoDB.Driver.Core.Clusters;
 using WebApi.Entities;
@@ -38,7 +37,7 @@ namespace WebApi.Services
         {
             if (!_ICluster.Description.State.IsConnected())
             {
-                return null;
+                throw new AppException(AppSettings.DBDisconnectedMessage);
             }
 
             Statistics stats = new Statistics()
@@ -55,7 +54,7 @@ namespace WebApi.Services
         {
             if (!_ICluster.Description.State.IsConnected())
             {
-                return -1;
+                throw new AppException(AppSettings.DBDisconnectedMessage);
             }
 
             return _petitionsSignedCollection.Find(x => true).ToList().Count();
@@ -65,7 +64,7 @@ namespace WebApi.Services
         {
             if (!_ICluster.Description.State.IsConnected())
             {
-                return -1;
+                throw new AppException(AppSettings.DBDisconnectedMessage);
             }
 
             return _eventAttendanceCollection.Find(x => true).ToList().Count();
@@ -75,7 +74,7 @@ namespace WebApi.Services
         {
             if (!_ICluster.Description.State.IsConnected())
             {
-                return -1;
+                throw new AppException(AppSettings.DBDisconnectedMessage);
             }
 
             return _threadMessagesCollection.Find(x => true).ToList().Count();

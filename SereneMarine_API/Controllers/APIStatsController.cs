@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
+using WebApi.Helpers;
 using WebApi.Models.ApiStats;
 using WebApi.Services;
 
@@ -22,51 +23,58 @@ namespace WebApi.Controllers
         [HttpGet]
         public IActionResult GetAllStats()
         {
-            var statistics = _apiStatsService.GetAllStats();
-            if (statistics == null)
+            try
             {
-                return StatusCode(500, "Could not make connection to database.");
+                var statistics = _apiStatsService.GetAllStats();
+                var model = _mapper.Map<StatisticsModel>(statistics);
+                return Ok(model);
             }
-
-            var model = _mapper.Map<StatisticsModel>(statistics);
-
-            return Ok(model);
+            catch (AppException ex)
+            {
+                return BadRequest( new {message = ex.Message});
+            }
         }
 
         [HttpGet("petitionsSigned")]
         public IActionResult CountPetitionsSigned()
         {
-            int result = _apiStatsService.CountPetitionsSigned();
-            if (result <= -1)
+            try
             {
-                return StatusCode(500, "Could not make connection to database.");
+                int result = _apiStatsService.CountPetitionsSigned();
+                return Ok(result);
             }
-
-            return Ok(result);
+            catch (AppException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
         [HttpGet("eventsAttended")]
         public IActionResult CountEventsAttended()
         {
-            int result = _apiStatsService.CountEventsAttended();
-            if (result <= -1)
+            try
             {
-                return StatusCode(500, "Could not make connection to database.");
+                int result = _apiStatsService.CountEventsAttended();
+                return Ok(result);
             }
-
-            return Ok(result);
+            catch (AppException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
         [HttpGet("threadMessages")]
         public IActionResult CountThreadMessages()
         {
-            int result = _apiStatsService.CountThreadMessages();
-            if (result <= -1)
+            try
             {
-                return StatusCode(500, "Could not make connection to database.");
+                int result = _apiStatsService.CountThreadMessages();
+                return Ok(result);
             }
-
-            return Ok(result);
+            catch (AppException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
     }
 }
