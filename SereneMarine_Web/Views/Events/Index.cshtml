@@ -505,6 +505,23 @@
         });
     });
 
+    function ShowOnMap(x) {
+        var point = window["Marker" + x]
+        point.togglePopup();
+    }
+
+    function DisplayId(id, span) {
+        var elm = document.getElementById(id).style.display;
+
+        if (elm == "none") {
+            document.getElementById(id).style.display = "Block";
+            document.getElementById(span).style.display = "Block";
+        } else {
+            document.getElementById(id).style.display = "None";
+            document.getElementById(span).style.display = "None";
+        }
+    }
+
     mapboxgl.accessToken = '@Configuration["AppSettings:MapboxAPIkey"].ToString()';
 
     var map = new mapboxgl.Map({
@@ -539,23 +556,6 @@
 
         window["Marker" + i] = new mapboxgl.Marker()
             .setLngLat([latC, longC]).addTo(map).setPopup(new mapboxgl.Popup().setHTML(eventNames_List[i]));
-    }
-
-    function ShowOnMap(x) {
-        var point = window["Marker" + x]
-        point.togglePopup();
-    }
-
-    function DisplayId(id, span) {
-        var elm = document.getElementById(id).style.display;
-
-        if (elm == "none") {
-            document.getElementById(id).style.display = "Block";
-            document.getElementById(span).style.display = "Block";
-        } else {
-            document.getElementById(id).style.display = "None";
-            document.getElementById(span).style.display = "None";
-        }
     }
 
     </script>
