@@ -16,6 +16,7 @@
 <!-- Promise polyfill script required to use Mapbox GL Geocoder in IE 11 -->
 <script src="https://cdn.jsdelivr.net/npm/es6-promise@4/dist/es6-promise.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/es6-promise@4/dist/es6-promise.auto.min.js"></script>
+<script src="~/js/mapbox.js" type="text/javascript"></script>
 
 <style>
     .events-grid {
@@ -496,7 +497,7 @@
 
 @section scripts{
 
-    <script type="text/javascript">
+<script type="text/javascript">
 
     $(document).ready(function () {
         $(function () {
@@ -504,11 +505,6 @@
             $('#datetimepicker2').datetimepicker();
         });
     });
-
-    function ShowOnMap(x) {
-        var point = window["Marker" + x]
-        point.togglePopup();
-    }
 
     function DisplayId(id, span) {
         var elm = document.getElementById(id).style.display;
@@ -523,40 +519,20 @@
     }
 
     mapboxgl.accessToken = '@Configuration["AppSettings:MapboxAPIkey"].ToString()';
+    var map = CreateMapBox();
 
-    var map = new mapboxgl.Map({
-        container: 'map',
-        style: 'mapbox://styles/mapbox/streets-v11',
-        center: [31.0218, -29.8587], // starting position [lng, lat]
-        zoom: 10 // starting zoom
-
-    });
-
-    map.addControl(
-        new MapboxGeocoder({
-            accessToken: mapboxgl.accessToken,
-            mapboxgl: mapboxgl
-        })
-    );
-
-    var lat_List = [];
-    var long_List = []
-    var eventNames_List = []
+    var latArray = [];
+    var longArray = [];
+    var eventNamesArray = [];
 
     @foreach (var item in Model.EventsViewModel)
     {
-        @:lat_List.push("@item.latitude");
-        @:long_List.push("@item.longitude");
-        @:eventNames_List.push("@item.event_name");
+        @:latArray.push("@item.latitude");
+        @:longArray.push("@item.longitude");
+        @:eventNamesArray.push("@item.event_name");
     }
 
-    for (var i = 0; i < lat_List.length; i++) {
-        var latC = lat_List[i].toString().replace(/,/, '.');
-        var longC = long_List[i].toString().replace(/,/, '.');
-
-        window["Marker" + i] = new mapboxgl.Marker()
-            .setLngLat([latC, longC]).addTo(map).setPopup(new mapboxgl.Popup().setHTML(eventNames_List[i]));
-    }
+    AddMarkersToMapByLatAndLongArrays(map, latArray, longArray, eventNamesArray);
 
     </script>
 }
