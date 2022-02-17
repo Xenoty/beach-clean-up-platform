@@ -267,9 +267,6 @@ namespace SereneMarine_Web.Controllers
             {
                 return View();
             }
-            //lets convert comma to decimal 
-            model.longitude = Math.Round(Convert.ToDouble(model.longitude, new CultureInfo("en-GB")), 7);
-            model.latitude = Math.Round(Convert.ToDouble(model.latitude, new CultureInfo("en-GB")), 7);
 
             //create api url request
             string url = SD.EventsPath + "create/";

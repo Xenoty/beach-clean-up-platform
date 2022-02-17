@@ -19,6 +19,7 @@ namespace SereneMarine_Web.ViewModels.Events
         [StringLength(200, MinimumLength = 10, ErrorMessage = "Please enter a event description between 10 and 200 characters in length")]
         [RegularExpression(@"^[@.,;\'""a-zA-Z0-9'-'\s]*$", ErrorMessage = "Please enter a event description made up of letters and numbers only")]
         public string event_descr { get; set; }
+    
         public double longitude { get; set; }
         public double latitude { get; set; }
 

@@ -9,7 +9,18 @@ namespace SereneMarine_Web.Helpers
 
         public string Content { get; set; }
 
-        private JObject contentJObject { get { return JObject.Parse(Content); } }
+        private JObject contentJObject
+        {
+            get
+            {
+                if (Content == null)
+                {
+                    return null;
+                } 
+                
+                return JObject.Parse(Content); 
+            } 
+        }
 
         private string ContentMessage { get { return (string)contentJObject["message"]; } }
 

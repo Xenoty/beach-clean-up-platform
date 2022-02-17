@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Mvc;
+using SereneMarine_Web.Helpers;
+using System;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 
@@ -14,7 +16,9 @@ namespace SereneMarine_Web.ViewModels.Events
 
         [Display(Name = "Description")]
         public string event_descr { get; set; }
+
         public double longitude { get; set; }
+
         public double latitude { get; set; }
 
         [Display(Name = "Location")]

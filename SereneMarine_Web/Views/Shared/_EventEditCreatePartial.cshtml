@@ -154,23 +154,20 @@
                 .setLngLat(coordinates)
                 .setHTML('you clicked here: <br/>' + coordinates)
                 .addTo(map);
-            //now populate fields for lat long
-            //split coordinates 
+
             var tempCoord = coordinates.toString().split("(");
-            //console.log("tempCoord: " + tempCoord);
+
             var coord = tempCoord[1].replace(")", "");
-            //console.log("coord: " + coord);
+
             var FinalCoord = coord.split(",");
-            //console.log("FinalCoord: " + coord);
-            //for (var i = 0; i < FinalCoord.length; i++) {
-            //    FinalCoord[i] = FinalCoord[i].replace(".", ",");
-            //    console.log("FinalCoord[i]: " + FinalCoord[i])
-            //};
+
             var lat = FinalCoord[0];
-            //console.log("lat = "+ lat);
+
             var long = FinalCoord[1];
-            //console.log("long = "+ long);
-            //console.log(FinalCoord);
+
+            lat = lat.replace('.', ',');
+            long = long.replace('.', ',');
+
             document.getElementById("latitude").value = lat;
             document.getElementById("longitude").value = long;
         });
