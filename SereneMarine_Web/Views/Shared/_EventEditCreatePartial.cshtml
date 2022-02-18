@@ -139,6 +139,7 @@
 <script type="text/javascript">
 
     mapboxgl.accessToken = '@Configuration["AppSettings:MapboxAPIkey"].ToString()';
+    // CreateMapBox from mapbox.js
     var map = CreateMapBox();
 
     map.on('style.load', function () {
@@ -167,8 +168,4 @@
         });
     });
 
-    $(function () {
-        $('#datetimepicker1').datetimepicker();
-        $('#datetimepicker2').datetimepicker();
-    });
 </script>

@@ -308,8 +308,9 @@
     <script type="text/javascript">
 
     mapboxgl.accessToken = '@Configuration["AppSettings:MapboxAPIkey"].ToString()';
+    // Create map from mapbox.js
     var map = CreateMapBox();
-
+    // Add single marker to map from mapbox.js
     AddSingleMarkerToMapByLatAndLongCoordinate(map, "@Model.latitude", "@Model.longitude", "@Model.event_name");
 
 </script>

@@ -503,13 +503,6 @@
 
 <script type="text/javascript">
 
-    $(document).ready(function () {
-        $(function () {
-            $('#datetimepicker1').datetimepicker();
-            $('#datetimepicker2').datetimepicker();
-        });
-    });
-
     function DisplayId(id, span) {
         var elm = document.getElementById(id).style.display;
 
@@ -523,6 +516,7 @@
     }
 
     mapboxgl.accessToken = '@Configuration["AppSettings:MapboxAPIkey"].ToString()';
+    // Create Mapbox from mapbox.js
     var map = CreateMapBox();
 
     var latArray = [];
@@ -535,7 +529,7 @@
         @:longArray.push("@item.longitude");
         @:eventNamesArray.push("@item.event_name");
     }
-
+    // Add markers to map from mapbox.js
     AddMarkersToMapByLatAndLongArrays(map, latArray, longArray, eventNamesArray);
 
     </script>
