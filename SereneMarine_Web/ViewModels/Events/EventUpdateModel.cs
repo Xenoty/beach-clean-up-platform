@@ -20,7 +20,11 @@ namespace SereneMarine_Web.ViewModels.Events
         [RegularExpression(@"^[@.,;\'""a-zA-Z0-9'-'\s]*$", ErrorMessage = "Please enter a event description made up of letters and numbers only")]
         public string event_descr { get; set; }
     
+        [Required]
+        [Display(Name = "Longitude")]
         public double longitude { get; set; }
+        [Required]
+        [Display(Name = "Latitude")]
         public double latitude { get; set; }
 
         [Required]

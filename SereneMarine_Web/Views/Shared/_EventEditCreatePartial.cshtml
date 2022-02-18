@@ -45,6 +45,12 @@
     .map-wrapper {
         margin-top: 1rem;
     }
+
+    .grayed-out{
+        background-color: #f1f1f1;
+        border: none;
+        color: #565656;
+    }
 </style>
 
 <div class="form-group">
@@ -73,20 +79,17 @@
 
 <div class="form-group">
     <div class="col-md-10">
-        <label class="form-title">Coordinates <i>(optional)</i></label>
-        <label>. Please use the map below, and click on the location.</label>
-        <div class="collapsible" onclick="dropdown('map', 'descr_arrow');">
-            Show Map <b id="descr_arrow">&#8593;</b>
-        </div>
+        <label class="form-title">Coordinates </label><br />
+        <label> Please click on the map below to set the exact location of where the event is happening.</label>
         <div class="coordinates-wrapper">
             <div class="event-section">
                 @Html.LabelFor(model => model.latitude, htmlAttributes: new { @class = "control-label col-md-5" })
-                @Html.EditorFor(model => model.latitude, new { htmlAttributes = new { @class = "control-label col-md-5", @id = "latitude" } })
+                @Html.EditorFor(model => model.latitude, new { htmlAttributes = new { @class = "control-label col-md-5 grayed-out", @id = "latitude", @readonly = "true" } })
                 @Html.ValidationMessageFor(model => model.latitude, "", new { @class = "text-danger" })
             </div>
             <div class="event-section">
                 @Html.LabelFor(model => model.longitude, htmlAttributes: new { @class = "control-label col-md-5" })
-                @Html.EditorFor(model => model.longitude, new { htmlAttributes = new { @class = "control-label col-md-5 cancel", @id = "longitude" } })
+                @Html.EditorFor(model => model.longitude, new { htmlAttributes = new { @class = "control-label col-md-5 grayed-out", @id = "longitude", @readonly = "true" } })
                 @Html.ValidationMessageFor(model => model.longitude, "", new { @class = "text-danger" })
             </div>
         </div>
@@ -95,7 +98,7 @@
     <div class="col-md-10">
         
         <div class="map-wrapper">
-            <div id="map" style="display:none;width: auto;height: 600px;position: relative;">
+            <div id="map" style="display:block;width: auto;height: 600px;position: relative;">
 
             </div>
         </div>
@@ -113,7 +116,7 @@
 <div class="form-group">
     @Html.LabelFor(model => model.event_startdate, htmlAttributes: new { @class = "control-label col-md-2" })
     <div class="col-md-10">
-        <div class="input-group date" id="datetimepicker1">
+        <div class="input-group date">
             @Html.EditorFor(model => model.event_startdate, new { htmlAttributes = new { @class = "form-control" } })
             <span class="input-group-addon">
                 <span class="glyphicon glyphicon-calendar"></span>
@@ -126,7 +129,7 @@
 <div class="form-group">
     @Html.LabelFor(model => model.event_enddate, htmlAttributes: new { @class = "control-label col-md-2" })
     <div class="col-md-10">
-        <div class="input-group date" id="datetimepicker2">
+        <div class="input-group date">
             @Html.EditorFor(model => model.event_enddate, new { htmlAttributes = new { @class = "form-control" } })
             <span class="input-group-addon">
                 <span class="glyphicon glyphicon-calendar"></span>
