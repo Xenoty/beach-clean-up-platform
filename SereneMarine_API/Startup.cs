@@ -40,8 +40,8 @@ namespace WebApi
         {
             // When the application is started, check whether a connection can be established to MongoDB
             //var testing = client.Settings.ConnectTimeout.TotalMilliseconds; // Default timeout for mongoDb
-            const int maxTimeToWaitForInMilliSeconds = 5000; // 5 Seconds
-            const int timeToWaitForInMilliSeconds = 100;
+            int maxTimeToWaitInMilliSecondsForTimeout = _configuration.GetValue<int>("UserDatabaseSettings:Timeout");
+            int intervalTimeToWaitInMilliSeconds = _configuration.GetValue<int>("UserDatabaseSettings:Interval");
             int currentTimeWaitedForInMilliSeconds = 0;
 
             string mongoDBConnectionString = _configuration.GetValue<string>("UserDatabaseSettings:ConnectionString");
@@ -49,7 +49,7 @@ namespace WebApi
 
             while (client.Cluster.Description.State != ClusterState.Connected)
             {
-                if (currentTimeWaitedForInMilliSeconds >= maxTimeToWaitForInMilliSeconds)
+                if (currentTimeWaitedForInMilliSeconds >= maxTimeToWaitInMilliSecondsForTimeout)
                 {
                     throw new Exception("Could not connect to MongoDB using connection string '" + mongoDBConnectionString + "'." +
                     "\n If you are using a on-premise MongoDB, make sure your Mongod server is running." +
@@ -57,8 +57,8 @@ namespace WebApi
                 }
 
                 // Sleep for 0.1 seconds then try again
-                System.Threading.Thread.Sleep(timeToWaitForInMilliSeconds);
-                currentTimeWaitedForInMilliSeconds += timeToWaitForInMilliSeconds;
+                System.Threading.Thread.Sleep(intervalTimeToWaitInMilliSeconds);
+                currentTimeWaitedForInMilliSeconds += intervalTimeToWaitInMilliSeconds;
             }
 
             bool loadDefaultData = _configuration.GetValue<bool>("AppSettings:LoadDefaultData");
