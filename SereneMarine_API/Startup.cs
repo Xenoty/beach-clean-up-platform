@@ -8,12 +8,15 @@ using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using MongoDB.Driver;
+using MongoDB.Driver.Core.Clusters;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
+using WebApi.Entities;
 using WebApi.Helpers;
 using WebApi.Models;
 using WebApi.Services;
@@ -24,6 +27,7 @@ namespace WebApi
     {
         private readonly IWebHostEnvironment _env;
         private readonly IConfiguration _configuration;
+        private IMongoClient client;
 
         public Startup(IWebHostEnvironment env, IConfiguration configuration)
         {
@@ -34,15 +38,49 @@ namespace WebApi
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            //string mongoDBConnectionString = _configuration.GetValue<string>("UserDatabaseSettings:ConnectionString");
-            //MongoClient mongoClient = new MongoClient(mongoDBConnectionString);
+            // When the application is started, check whether a connection can be established to MongoDB
+            //var testing = client.Settings.ConnectTimeout.TotalMilliseconds; // Default timeout for mongoDb
+            const int maxTimeToWaitForInMilliSeconds = 5000; // 5 Seconds
+            const int timeToWaitForInMilliSeconds = 100;
+            int currentTimeWaitedForInMilliSeconds = 0;
 
-            //if (mongoClient.Cluster.Description.State == MongoDB.Driver.Core.Clusters.ClusterState.Disconnected)
-            //{
-            //    throw new Exception("Could not connect to MongoDB using connection string '" + mongoDBConnectionString + "'." +
-            //                        "\n If you are using a on-premise MongoDB, make sure your Mongod server is running." +
-            //                        "\n If you are using  MongoDB Atlas, make sure your connection string is correct, including username and password.");
-            //}
+            string mongoDBConnectionString = _configuration.GetValue<string>("UserDatabaseSettings:ConnectionString");
+            client = new MongoClient(mongoDBConnectionString);
+
+            while (client.Cluster.Description.State != ClusterState.Connected)
+            {
+                if (currentTimeWaitedForInMilliSeconds >= maxTimeToWaitForInMilliSeconds)
+                {
+                    throw new Exception("Could not connect to MongoDB using connection string '" + mongoDBConnectionString + "'." +
+                    "\n If you are using a on-premise MongoDB, make sure your Mongod server is running." +
+                    "\n If you are using  MongoDB Atlas, make sure your connection string is correct, including username and password.");
+                }
+
+                // Sleep for 0.1 seconds then try again
+                System.Threading.Thread.Sleep(timeToWaitForInMilliSeconds);
+                currentTimeWaitedForInMilliSeconds += timeToWaitForInMilliSeconds;
+            }
+
+            bool loadDefaultData = _configuration.GetValue<bool>("AppSettings:LoadDefaultData");
+            if (loadDefaultData)
+            {
+                // Load default data
+                UserDatabaseSettings userDatabaseSettings = CreateUserDatabaseSettings();
+                // Create Services
+                UserService userService = new UserService(client, userDatabaseSettings);
+                EventsService eventsService = new EventsService(client, userDatabaseSettings, _configuration);
+                PetitionsSevice petitionsSevice = new PetitionsSevice(client, userDatabaseSettings);
+                ThreadsService threadsService = new ThreadsService(client, userDatabaseSettings);
+                // Create dummy data
+                User user = CreateAdminUser(userService);
+                CreateUpcommingEvents(user, eventsService);
+                CreatePastEvents(user, eventsService);
+                CreatePetitions(user, petitionsSevice);
+                CreateThreads(user, threadsService);
+                
+                // Set load default data to false
+                UpdateAppSetting("AppSettings:LoadDefaultData", "false");
+            }
 
             services.AddSingleton<IMongoClient, MongoClient>(s =>
             {
@@ -212,6 +250,278 @@ namespace WebApi
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints => endpoints.MapControllers());
+        }
+
+        private UserDatabaseSettings CreateUserDatabaseSettings()
+        {
+            return new UserDatabaseSettings()
+            {
+                UsersCollectionName = _configuration["UserDatabaseSettings:UsersCollectionName"],
+                EventsCollectionName = _configuration["UserDatabaseSettings:EventsCollectionName"],
+                EventAttendanceCollectionName = _configuration["UserDatabaseSettings:EventAttendanceCollectionName"],
+                PetitionsCollectionName = _configuration["UserDatabaseSettings:PetitionsCollectionName"],
+                PetitionsSignedCollectionName = _configuration["UserDatabaseSettings:PetitionsSignedCollectionName"],
+                ThreadsCollectionName = _configuration["UserDatabaseSettings:ThreadsCollectionName"],
+                ThreadMessagesCollectionName = _configuration["UserDatabaseSettings:ThreadMessagesCollectionName"],
+                DatabaseName = _configuration["UserDatabaseSettings:DatabaseName"]
+            };
+        }
+
+        private User CreateAdminUser(UserService userService)
+        {
+            // Create the admin user
+            User user = new User()
+            {
+                FirstName = "Admin",
+                LastName = "User",
+                Email_address = "admin@serenemarine.com",
+                Role = "Admin",
+                Joined = DateTime.Now,
+                User_Id = Guid.NewGuid().ToString(),
+            };
+
+            try
+            {
+                userService.Create(user, "123456");
+            }
+            catch (AppException appException)
+            {
+                Console.WriteLine(appException.Message);
+            }
+
+            return user;
+        }
+
+        private void CreateUpcommingEvents(User user, EventsService eventsService)
+        {
+            // Create 3 Upcomming Events, 4 past events
+
+            Event ev1 = new Event()
+            {
+                event_id = Guid.NewGuid().ToString(),
+                event_name = "Sample Event 1",
+                event_descr = "Sample Event 1 description. Lorem Ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum sed lebro porttitor, lacinia sem id, rutrum nunc.",
+                User_Id = user.User_Id,
+                longitude = 0.0f,
+                latitude = 0.0f,
+                address = "North Beach, Durban, KwaZulu-Natal",
+                event_startdate = DateTime.Now.AddDays(1),
+                event_enddate = DateTime.Now.AddDays(1).AddHours(4),
+                event_createddate = DateTime.Now,
+                max_attendance = 75,
+                event_completed = false
+            };
+
+            Event ev2 = new Event()
+            {
+                event_id = Guid.NewGuid().ToString(),
+                event_name = "Sample Event 2",
+                event_descr = "Sample Event 2 description. Lorem Ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum sed lebro porttitor, lacinia sem id, rutrum nunc.",
+                User_Id = user.User_Id,
+                longitude = 0.0f,
+                latitude = 0.0f,
+                address = "South Beach, Durban, KwaZulu-Natal",
+                event_startdate = DateTime.Now.AddDays(2),
+                event_enddate = DateTime.Now.AddDays(2).AddHours(4),
+                event_createddate = DateTime.Now,
+                max_attendance = 50,
+                event_completed = false
+            };
+
+            Event ev3 = new Event()
+            {
+                event_id = Guid.NewGuid().ToString(),
+                event_name = "Sample Event 3",
+                event_descr = "Sample Event 3 description. Lorem Ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum sed lebro porttitor, lacinia sem id, rutrum nunc.",
+                User_Id = user.User_Id,
+                longitude = 0.0f,
+                latitude = 0.0f,
+                address = "New Beach, Durban, KwaZulu-Natal",
+                event_startdate = DateTime.Now.AddDays(3),
+                event_enddate = DateTime.Now.AddDays(3).AddHours(4),
+                event_createddate = DateTime.Now,
+                max_attendance = 100,
+                event_completed = false
+            };
+
+            try
+            {
+                eventsService.Create(ev1);
+                eventsService.Create(ev2);
+                eventsService.Create(ev3);
+            }
+            catch (AppException appException)
+            {
+
+                Console.WriteLine(appException.Message);
+            }
+        }
+
+        private void CreatePastEvents(User user, EventsService eventsService)
+        {
+            Event pastEvent1 = new Event()
+            {
+                event_id = Guid.NewGuid().ToString(),
+                event_name = "Past Event 1",
+                event_descr = "Past Event 1 description. Lorem Ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum sed lebro porttitor, lacinia sem id, rutrum nunc.",
+                User_Id = user.User_Id,
+                longitude = 0.0f,
+                latitude = 0.0f,
+                address = "North Beach, Durban, KwaZulu-Natal",
+                event_startdate = DateTime.Now.AddDays(-1),
+                event_enddate = DateTime.Now.AddDays(-1).AddHours(4),
+                event_createddate = DateTime.Now,
+                max_attendance = 50,
+                event_completed = true
+            };
+
+            Event pastEvent2 = new Event()
+            {
+                event_id = Guid.NewGuid().ToString(),
+                event_name = "Past Event 2",
+                event_descr = "Past Event 2 description. Lorem Ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum sed lebro porttitor, lacinia sem id, rutrum nunc.",
+                User_Id = user.User_Id,
+                longitude = 0.0f,
+                latitude = 0.0f,
+                address = "South Beach, Durban, KwaZulu-Natal",
+                event_startdate = DateTime.Now.AddDays(-2),
+                event_enddate = DateTime.Now.AddDays(-2).AddHours(4),
+                event_createddate = DateTime.Now,
+                max_attendance = 70,
+                event_completed = true
+            };
+
+            Event pastEvent3 = new Event()
+            {
+                event_id = Guid.NewGuid().ToString(),
+                event_name = "Past Event 3",
+                event_descr = "Past Event 3 description. Lorem Ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum sed lebro porttitor, lacinia sem id, rutrum nunc.",
+                User_Id = user.User_Id,
+                longitude = 0.0f,
+                latitude = 0.0f,
+                address = "New Beach, Durban, KwaZulu-Natal",
+                event_startdate = DateTime.Now.AddDays(-3),
+                event_enddate = DateTime.Now.AddDays(-3).AddHours(4),
+                event_createddate = DateTime.Now,
+                max_attendance = 100,
+                event_completed = true
+            };
+
+            try
+            {
+                eventsService.Create(pastEvent1);
+                eventsService.Create(pastEvent2);
+                eventsService.Create(pastEvent3);
+            }
+            catch (AppException appException)
+            {
+
+                Console.WriteLine(appException.Message);
+            }
+        }
+
+        private void CreatePetitions(User user, PetitionsSevice petitionsService)
+        {
+            Petition petition1 = new Petition()
+            {
+                petition_id = Guid.NewGuid().ToString(),
+                User_Id = user.User_Id,
+                name = "Petition 1",
+                description = "Lorem Ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum sed lebro porttitor, lacinia sem id, rutrum nunc.",
+                required_signatures = 2000,
+                current_signatures = 0,
+                completed = false,
+                created_date = DateTime.Now
+            };
+
+            Petition petition2 = new Petition()
+            {
+                petition_id = Guid.NewGuid().ToString(),
+                User_Id = user.User_Id,
+                name = "Petition 2",
+                description = "Lorem Ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum sed lebro porttitor, lacinia sem id, rutrum nunc.",
+                required_signatures = 5000,
+                current_signatures = 0,
+                completed = false,
+                created_date = DateTime.Now.AddHours(1)
+            };
+
+            Petition petition3 = new Petition()
+            {
+                petition_id = Guid.NewGuid().ToString(),
+                User_Id = user.User_Id,
+                name = "Petition 3",
+                description = "Lorem Ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum sed lebro porttitor, lacinia sem id, rutrum nunc.",
+                required_signatures = 1000,
+                current_signatures = 0,
+                completed = false,
+                created_date = DateTime.Now.AddHours(2)
+            };
+
+            try
+            {
+                petitionsService.Create(petition1);
+                petitionsService.Create(petition2);
+                petitionsService.Create(petition3);
+            }
+            catch (AppException appException)
+            {
+
+                Console.WriteLine(appException.Message);
+            }
+        }
+
+        private void CreateThreads(User user, ThreadsService threadsService)
+        {
+            Thread thread1 = new Thread()
+            {
+                thread_id = Guid.NewGuid().ToString(),
+                User_Id = user.User_Id,
+                thread_topic = "Thread Topic 1",
+                thread_descr = "Lorem Ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum sed lebro porttitor, lacinia sem id, rutrum nunc.",
+                created_date = DateTime.Now,
+                thread_closed = false
+            };
+
+            Thread thread2 = new Thread()
+            {
+                thread_id = Guid.NewGuid().ToString(),
+                User_Id = user.User_Id,
+                thread_topic = "Thread Topic 2",
+                thread_descr = "Lorem Ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum sed lebro porttitor, lacinia sem id, rutrum nunc.",
+                created_date = DateTime.Now.AddHours(1),
+                thread_closed = false
+            };
+
+            Thread thread3 = new Thread()
+            {
+                thread_id = Guid.NewGuid().ToString(),
+                User_Id = user.User_Id,
+                thread_topic = "Thread Topic 3",
+                thread_descr = "Lorem Ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum sed lebro porttitor, lacinia sem id, rutrum nunc.",
+                created_date = DateTime.Now.AddHours(2),
+                thread_closed = false
+            };
+
+            try
+            {
+                threadsService.Create(thread1);
+                threadsService.Create(thread2);
+                threadsService.Create(thread3);
+            }
+            catch (AppException appException)
+            {
+                Console.WriteLine(appException.Message);
+            }
+        }
+
+        private void UpdateAppSetting(string key, string value)
+        {
+            var configJson = File.ReadAllText("appsettings.json");
+            var config = JsonSerializer.Deserialize<Dictionary<string, object>>(configJson);
+            config[key] = value;
+            var updatedConfigJson = JsonSerializer.Serialize(config, new JsonSerializerOptions { WriteIndented = true });
+            File.WriteAllText("appsettings.json", updatedConfigJson);
         }
     }
 }
