@@ -94,20 +94,14 @@ namespace WebApi.Services
                 throw new AppException("Thread Created Date is required");
             }
 
-            // need to insert author name for ease of access in web end
-            Thread threadQuery = (from x in _threadCollection.AsQueryable()
-                            join y in _userCollection.AsQueryable() on x.User_Id equals y.User_Id
-                            select new Thread()
-                            {
-                                author = y.FirstName + " " + y.LastName
-                            }).FirstOrDefault();
-
-            if (string.IsNullOrEmpty(threadQuery.author))
+            User user = _userCollection.Find(u => u.User_Id == thread.User_Id).SingleOrDefault();
+            if (user == null)
             {
-                throw new AppException($"Error binding user_id and names");
+                throw new AppException("Could not find matching user_id");
             }
 
-            thread.author = threadQuery.author;
+            thread.author = user.FirstName + " " + user.LastName;
+
             _threadCollection.InsertOne(thread);
 
             return thread;
