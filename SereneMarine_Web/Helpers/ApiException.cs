@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json.Linq;
 using System;
+using System.Net.Http;
 
 namespace SereneMarine_Web.Helpers
 {
@@ -9,24 +10,33 @@ namespace SereneMarine_Web.Helpers
 
         public string Content { get; set; }
 
-        private JObject contentJObject
+        public ApiException()
         {
-            get
-            {
-                if (Content == null)
-                {
-                    return null;
-                } 
-                
-                return JObject.Parse(Content); 
-            } 
+
         }
 
-        private string ContentMessage { get { return (string)contentJObject["message"]; } }
+        public ApiException(HttpResponseMessage httpResponseMessage)
+        {
+            var testing = httpResponseMessage.Content.ReadAsStringAsync();
+            string response = testing.Result;
+
+            if (string.IsNullOrEmpty(response))
+            {
+                response = httpResponseMessage.ReasonPhrase;
+            }
+            else
+            {
+                JObject contentJObject = JObject.Parse(response);
+                response = contentJObject["message"].ToString();
+            }
+
+            StatusCode = (int)httpResponseMessage.StatusCode;
+            Content = response;
+        }
 
         public string GetApiErrorMessage()
         {
-            return "ERROR: Status Code(" + StatusCode + ") - \"" + ContentMessage + " \"" ;
+            return "ERROR: Status Code(" + StatusCode + ") - \"" + Content + " \"" ;
         }
     }
 }

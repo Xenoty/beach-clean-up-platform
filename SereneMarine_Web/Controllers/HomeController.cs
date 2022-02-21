@@ -35,12 +35,7 @@ namespace SereneMarine_Web.Controllers
 
             if (!response.IsSuccessStatusCode)
             {
-                ApiException exception = new ApiException
-                {
-                    StatusCode = (int)response.StatusCode,
-                    Content = await response.Content.ReadAsStringAsync()
-                };
-
+                ApiException exception = new ApiException(response);
                 TempData["ApiError"] = exception.GetApiErrorMessage();
 
                 return View(previousStaticsModel);

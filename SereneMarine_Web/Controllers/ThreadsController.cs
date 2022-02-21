@@ -39,11 +39,7 @@ namespace SereneMarine_Web.Controllers
 
             if (!response.IsSuccessStatusCode)
             {
-                ApiException exception = new ApiException
-                {
-                    StatusCode = (int)response.StatusCode,
-                    Content = await response.Content.ReadAsStringAsync()
-                };
+                ApiException exception = new ApiException(response);
                 TempData["ApiError"] = exception.GetApiErrorMessage();
 
                 return View();
@@ -86,13 +82,7 @@ namespace SereneMarine_Web.Controllers
 
             if (!response.IsSuccessStatusCode)
             {
-                //display api error message
-                //create alert for error
-                ApiException exception = new ApiException
-                {
-                    StatusCode = (int)response.StatusCode,
-                    Content = await response.Content.ReadAsStringAsync()
-                };
+                ApiException exception = new ApiException(response);
                 TempData["ApiError"] = exception.GetApiErrorMessage();
 
                 return View();
@@ -127,11 +117,7 @@ namespace SereneMarine_Web.Controllers
 
             if (!response.IsSuccessStatusCode)
             {
-                ApiException exception = new ApiException
-                {
-                    StatusCode = (int)response.StatusCode,
-                    Content = await response.Content.ReadAsStringAsync()
-                };
+                ApiException exception = new ApiException(response);
                 TempData["ApiError"] = exception.GetApiErrorMessage();
 
                 RedirectToAction("Index", "Threads");
@@ -147,13 +133,9 @@ namespace SereneMarine_Web.Controllers
             if (!response.IsSuccessStatusCode)
             {
                 //create alert for error
-                ApiException exception = new ApiException
-                {
-                    StatusCode = (int)response.StatusCode,
-                    Content = await response.Content.ReadAsStringAsync()
-                };
-
+                ApiException exception = new ApiException(response);
                 TempData["ApiError"] = exception.GetApiErrorMessage();
+
                 return View();
             }
             //read data from json response
@@ -191,13 +173,7 @@ namespace SereneMarine_Web.Controllers
 
             if (!response.IsSuccessStatusCode)
             {
-                //display api error message
-                //create alert for error
-                ApiException exception = new ApiException
-                {
-                    StatusCode = (int)response.StatusCode,
-                    Content = await response.Content.ReadAsStringAsync()
-                };
+                ApiException exception = new ApiException(response);
                 TempData["ApiError"] = exception.GetApiErrorMessage();
 
                 return View();
@@ -227,14 +203,9 @@ namespace SereneMarine_Web.Controllers
 
             if (!response.IsSuccessStatusCode)
             {
-                //create alert for error
-                ApiException exception = new ApiException
-                {
-                    StatusCode = (int)response.StatusCode,
-                    Content = await response.Content.ReadAsStringAsync()
-                };
-
+                ApiException exception = new ApiException(response);
                 TempData["ApiError"] = exception.GetApiErrorMessage();
+
                 return View();
             }
 
@@ -261,13 +232,7 @@ namespace SereneMarine_Web.Controllers
 
             if (!response.IsSuccessStatusCode)
             {
-                //create alert for error
-                ApiException exception = new ApiException
-                {
-                    StatusCode = (int)response.StatusCode,
-                    Content = await response.Content.ReadAsStringAsync()
-                };
-
+                ApiException exception = new ApiException(response);
                 TempData["ApiError"] = exception.GetApiErrorMessage();
                 return RedirectToAction("Delete", "Threads", new { id = id });
             }

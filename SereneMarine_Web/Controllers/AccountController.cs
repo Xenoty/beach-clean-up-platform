@@ -53,8 +53,6 @@ namespace SereneMarine_Web.Controllers
             // <post web api>
             //httpPost /users/authenticate
             string url = SD.UserPath + "authenticate";
-            HttpResponseMessage response = null;
-            HttpClient client = new HttpClient();
 
             //LOADING DATA TO JSON OBJECT
             //create <upload contents>
@@ -69,12 +67,7 @@ namespace SereneMarine_Web.Controllers
 
             if (!response.IsSuccessStatusCode)
             {
-                ApiException exception = new ApiException
-                {
-                    StatusCode = (int)response.StatusCode,
-                    Content = await response.Content.ReadAsStringAsync()
-                };
-
+                ApiException exception = new ApiException(response);
                 TempData["ApiError"] = exception.GetApiErrorMessage();
 
                 return View();
@@ -123,8 +116,6 @@ namespace SereneMarine_Web.Controllers
                 // <post web api>
                 //httpPost /users/register
                 string url = SD.UserPath + "register";
-                HttpResponseMessage response = null;
-                HttpClient client = new HttpClient();
 
                 //LOADING DATA TO JSON OBJECT
                 //create <upload contents>
@@ -138,12 +129,7 @@ namespace SereneMarine_Web.Controllers
 
                 if (!response.IsSuccessStatusCode)
                 {
-                    ApiException exception = new ApiException
-                    {
-                        StatusCode = (int)response.StatusCode,
-                        Content = await response.Content.ReadAsStringAsync()
-                    };
-
+                    ApiException exception = new ApiException(response);
                     TempData["ApiError"] = exception.GetApiErrorMessage();
 
                     return View();
