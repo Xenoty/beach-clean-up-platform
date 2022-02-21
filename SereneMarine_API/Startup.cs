@@ -9,12 +9,14 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using MongoDB.Driver;
 using MongoDB.Driver.Core.Clusters;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 using System;
 using System.Collections.Generic;
+using System.Dynamic;
 using System.IO;
 using System.Reflection;
 using System.Text;
-using System.Text.Json;
 using System.Threading.Tasks;
 using WebApi.Entities;
 using WebApi.Helpers;
@@ -518,10 +520,13 @@ namespace WebApi
         private void UpdateAppSetting(string key, string value)
         {
             var configJson = File.ReadAllText("appsettings.json");
-            var config = JsonSerializer.Deserialize<Dictionary<string, object>>(configJson);
-            config[key] = value;
-            var updatedConfigJson = JsonSerializer.Serialize(config, new JsonSerializerOptions { WriteIndented = true });
-            File.WriteAllText("appsettings.json", updatedConfigJson);
+            var jsonSettings = new JsonSerializerSettings();
+            jsonSettings.Converters.Add(new ExpandoObjectConverter());
+
+            dynamic config = JsonConvert.DeserializeObject<ExpandoObject>(configJson, jsonSettings);
+            config.AppSettings.LoadDefaultData = false;
+            var newJson = JsonConvert.SerializeObject(config, Formatting.Indented, jsonSettings);
+            File.WriteAllText("appsettings.json", newJson);
         }
     }
 }
