@@ -73,7 +73,7 @@ namespace WebApi.Controllers
                     new Claim(ClaimTypes.Name, user.User_Id.ToString()),
                     new Claim(ClaimTypes.Role, user.Role),
                     }),
-                    Expires = DateTime.UtcNow.AddHours(3),
+                    Expires = DateTime.UtcNow.AddDays(3), // Update this value to change the expiry date of the token
                     SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
                 };
                 var token = tokenHandler.CreateToken(tokenDescriptor);
