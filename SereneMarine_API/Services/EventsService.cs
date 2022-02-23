@@ -7,7 +7,6 @@ using System.Linq;
 using WebApi.Entities;
 using WebApi.Helpers;
 using WebApi.Models;
-using WebApi.Models.Events;
 
 namespace WebApi.Services
 {
@@ -24,7 +23,6 @@ namespace WebApi.Services
     {
         private readonly IMongoCollection<EventAttendance> _eventAttendanceCollection;
         private readonly IMongoCollection<Event> _eventCollection;
-        private readonly IConfiguration _configuration;
 
         private ICluster _ICluster;
 
@@ -35,8 +33,6 @@ namespace WebApi.Services
 
             _eventAttendanceCollection = database.GetCollection<EventAttendance>(settings.EventAttendanceCollectionName);
             _eventCollection = database.GetCollection<Event>(settings.EventsCollectionName);
-
-            _configuration = configuration;
         }
 
         // TODO : Connection timed out
@@ -102,7 +98,7 @@ namespace WebApi.Services
                 throw new AppException("Event 'End Date' is required");
             }
 
-            if (ev.max_attendance == default(int) || ev.max_attendance == 0)
+            if (ev.max_attendance == 0)
             {
                 throw new AppException("Max attendance is required");
             }
@@ -110,14 +106,6 @@ namespace WebApi.Services
             if (string.IsNullOrEmpty(ev.address))
             {
                 throw new AppException("Address is required");
-            }
-
-            if (ev.latitude == 0 || ev.longitude == 0)
-            {
-                GetCoordinates gc = new GetCoordinates(_configuration);
-                EventCoordinatesModel ecm = gc.GetLongLatMapBox(ev.address).Result;
-                ev.latitude = ecm.latitude;
-                ev.longitude = ecm.longitude;
             }
 
             _eventCollection.InsertOne(ev);
@@ -155,14 +143,12 @@ namespace WebApi.Services
                 ev.event_descr = eventParam.event_descr;
             }
 
-            if (eventParam.longitude != default(double)
-                && eventParam.longitude != 0)
+            if (eventParam.longitude != 0.0f)
             {
                 ev.longitude = eventParam.longitude;
             }
 
-            if (eventParam.latitude != default(double)
-                && eventParam.latitude != 0)
+            if (eventParam.latitude != 0.0f)
             {
                 ev.latitude = eventParam.latitude;
             }
@@ -170,16 +156,6 @@ namespace WebApi.Services
             if (!string.IsNullOrWhiteSpace(eventParam.address.ToString()))
             {
                 ev.address = eventParam.address;
-
-                if (eventParam.latitude == 0 || eventParam.longitude == 0)
-                {
-                    //get coordinates by address
-                    GetCoordinates gc = new GetCoordinates(_configuration);
-                    EventCoordinatesModel ecm = gc.GetLongLatMapBox(ev.address).Result;
-                    ev.latitude = ecm.latitude;
-                    ev.longitude = ecm.longitude;
-                }
-
             }
 
             if (eventParam.event_startdate != default(DateTime))
@@ -192,8 +168,7 @@ namespace WebApi.Services
                 ev.event_enddate = eventParam.event_enddate;
             }
 
-            if (eventParam.max_attendance != int.MinValue
-                && eventParam.max_attendance != 0)
+            if (eventParam.max_attendance != 0)
             {
                 ev.max_attendance = eventParam.max_attendance;
             }
