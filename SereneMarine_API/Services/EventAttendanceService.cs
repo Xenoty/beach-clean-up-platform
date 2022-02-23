@@ -78,8 +78,8 @@ namespace WebApi.Services
                 throw new AppException("User_id is required");
             }
 
-            Event ev = _eventCollection.Find(x => x.event_id == eventAttendance.event_id).FirstOrDefault();
-            if (ev == null)
+            Event eventFound = _eventCollection.Find(x => x.event_id == eventAttendance.event_id).FirstOrDefault();
+            if (eventFound == null)
             {
                 throw new AppException("Event '" + eventAttendance.event_id + "' does not exist");
             }
@@ -96,6 +96,10 @@ namespace WebApi.Services
             }
 
             _eventAttendanceCollection.InsertOne(eventAttendance);
+
+            //Increment the current_attendance by 1
+            eventFound.current_attendance += 1;
+            _eventCollection.ReplaceOne(ev => ev.event_id == eventFound.event_id, eventFound);
 
             return eventAttendance;
         }

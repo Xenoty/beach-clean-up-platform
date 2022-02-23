@@ -35,7 +35,6 @@ namespace WebApi.Services
             _eventCollection = database.GetCollection<Event>(settings.EventsCollectionName);
         }
 
-        // TODO : Connection timed out
         public List<Event> GetAll()
         {
             if (!_ICluster.Description.State.IsConnected())
@@ -53,10 +52,7 @@ namespace WebApi.Services
                 throw new AppException(AppSettings.DBDisconnectedMessage);
             }
 
-            Event ev = _eventCollection.Find(e => e.event_id == id).FirstOrDefault();
-            ev.current_attendance = _eventAttendanceCollection.Find(ea => ea.event_id == id).ToList().Count();
-
-            return ev;
+            return _eventCollection.Find(e => e.event_id == id).FirstOrDefault();
         }
 
         public Event Create(Event ev)
