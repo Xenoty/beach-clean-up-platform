@@ -111,7 +111,7 @@ namespace WebApi
             services.AddSingleton<APIStatsService>();
 
             //configure mapping
-            services.AddAutoMapper(typeof(SereneMarineMappings));
+            services.AddAutoMapper(typeof(AutoMapperProfile));
 
             // configure DI for application services
             services.AddScoped<IUserService, UserService>();
