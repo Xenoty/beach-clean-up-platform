@@ -79,24 +79,16 @@ namespace WebApi.Services
                 throw new AppException("User_id is required");
             }
 
-            var query = from x in _petitionCollection.AsQueryable()
-                        join y in _petitionSignedCollection.AsQueryable() on x.petition_id equals y.petition_id
-                        into MatchedEvents
-                        where (x.petition_id == petitionSigned.petition_id)
-                        select new
-                        {
-                            petition_id = x.petition_id
-                        };
-
-            if (!query.Any())
+            Petition petition = _petitionCollection.Find(x => x.petition_id == petitionSigned.petition_id).FirstOrDefault();
+            if (petition == null)
             {
-                throw new AppException($"Event {petitionSigned.petition_id} does not exist");
+                throw new AppException($"Petition {petitionSigned.petition_id} does not exist");
             }
 
             bool userHasAlreadySignedPetition = _petitionSignedCollection.Find(x => x.User_Id == petitionSigned.User_Id && x.petition_id == petitionSigned.petition_id).FirstOrDefault() != null;
             if (userHasAlreadySignedPetition)
             {
-                throw new AppException("User has already participated in event");
+                throw new AppException("User has already signed Petition");
             }
 
             if (petitionSigned.signed_date == default(DateTime))
@@ -105,6 +97,10 @@ namespace WebApi.Services
             }
 
             _petitionSignedCollection.InsertOne(petitionSigned);
+
+            // Increment the current_signatures by 1
+            petition.current_signatures += 1;
+            _petitionCollection.ReplaceOne(pet => pet.petition_id == petition.petition_id, petition);
 
             return petitionSigned;
         }

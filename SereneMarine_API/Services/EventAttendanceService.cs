@@ -78,19 +78,8 @@ namespace WebApi.Services
                 throw new AppException("User_id is required");
             }
 
-            // check if event actually exists
-            // use linq standard for inner join between two collections
-            var query = from x in _eventCollection.AsQueryable()
-                        join y in _eventAttendanceCollection.AsQueryable() on x.event_id equals y.event_id
-                        into MatchedEvents
-                        where (x.event_id == eventAttendance.event_id)
-                        select new
-                        {
-                            event_id = x.event_id
-                        };
-
-            //see if query has any results
-            if (!query.Any())
+            Event ev = _eventCollection.Find(x => x.event_id == eventAttendance.event_id).FirstOrDefault();
+            if (ev == null)
             {
                 throw new AppException("Event '" + eventAttendance.event_id + "' does not exist");
             }

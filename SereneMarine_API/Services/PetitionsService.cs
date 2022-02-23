@@ -43,27 +43,7 @@ namespace WebApi.Services
                 throw new AppException(AppSettings.DBDisconnectedMessage);
             }
 
-            List<Petition> petitionList = _petitionCollection.Find(x => true).ToList();
-
-            List<PetitionSigned> petitionSignedList = (from x in _petitionCollection.AsQueryable()
-                                                       join y in _petitionSignedCollection.AsQueryable() on x.petition_id equals y.petition_id
-                                                       select y).ToList();
-
-            // for loop is x2 faster than linq
-            for (int i = 0; i < petitionList.Count; i++)
-            {
-                int count = 0;
-                for (int j = 0; j < petitionSignedList.Count; j++)
-                {
-                    if (petitionList[i].petition_id == petitionSignedList[j].petition_id)
-                    {
-                        count++;
-                    }
-                }
-                petitionList[i].current_signatures = count;
-            }
-
-            return petitionList;
+            return _petitionCollection.Find(x => true).ToList();
         }
 
         public Petition GetById(string id)
@@ -73,11 +53,7 @@ namespace WebApi.Services
                 throw new AppException(AppSettings.DBDisconnectedMessage);
             }
 
-            Petition petition = _petitionCollection.Find(pet => pet.petition_id == id).FirstOrDefault();
-            int signatures = _petitionSignedCollection.Find(x => x.petition_id == id).ToList().Count();
-            petition.current_signatures = signatures;
-
-            return petition;
+            return _petitionCollection.Find(pet => pet.petition_id == id).FirstOrDefault();
         }
 
         public List<Petition> GetByCompletion(bool isComplete)
@@ -176,7 +152,7 @@ namespace WebApi.Services
                 petitionToUpdate.description = petition.description;
             }
 
-            if (petition.required_signatures != default(int))
+            if (petition.required_signatures != 0)
             {
                 petitionToUpdate.required_signatures = petition.required_signatures;
             }
