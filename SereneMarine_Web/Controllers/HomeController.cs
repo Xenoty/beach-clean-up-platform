@@ -1,9 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
 using SereneMarine_Web.Helpers;
 using SereneMarine_Web.Models;
+using System;
 using System.Diagnostics;
-using System.Threading.Tasks;
 
 namespace SereneMarine_Web.Controllers
 {
@@ -20,33 +19,46 @@ namespace SereneMarine_Web.Controllers
 
         #region Private Variables
 
+        private ICacheProvider _cacheProvider;
         private ApiStatisticsModel previousStaticsModel = new ApiStatisticsModel();
+
+        #endregion
+
+        #region Constructor
+
+        public HomeController(ICacheProvider cacheProvider)
+        {
+            _cacheProvider = cacheProvider;
+        }
 
         #endregion
 
         #region Task Methods
 
-        public async Task<IActionResult> Index()
+        public IActionResult Index()
         {
-            //get all the totals from the api
-            string url = SD.ApiStatsPath;
-
-            response = await client.GetAsync(url);
-
-            if (!response.IsSuccessStatusCode)
+            try
             {
-                ApiException exception = new ApiException(response);
+                ApiStatisticsModel model = _cacheProvider.GetCachedResponse().Result;
+                if (previousStaticsModel != model)
+                {
+                    previousStaticsModel = model;
+                }
+                
+                return View(model);
+            }
+            catch (Exception ex)
+            {
+                ApiException exception = new ApiException()
+                {
+                    StatusCode = 500,
+                    Content = "{ \n error : " + ex.Message + "}"
+                };
+
                 TempData["ApiError"] = exception.GetApiErrorMessage();
 
                 return View(previousStaticsModel);
             }
-
-            var jsonString = await response.Content.ReadAsStringAsync();
-
-            ApiStatisticsModel model = JsonConvert.DeserializeObject<ApiStatisticsModel>(jsonString);
-            previousStaticsModel = model;
-
-            return View(model);
         }
 
         #endregion
