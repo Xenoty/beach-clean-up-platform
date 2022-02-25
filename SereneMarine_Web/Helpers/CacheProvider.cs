@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using SereneMarine_Web.Models;
 using System;
@@ -17,10 +18,12 @@ namespace SereneMarine_Web.Helpers
     {
         private static readonly SemaphoreSlim GetApiStatsSemaphore = new SemaphoreSlim(1, 1);
         private readonly IMemoryCache _cache;
+        private readonly IConfiguration _configuration;
 
-        public CacheProvider(IMemoryCache memoryCache)
+        public CacheProvider(IMemoryCache memoryCache, IConfiguration configuration)
         {
             _cache = memoryCache;
+            _configuration = configuration;
         }
 
         public async Task <ApiStatisticsModel> GetCachedResponse()
@@ -61,11 +64,15 @@ namespace SereneMarine_Web.Helpers
                 var jsonString = await response.Content.ReadAsStringAsync();
                 apiStatistics = JsonConvert.DeserializeObject<ApiStatisticsModel>(jsonString);
 
+                double absExpiration = _configuration.GetValue<double>("CacheSettings:AbsoluteExpirationInMinutes");
+                double slidingExpiration = _configuration.GetValue<double>("CacheSettings:SlidingExpirationInMinutes");
+                long size = _configuration.GetValue<long>("CacheSettings:Size");
+
                 var cacheEntryOptions = new MemoryCacheEntryOptions
                 {
-                    AbsoluteExpiration = DateTime.Now.AddMinutes(1),
-                    SlidingExpiration = TimeSpan.FromMinutes(0.5),
-                    Size = 1024,
+                    AbsoluteExpiration = DateTime.Now.AddMinutes(absExpiration),
+                    SlidingExpiration = TimeSpan.FromMinutes(slidingExpiration),
+                    Size = size,
                 };
                 _cache.Set(cacheKey, apiStatistics, cacheEntryOptions);
             }
