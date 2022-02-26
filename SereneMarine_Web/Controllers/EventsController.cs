@@ -34,7 +34,8 @@ namespace SereneMarine_Web.Controllers
         [HttpGet]
         public async Task<IActionResult> Index(EventsIndexViewModel filter, string submit, string clear)
         {
-            if (!string.IsNullOrEmpty(clear))
+            bool clearFitler  = !string.IsNullOrEmpty(clear);
+            if (clearFitler)
             {
                 ModelState.Clear();
                 filter = null;
@@ -104,7 +105,6 @@ namespace SereneMarine_Web.Controllers
                         }
                     }
                 }
-
             }
 
             IEnumerable<EventsViewModel> eventsViewModelEnumerable = null;
@@ -129,6 +129,12 @@ namespace SereneMarine_Web.Controllers
             {
                 previousEventsIndexViewModel = eventsIndexViewModel;
             }
+
+            if (clearFitler)
+            {
+                return RedirectToAction("Index", "Events");
+            }
+
             return View(eventsIndexViewModel);
         }
 
@@ -146,7 +152,6 @@ namespace SereneMarine_Web.Controllers
             bool getStartDate = startDate.HasValue;
             bool getEndDate = endDate.HasValue;
             bool getMaxAttendance = maxAttendance.HasValue;
-
 
             eventsViewModelEnumerable = eventsIndexViewModel.EventsViewModel.Where(x => x.matching_user == userHasParticpatedInEvent);
 
