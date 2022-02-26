@@ -37,6 +37,8 @@ namespace SereneMarine_Web.Controllers
             if (!string.IsNullOrEmpty(clear))
             {
                 ModelState.Clear();
+                filter = null;
+                submit = string.Empty;
             }
             //initalize variables
             EventsIndexViewModel eventsIndexViewModel = new EventsIndexViewModel();
@@ -74,8 +76,12 @@ namespace SereneMarine_Web.Controllers
                 //RETRIEVE Response from api
                 response = await client.GetAsync(attUrl);
 
-                if (response.IsSuccessStatusCode == false)
+                if (!response.IsSuccessStatusCode)
                 {
+                    //create alert for error
+                    ApiException exception = new ApiException(response);
+                    TempData["ApiError"] = exception.GetApiErrorMessage();
+
                     return View(eventsIndexViewModel);
                 }
 
@@ -101,73 +107,74 @@ namespace SereneMarine_Web.Controllers
 
             }
 
+            IEnumerable<EventsViewModel> eventsViewModelEnumerable = null;
+
             if (string.IsNullOrEmpty(submit))
             {
-                var eventsViewModelEnumerable = eventsIndexViewModel.EventsViewModel.Where(x => x.event_startdate >= DateTime.Now);
+                eventsViewModelEnumerable = eventsIndexViewModel.EventsViewModel.Where(x => x.event_startdate >= DateTime.Now);
                 if (eventsViewModelEnumerable.Count() == 0)
                 {
                     // If there are no upcomming events, show all events
                     eventsViewModelEnumerable = eventsIndexViewModel.EventsViewModel.Where(x => true);
                 }
-
-                eventsIndexViewModel.EventsViewModel = eventsViewModelEnumerable.OrderByDescending(x => x.event_startdate).ToList();
             }
             else
             {
-                bool upcomming = false;
-                bool userCompleted = false;
-                bool end_date = false;
-
-                if (filter.filterEvents.UserCompleted)
-                {
-                    userCompleted = true;
-                    eventsIndexViewModel.EventsViewModel = eventsIndexViewModel.EventsViewModel.Where(x => true && x.matching_user).OrderByDescending(x => x.event_startdate).ToList();
-                }
-                if (filter.filterEvents.Completed && !userCompleted)
-                {
-                    if (filter.filterEvents.Current)
-                    {
-                        upcomming = true;
-                        eventsIndexViewModel.EventsViewModel = eventsIndexViewModel.EventsViewModel.Where(x => true).OrderByDescending(x => x.event_startdate).ToList();
-                    }
-                    else
-                    {
-                        //only return events that haven't been completed and not < current date
-                        eventsIndexViewModel.EventsViewModel = eventsIndexViewModel.EventsViewModel.Where(x => x.event_enddate <= DateTime.Now /*|| x.event_completed == false*/).OrderByDescending(x => x.event_startdate).ToList();
-                    }
-                }
-                if (filter.filterEvents.Current && upcomming == false && !userCompleted)
-                {
-                    eventsIndexViewModel.EventsViewModel = eventsIndexViewModel.EventsViewModel.Where(x => x.event_enddate >= DateTime.Now || x.event_completed).OrderByDescending(x => x.event_startdate).ToList();
-                }
-
-                if (filter.filterEvents.event_startdate != null && filter.filterEvents.event_startdate != default(DateTime))
-                {
-                    if (filter.filterEvents.event_enddate != null)
-                    {
-                        end_date = true;
-                        eventsIndexViewModel.EventsViewModel = eventsIndexViewModel.EventsViewModel.Where(x => x.event_startdate >= filter.filterEvents.event_startdate
-                        && x.event_enddate <= filter.filterEvents.event_enddate).OrderByDescending(x => x.event_startdate).ToList();
-                    }
-                    else
-                    {
-                        eventsIndexViewModel.EventsViewModel = eventsIndexViewModel.EventsViewModel.Where(x => x.event_startdate >= filter.filterEvents.event_startdate).OrderByDescending(x => x.event_startdate).ToList();
-                    }
-                }
-                if (filter.filterEvents.event_enddate != null && filter.filterEvents.event_enddate != default(DateTime) && end_date == false)
-                {
-                    eventsIndexViewModel.EventsViewModel = eventsIndexViewModel.EventsViewModel.Where(x => x.event_enddate <= filter.filterEvents.event_enddate).OrderByDescending(x => x.event_startdate).ToList();
-                }
-                if (filter.filterEvents.max_attendance != 0 && filter.filterEvents.max_attendance != null)
-                {
-                    eventsIndexViewModel.EventsViewModel = eventsIndexViewModel.EventsViewModel.Where(x => x.max_attendance <= filter.filterEvents.max_attendance).OrderByDescending(x => x.event_startdate).ToList();
-                }
+                eventsViewModelEnumerable = GetFilteredEventsAsIEnumerable(eventsIndexViewModel, filter);
             }
+
+            // Order by descending by default
+            eventsIndexViewModel.EventsViewModel = eventsViewModelEnumerable.OrderByDescending(x => x.event_startdate).ToList();
             if (previousEventsIndexViewModel != eventsIndexViewModel)
             {
                 previousEventsIndexViewModel = eventsIndexViewModel;
             }
             return View(eventsIndexViewModel);
+        }
+
+        private IEnumerable<EventsViewModel> GetFilteredEventsAsIEnumerable(EventsIndexViewModel eventsIndexViewModel, EventsIndexViewModel filter)
+        {
+            IEnumerable<EventsViewModel> eventsViewModelEnumerable = null;
+
+            bool userHasParticpatedInEvent = filter.filterEvents.UserParticipatedEvents;
+            bool getUpcommingEvents = filter.filterEvents.GetUpCommingEvents;
+            bool getPastEvents = filter.filterEvents.GetPastEvents;
+            DateTime? startDate = filter.filterEvents.EventStartDate;
+            DateTime? endDate = filter.filterEvents.EventEndDate;
+            int? maxAttendance = filter.filterEvents.MaxAttendance;
+
+            bool getStartDate = startDate.HasValue;
+            bool getEndDate = endDate.HasValue;
+            bool getMaxAttendance = maxAttendance.HasValue;
+
+
+            eventsViewModelEnumerable = eventsIndexViewModel.EventsViewModel.Where(x => x.matching_user == userHasParticpatedInEvent);
+
+            if (getUpcommingEvents)
+            {
+                eventsViewModelEnumerable = eventsViewModelEnumerable.Where(x => x.event_startdate >= DateTime.Now);
+            }
+            else if (getPastEvents)
+            {
+                eventsViewModelEnumerable = eventsViewModelEnumerable.Where(x => x.event_startdate <= DateTime.Now);
+            }
+
+            if (getStartDate)
+            {
+                eventsViewModelEnumerable = eventsViewModelEnumerable.Where(x => x.event_startdate > startDate);
+            }
+
+            if (getEndDate)
+            {
+                eventsViewModelEnumerable = eventsViewModelEnumerable.Where(x => x.event_enddate < endDate);
+            }
+
+            if (getMaxAttendance)
+            {
+                eventsViewModelEnumerable = eventsViewModelEnumerable.Where(x => x.max_attendance <= maxAttendance);
+            }
+
+            return eventsViewModelEnumerable;
         }
 
         [AllowAnonymous]

@@ -285,20 +285,20 @@
 
                     <div class="checkboxes-wrapper clear-wrapper">
                         <div class="checkbox">
-                            @Html.LabelFor(model => model.filterEvents.Current, htmlAttributes: new { @class = "control-label col-md-2" })
+                            @Html.LabelFor(model => model.filterEvents.GetUpCommingEvents, htmlAttributes: new { @class = "control-label col-md-2" })
                             @*<input type="checkbox" class="form-check" value="Current" name="event" />*@
-                            @Html.CheckBoxFor(model => model.filterEvents.Current)
+                            @Html.CheckBoxFor(model => model.filterEvents.GetUpCommingEvents)
                         </div>
                         <div class="checkbox">
-                            @Html.LabelFor(model => model.filterEvents.Completed, htmlAttributes: new { @class = "control-label col-md-2" })
-                            @Html.CheckBoxFor(model => model.filterEvents.Completed)
+                            @Html.LabelFor(model => model.filterEvents.GetPastEvents, htmlAttributes: new { @class = "control-label col-md-2" })
+                            @Html.CheckBoxFor(model => model.filterEvents.GetPastEvents)
                         </div>
                         @if (User.Identity.IsAuthenticated)
                         {
 
                             <div class="checkbox">
-                                @Html.LabelFor(model => model.filterEvents.UserCompleted, htmlAttributes: new { @class = "control-label col-md-2" })
-                                @Html.CheckBoxFor(model => model.filterEvents.UserCompleted)
+                                @Html.LabelFor(model => model.filterEvents.UserParticipatedEvents, htmlAttributes: new { @class = "control-label col-md-2" })
+                                @Html.CheckBoxFor(model => model.filterEvents.UserParticipatedEvents)
                             </div>
                         }
                     </div>
@@ -308,9 +308,9 @@
                     <div class="filter-title">Date</div>
                     @*<div class="checkboxes-wrapper">*@
                     <div class="date-wrapper">
-                        @Html.LabelFor(model => model.filterEvents.event_startdate, htmlAttributes: new { @class = "control-label col-md-2" })
+                        @Html.LabelFor(model => model.filterEvents.EventStartDate, htmlAttributes: new { @class = "control-label col-md-2" })
                         <div class="input-group date">
-                            @Html.EditorFor(model => model.filterEvents.event_startdate, new { htmlAttributes = new { @class = "form-control" } })
+                            @Html.EditorFor(model => model.filterEvents.EventStartDate, new { htmlAttributes = new { @class = "form-control" } })
                             <span class="input-group-addon">
                                 <span class="glyphicon glyphicon-calendar"></span>
                             </span>
@@ -318,9 +318,9 @@
                     </div>
 
                     <div class="date-wrapper">
-                        @Html.LabelFor(model => model.filterEvents.event_enddate, htmlAttributes: new { @class = "control-label col-md-2" })
+                        @Html.LabelFor(model => model.filterEvents.EventEndDate, htmlAttributes: new { @class = "control-label col-md-2" })
                         <div class="input-group date">
-                            @Html.EditorFor(model => model.filterEvents.event_enddate, new { htmlAttributes = new { @class = "form-control" } })
+                            @Html.EditorFor(model => model.filterEvents.EventEndDate, new { htmlAttributes = new { @class = "form-control" } })
                             <span class="input-group-addon">
                                 <span class="glyphicon glyphicon-calendar"></span>
                             </span>
@@ -328,18 +328,18 @@
                     </div>
 
                     @*</div>*@
-                    @Html.ValidationMessageFor(model => model.filterEvents.event_startdate, "", new { @class = "text-danger" })
-                    @Html.ValidationMessageFor(model => model.filterEvents.event_enddate, "", new { @class = "text-danger" })
+                    @Html.ValidationMessageFor(model => model.filterEvents.EventStartDate, "", new { @class = "text-danger" })
+                    @Html.ValidationMessageFor(model => model.filterEvents.EventEndDate, "", new { @class = "text-danger" })
 
 
                     <hr />
                 </div>
                 <div class="attendance">
                     <div class="filter-title">Attendance</div>
-                    @Html.LabelFor(model => model.filterEvents.max_attendance, htmlAttributes: new { @class = "control-label col-md-4" })
+                    @Html.LabelFor(model => model.filterEvents.MaxAttendance, htmlAttributes: new { @class = "control-label col-md-4" })
                     @*<label for="attendance" class="form-check-label">Max Attendance</label>*@
-                    @Html.EditorFor(model => model.filterEvents.max_attendance, new { htmlAttributes = new { @class = "Form-control" } })
-                    @Html.ValidationMessageFor(model => model.filterEvents.max_attendance, "", new { @class = "text-danger" })
+                    @Html.EditorFor(model => model.filterEvents.MaxAttendance, new { htmlAttributes = new { @class = "Form-control" } })
+                    @Html.ValidationMessageFor(model => model.filterEvents.MaxAttendance, "", new { @class = "text-danger" })
                     @*<input type="number" max="9999" name="attendance" placeholder="50" min="5" />*@
                     <hr />
                 </div>

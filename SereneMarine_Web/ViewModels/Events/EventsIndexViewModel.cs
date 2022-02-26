@@ -17,25 +17,25 @@ namespace SereneMarine_Web.ViewModels.Events
     public class FilterEvents
     {
         [Display(Name = "Upcomming")]
-        public bool Current { get; set; }
+        public bool GetUpCommingEvents { get; set; }
 
         [Display(Name = "Past")]
-        public bool Completed { get; set; }
+        public bool GetPastEvents { get; set; }
 
         [Display(Name = "Completed")]
-        public bool UserCompleted { get; set; }
+        public bool UserParticipatedEvents { get; set; }
 
         [Display(Name = "Start")]
         [DisplayFormat(DataFormatString = "{0:MM/dd/yyyy HH:MM}")]
-        public DateTime? event_startdate { get; set; }
+        public DateTime? EventStartDate { get; set; }
 
         [Display(Name = "End")]
         [DisplayFormat(DataFormatString = "{0:MM/dd/yyyy HH:MM}")]
-        public DateTime? event_enddate { get; set; }
+        public DateTime? EventEndDate { get; set; }
 
         [Display(Name = "Max Attedance")]
         [Range(5, 1000, ErrorMessage = "The field Max attendance must be between 5 - 1000.")]
         [RegularExpression("^[0-9]*$", ErrorMessage = "Max Attendance must be numeric values only")]
-        public int? max_attendance { get; set; }
+        public int? MaxAttendance { get; set; }
     }
 }
