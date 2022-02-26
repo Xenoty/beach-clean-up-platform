@@ -22,23 +22,16 @@ namespace WebApi.Services
     public class UserService : IUserService
     {
         private readonly IMongoCollection<User> _userCollection;
-        private ICluster _ICluster;
 
         public UserService(IMongoClient client, IUserDatabseSettings settings)
         {
             IMongoDatabase database = client.GetDatabase(settings.DatabaseName);
-            _ICluster = client.Cluster;
 
             _userCollection = database.GetCollection<User>(settings.UsersCollectionName);
         }
 
         public User Authenticate(string email, string password)
         {
-            if (!_ICluster.Description.State.IsConnected())
-            {
-                throw new AppException(AppSettings.DBDisconnectedMessage);
-            }
-
             if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(password))
             {
                 return null;
@@ -65,30 +58,18 @@ namespace WebApi.Services
         //get users as list and not as IEnumberable
         public List<User> GetAll()
         {
-            if (!_ICluster.Description.State.IsConnected())
-            {
-                throw new AppException(AppSettings.DBDisconnectedMessage);
-            }
             return _userCollection.Find(user => true).ToList();
         }
         
 
         public User GetById(string id)
         {
-            if (!_ICluster.Description.State.IsConnected())
-            {
-                throw new AppException(AppSettings.DBDisconnectedMessage);
-            }
             return _userCollection.Find(user => user.User_Id == id).FirstOrDefault();                
         }
                 
 
         public User Create(User user, string password)
         {
-            if (!_ICluster.Description.State.IsConnected())
-            {
-                throw new AppException(AppSettings.DBDisconnectedMessage);
-            }
 
             // validation
             if (string.IsNullOrWhiteSpace(password))
@@ -124,11 +105,6 @@ namespace WebApi.Services
 
         public void Update(User userParam, string password = null)
         {
-            if (!_ICluster.Description.State.IsConnected())
-            {
-                throw new AppException(AppSettings.DBDisconnectedMessage);
-            }
-
             User user = _userCollection.Find(user => user.User_Id == userParam.User_Id).SingleOrDefault();
 
             if (user == null)
@@ -194,10 +170,6 @@ namespace WebApi.Services
 
         public void Delete(string id)
         {
-            if (!_ICluster.Description.State.IsConnected())
-            {
-                throw new AppException(AppSettings.DBDisconnectedMessage);
-            }
 
             User user = _userCollection.Find(user => user.User_Id == id).FirstOrDefault();
             if (user != null)

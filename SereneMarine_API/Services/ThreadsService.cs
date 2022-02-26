@@ -24,12 +24,9 @@ namespace WebApi.Services
         private readonly IMongoCollection<Thread> _threadCollection;
         private readonly IMongoCollection<User> _userCollection;
 
-        private ICluster _ICluster;
-
         public ThreadsService(IMongoClient client, IUserDatabseSettings settings)
         {
             IMongoDatabase database = client.GetDatabase(settings.DatabaseName);
-            _ICluster = client.Cluster;
 
             _threadCollection = database.GetCollection<Thread>(settings.ThreadsCollectionName);
             _userCollection = database.GetCollection<User>(settings.UsersCollectionName);
@@ -37,38 +34,21 @@ namespace WebApi.Services
 
         public List<Thread> GetAll() 
         {
-            if (!_ICluster.Description.State.IsConnected())
-            {
-                throw new AppException(AppSettings.DBDisconnectedMessage);
-            }
             return _threadCollection.Find(th => true).ToList();  
         }
 
         public Thread GetById(string id)
         {
-            if(!_ICluster.Description.State.IsConnected())
-            {
-                throw new AppException(AppSettings.DBDisconnectedMessage);
-            }
             return _threadCollection.Find(th => th.thread_id == id).FirstOrDefault(); 
         }
 
         public List<Thread> GetByUser(string id)
         {
-            if(!_ICluster.Description.State.IsConnected())
-            {
-                throw new AppException(AppSettings.DBDisconnectedMessage);
-            }
             return _threadCollection.Find(th => th.User_Id == id).ToList(); 
         }
 
         public Thread Create(Thread thread)
         {
-            if (!_ICluster.Description.State.IsConnected())
-            {
-                throw new AppException(AppSettings.DBDisconnectedMessage);
-            }
-
             if (string.IsNullOrEmpty(thread.User_Id))
             {
                 throw new AppException("User_id is required");
@@ -109,11 +89,6 @@ namespace WebApi.Services
 
         public void Update(Thread thread)
         {
-            if (!_ICluster.Description.State.IsConnected())
-            {
-                throw new AppException(AppSettings.DBDisconnectedMessage);
-            }
-
             Thread threadToUpdate = _threadCollection.Find(th => th.thread_id == thread.thread_id).SingleOrDefault();
 
             if (threadToUpdate == null)
@@ -153,10 +128,6 @@ namespace WebApi.Services
 
         public void DeleteByThread(string id)
         {
-            if (!_ICluster.Description.State.IsConnected())
-            {
-                throw new AppException(AppSettings.DBDisconnectedMessage);
-            }
             Thread threadToDelete = _threadCollection.Find(th => th.thread_id == id).FirstOrDefault();
             if (threadToDelete != null)
             {
@@ -166,11 +137,6 @@ namespace WebApi.Services
 
         public void DeleteByUser(string id)
         {
-            if (!_ICluster.Description.State.IsConnected())
-            {
-                throw new AppException(AppSettings.DBDisconnectedMessage);
-            }
-
             Thread threadToDelete = _threadCollection.Find(th => th.User_Id == id).FirstOrDefault();
             if (threadToDelete != null)
             {

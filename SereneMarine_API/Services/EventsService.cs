@@ -24,12 +24,9 @@ namespace WebApi.Services
         private readonly IMongoCollection<EventAttendance> _eventAttendanceCollection;
         private readonly IMongoCollection<Event> _eventCollection;
 
-        private ICluster _ICluster;
-
         public EventsService(IMongoClient client, IUserDatabseSettings settings, IConfiguration configuration)
         {
             IMongoDatabase database = client.GetDatabase(settings.DatabaseName);
-            _ICluster = client.Cluster;
 
             _eventAttendanceCollection = database.GetCollection<EventAttendance>(settings.EventAttendanceCollectionName);
             _eventCollection = database.GetCollection<Event>(settings.EventsCollectionName);
@@ -37,31 +34,16 @@ namespace WebApi.Services
 
         public List<Event> GetAll()
         {
-            if (!_ICluster.Description.State.IsConnected())
-            {
-                throw new AppException(AppSettings.DBDisconnectedMessage);
-            }
-
             return _eventCollection.Find(ev => true).ToList();
         }
 
         public Event GetById(string id)
         {
-            if (!_ICluster.Description.State.IsConnected())
-            {
-                throw new AppException(AppSettings.DBDisconnectedMessage);
-            }
-
             return _eventCollection.Find(e => e.event_id == id).FirstOrDefault();
         }
 
         public Event Create(Event ev)
         {
-            if (!_ICluster.Description.State.IsConnected())
-            {
-                throw new AppException(AppSettings.DBDisconnectedMessage);
-            }
-
             // Need to assign userid from bearer token to ev.user_id
             if (string.IsNullOrEmpty(ev.User_Id))
             {
@@ -111,11 +93,6 @@ namespace WebApi.Services
 
         public void Update(Event eventParam)
         {
-            if (!_ICluster.Description.State.IsConnected())
-            {
-                throw new AppException(AppSettings.DBDisconnectedMessage);
-            }
-
             Event ev = _eventCollection.Find(ev => ev.event_id == eventParam.event_id).SingleOrDefault();
 
             if (ev == null)
@@ -179,11 +156,6 @@ namespace WebApi.Services
 
         public void Delete(string id)
         {
-            if (!_ICluster.Description.State.IsConnected())
-            {
-                throw new AppException(AppSettings.DBDisconnectedMessage);
-            }
-
             Event ev = _eventCollection.Find(ev => ev.event_id == id).FirstOrDefault();
             if (ev != null)
             {

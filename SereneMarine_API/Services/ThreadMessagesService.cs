@@ -28,12 +28,9 @@ namespace WebApi.Services
         private readonly IMongoCollection<Thread> _threadCollection;
         private readonly IMongoCollection<User> _userCollection;
 
-        private ICluster _ICluster;
-
         public ThreadMessagesService(IMongoClient client, IUserDatabseSettings settings)
         {
             IMongoDatabase database = client.GetDatabase(settings.DatabaseName);
-            _ICluster = client.Cluster;
 
             _threadMessageCollection = database.GetCollection<ThreadMessage>(settings.ThreadMessagesCollectionName);
             _threadCollection = database.GetCollection<Thread>(settings.ThreadsCollectionName);
@@ -43,19 +40,11 @@ namespace WebApi.Services
 
         public List<ThreadMessage> GetAll()
         {
-            if (!_ICluster.Description.State.IsConnected())
-            {
-                throw new AppException(AppSettings.DBDisconnectedMessage);
-            }
             return _threadMessageCollection.Find(tm => true).ToList();
         }
 
         public List<ThreadMessage> GetByThread(string id)
         {
-            if (!_ICluster.Description.State.IsConnected())
-            {
-                throw new AppException(AppSettings.DBDisconnectedMessage);
-            }
 
             //use linq standard for inner join between two collections
             IQueryable<ThreadMessage> query = from x in _threadMessageCollection.AsQueryable()
@@ -77,19 +66,11 @@ namespace WebApi.Services
 
         public List<ThreadMessage> GetByUser(string id)
         {
-            if (!_ICluster.Description.State.IsConnected())
-            {
-                throw new AppException(AppSettings.DBDisconnectedMessage);
-            }
             return _threadMessageCollection.Find(tm => tm.User_Id == id).ToList();
         } 
 
         public ThreadMessage Create(ThreadMessage threadMessage)
         {
-            if (!_ICluster.Description.State.IsConnected())
-            {
-                throw new AppException(AppSettings.DBDisconnectedMessage);
-            }
 
             if (string.IsNullOrEmpty(threadMessage.User_Id))
             {
@@ -133,11 +114,6 @@ namespace WebApi.Services
 
         public void UpdateMessage(ThreadMessage threadMessage)
         {
-            if (!_ICluster.Description.State.IsConnected())
-            {
-                throw new AppException(AppSettings.DBDisconnectedMessage);
-            }
-
             ThreadMessage threadMessageToUpdate = _threadMessageCollection.Find(pet => pet.thread_message_id == threadMessage.thread_message_id).SingleOrDefault();
 
             if (threadMessageToUpdate == null)
@@ -162,11 +138,6 @@ namespace WebApi.Services
         }
         public void DeleteByThread(string id)
         {
-            if (!_ICluster.Description.State.IsConnected()) 
-            {
-                throw new AppException(AppSettings.DBDisconnectedMessage);
-            }
-
             ThreadMessage threadMessage = _threadMessageCollection.Find(tm => tm.thread_id == id).FirstOrDefault();
             if (threadMessage != null)
             {
@@ -175,11 +146,6 @@ namespace WebApi.Services
         }
         public void DeleteByMessage(string id)
         {
-            if(!_ICluster.Description.State.IsConnected())
-            {
-                throw new AppException(AppSettings.DBDisconnectedMessage);
-            }
-
             ThreadMessage threadMessage = _threadMessageCollection.Find(tm => tm.thread_message_id == id).FirstOrDefault();
             if (threadMessage != null)
             {
@@ -188,11 +154,6 @@ namespace WebApi.Services
         }
         public void DeleteByUser(string id)
         {
-            if(!_ICluster.Description.State.IsConnected())
-            {
-                throw new AppException(AppSettings.DBDisconnectedMessage);
-            }
-
             ThreadMessage threadMessage = _threadMessageCollection.Find(tm => tm.User_Id == id).FirstOrDefault();
             if (threadMessage != null)
             {
@@ -201,10 +162,6 @@ namespace WebApi.Services
         }
         public void DeleteByThreadAndUser(string thread_id, string user_id)
         {
-            if(!_ICluster.Description.State.IsConnected())
-            {
-                throw new AppException(AppSettings.DBDisconnectedMessage);
-            }
 
             ThreadMessage threadMessage = _threadMessageCollection.Find(tm => tm.thread_id == thread_id && tm.User_Id == user_id).FirstOrDefault();
             if (threadMessage != null)

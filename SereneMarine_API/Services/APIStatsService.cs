@@ -1,8 +1,6 @@
 ﻿using System.Linq;
 using MongoDB.Driver;
-using MongoDB.Driver.Core.Clusters;
 using WebApi.Entities;
-using WebApi.Helpers;
 using WebApi.Models;
 
 namespace WebApi.Services
@@ -21,12 +19,9 @@ namespace WebApi.Services
         private readonly IMongoCollection<ThreadMessage> _threadMessagesCollection;
         private readonly IMongoCollection<EventAttendance> _eventAttendanceCollection;
 
-        private ICluster _ICluster;
-
         public APIStatsService(IMongoClient client, IUserDatabseSettings settings)
         {
             IMongoDatabase database = client.GetDatabase(settings.DatabaseName);
-            _ICluster = client.Cluster;
 
             _petitionsSignedCollection = database.GetCollection<PetitionSigned>(settings.PetitionsSignedCollectionName);
             _threadMessagesCollection = database.GetCollection<ThreadMessage>(settings.ThreadMessagesCollectionName);
@@ -35,11 +30,6 @@ namespace WebApi.Services
 
         public Statistics GetAllStats()
         {
-            if (!_ICluster.Description.State.IsConnected())
-            {
-                throw new AppException(AppSettings.DBDisconnectedMessage);
-            }
-
             Statistics stats = new Statistics()
             {
                 PetitionsSigned = _petitionsSignedCollection.Find(x => true).ToList().Count(),
@@ -52,31 +42,16 @@ namespace WebApi.Services
 
         public int CountPetitionsSigned() 
         {
-            if (!_ICluster.Description.State.IsConnected())
-            {
-                throw new AppException(AppSettings.DBDisconnectedMessage);
-            }
-
             return _petitionsSignedCollection.Find(x => true).ToList().Count();
         }
 
         public int CountEventsAttended()
         {
-            if (!_ICluster.Description.State.IsConnected())
-            {
-                throw new AppException(AppSettings.DBDisconnectedMessage);
-            }
-
             return _eventAttendanceCollection.Find(x => true).ToList().Count();
         }
 
         public int CountThreadMessages() 
         {
-            if (!_ICluster.Description.State.IsConnected())
-            {
-                throw new AppException(AppSettings.DBDisconnectedMessage);
-            }
-
             return _threadMessagesCollection.Find(x => true).ToList().Count();
         }
     }

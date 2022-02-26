@@ -25,12 +25,9 @@ namespace WebApi.Services
         private readonly IMongoCollection<Petition> _petitionCollection;
         private readonly IMongoCollection<PetitionSigned> _petitionSignedCollection;
 
-        private ICluster _ICluster;
-
         public PetitionsSevice(IMongoClient client, IUserDatabseSettings settings)
         {
             IMongoDatabase database = client.GetDatabase(settings.DatabaseName);
-            _ICluster = client.Cluster;
 
             _petitionCollection = database.GetCollection<Petition>(settings.PetitionsCollectionName);
             _petitionSignedCollection = database.GetCollection<PetitionSigned>(settings.PetitionsSignedCollectionName);
@@ -38,51 +35,26 @@ namespace WebApi.Services
 
         public List<Petition> GetAll()
         {
-            if (!_ICluster.Description.State.IsConnected())
-            {
-                throw new AppException(AppSettings.DBDisconnectedMessage);
-            }
-
             return _petitionCollection.Find(x => true).ToList();
         }
 
         public Petition GetById(string id)
         {
-            if (!_ICluster.Description.State.IsConnected())
-            {
-                throw new AppException(AppSettings.DBDisconnectedMessage);
-            }
-
             return _petitionCollection.Find(pet => pet.petition_id == id).FirstOrDefault();
         }
 
         public List<Petition> GetByCompletion(bool isComplete)
         {
-            if (!_ICluster.Description.State.IsConnected())
-            {
-                throw new AppException(AppSettings.DBDisconnectedMessage);
-            }
-
             return _petitionCollection.Find(pet => pet.completed == isComplete).ToList();
         }
 
         public Petition GetByUser(string id)
         {
-            if (!_ICluster.Description.State.IsConnected())
-            {
-                throw new AppException(AppSettings.DBDisconnectedMessage);
-            }
-
             return _petitionCollection.Find(pet => pet.User_Id == id).FirstOrDefault();
         }
 
         public Petition Create(Petition petition)
         {
-            if (!_ICluster.Description.State.IsConnected())
-            {
-                throw new AppException(AppSettings.DBDisconnectedMessage);
-            }
-
             //need to assign userid from bearer token to pet.user_id
             if (string.IsNullOrEmpty(petition.User_Id))
             {
@@ -122,11 +94,6 @@ namespace WebApi.Services
 
         public void Update(Petition petition)
         {
-            if (!_ICluster.Description.State.IsConnected())
-            {
-                throw new AppException(AppSettings.DBDisconnectedMessage);
-            }
-
             Petition petitionToUpdate = _petitionCollection.Find(pet => pet.petition_id == petition.petition_id).SingleOrDefault();
 
             if (petitionToUpdate == null)
@@ -167,11 +134,6 @@ namespace WebApi.Services
 
         public void Delete(string id)
         {
-            if (!_ICluster.Description.State.IsConnected())
-            {
-                throw new AppException(AppSettings.DBDisconnectedMessage);
-            }
-
             Petition pet = _petitionCollection.Find(pet => pet.petition_id == id).FirstOrDefault();
             if (pet != null)
             {

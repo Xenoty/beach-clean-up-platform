@@ -24,11 +24,9 @@ namespace WebApi.Services
     {
         private readonly IMongoCollection<EventAttendance> _eventAttendanceCollection;
         private readonly IMongoCollection<Event> _eventCollection;
-        private readonly ICluster _ICluster;
-
+       
         public EventAttendanceService(IMongoClient client, IUserDatabseSettings settings)
         {
-            _ICluster = client.Cluster;
             IMongoDatabase database = client.GetDatabase(settings.DatabaseName);
 
             _eventAttendanceCollection = database.GetCollection<EventAttendance>(settings.EventAttendanceCollectionName);
@@ -37,41 +35,21 @@ namespace WebApi.Services
 
         public List<EventAttendance> GetAll() 
         {
-            if (!_ICluster.Description.State.IsConnected())
-            {
-                throw new AppException(AppSettings.DBDisconnectedMessage);
-            }
-
             return _eventAttendanceCollection.Find(ea => true).ToList();
         }
 
         public List<EventAttendance> GetAttendanceByEvent(string id)
         {
-            if (!_ICluster.Description.State.IsConnected())
-            {
-                throw new AppException(AppSettings.DBDisconnectedMessage);
-            }
-
             return _eventAttendanceCollection.Find(ea => ea.event_id == id).ToList();
         } 
 
         public List<EventAttendance> GetAttendanceByUser(string id, bool value)
         {
-            if (!_ICluster.Description.State.IsConnected())
-            {
-                throw new AppException(AppSettings.DBDisconnectedMessage);
-            }
-
             return _eventAttendanceCollection.Find(ea => ea.User_Id == id && ea.event_attended == value).ToList();
         }
 
         public EventAttendance Create(EventAttendance eventAttendance)
         {
-            if (!_ICluster.Description.State.IsConnected())
-            {
-                throw new AppException(AppSettings.DBDisconnectedMessage);
-            }
-
             // need to assign userid from bearer token to ea.user_id
             if (string.IsNullOrEmpty(eventAttendance.User_Id))
             {
@@ -106,11 +84,6 @@ namespace WebApi.Services
 
         public void DeleteByEvent(string id)
         {
-            if (!_ICluster.Description.State.IsConnected())
-            {
-                throw new AppException(AppSettings.DBDisconnectedMessage);
-            }
-
             EventAttendance eventAttendance = _eventAttendanceCollection.Find(ea => ea.event_id == id).FirstOrDefault();
             if (eventAttendance != null)
             {
@@ -129,11 +102,6 @@ namespace WebApi.Services
 
         public void DeleteByEventAndUser(string event_id, string user_id)
         {
-            if (!_ICluster.Description.State.IsConnected())
-            {
-                throw new AppException(AppSettings.DBDisconnectedMessage);
-            }
-
             EventAttendance eventAttendance = _eventAttendanceCollection.Find(ea => ea.event_id == event_id && ea.User_Id == user_id).FirstOrDefault();
             if (eventAttendance != null)
             {
