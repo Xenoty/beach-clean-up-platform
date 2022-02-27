@@ -24,6 +24,7 @@ Final year University project aiming to increase the participation of beach clea
 - Admins can CRUD Events, Petitions and Threads. 
 - Users can participate in Events, Petitions and Threads. 
 - Anonymous users can join events using their email address.
+- HTML & CSS has not been optimized for mobile devices.
 
 ### Tech Stack
 1. ASP.NET core WebApi (*API*)
