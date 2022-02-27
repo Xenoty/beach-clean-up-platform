@@ -1,6 +1,5 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
 using WebApi.Entities;
@@ -19,59 +18,69 @@ namespace WebApi.Controllers
         private IEventAttendanceService _attendanceService;
         private IMapper _mapper;
 
-        public EventAttendanceController(
-            IEventAttendanceService attendanceService,
-            IMapper mapper)
+        public EventAttendanceController(IEventAttendanceService attendanceService, IMapper mapper)
         {
             _attendanceService = attendanceService;
             _mapper = mapper;
         }
 
         /// <summary>
-        /// Gets all eventAttendances
+        /// Gets all Events Attended
         /// </summary>
-        /// 
         [HttpGet]
         public IActionResult GetAll()
         {
-            var events = _attendanceService.GetAll();
-            var model = _mapper.Map<IList<EventAttendanceModel>>(events);
-            return Ok(model);
+            try
+            {
+                List<EventAttendance> eventAttendanceList = _attendanceService.GetAll();
+                IList<EventAttendanceModel> eventAttendanceModelIList = _mapper.Map<IList<EventAttendanceModel>>(eventAttendanceList);
+                return Ok(eventAttendanceModelIList);
+            }
+            catch (AppException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
         [HttpPost("create")]
         public IActionResult Create([FromBody] EventAttendanceRegisterModel model)
         {
             // map model to entity
-            var ea = _mapper.Map<EventAttendance>(model);
+            EventAttendance eventAttendance = _mapper.Map<EventAttendance>(model);
 
             try
             {
-                ////initalise values and assign to model value
-                ea.date_accepted = DateTime.Now;
-                ea.event_attended = false;
+                // Initialize values and assign to model value
+                eventAttendance.date_accepted = DateTime.Now;
+                eventAttendance.event_attended = false;
                 // create ea
-                _attendanceService.Create(ea);
+                _attendanceService.Create(eventAttendance);
                 return Ok();
             }
             catch (AppException ex)
             {
                 // return error message if there was an exception
-                return BadRequest(new { message = ex.Message });
+                return BadRequest( new { message = ex.Message });
             }
         }
 
         /// <summary>
         /// Gets attendance by specific event_id
         /// </summary>
-        /// 
         //[AllowAnonymous]
         [HttpGet("event/{event_id}")]
         public IActionResult GetAttendanceByEvent(string event_id)
         {
-            var ev = _attendanceService.GetAttendanceByEvent(event_id);
-            var model = _mapper.Map<IList<EventAttendanceModel>>(ev);
-            return Ok(model);
+            try
+            {
+                List<EventAttendance> eventAttendanceList = _attendanceService.GetAttendanceByEvent(event_id);
+                IList<EventAttendanceModel> eventAttendanceModelIList = _mapper.Map<IList<EventAttendanceModel>>(eventAttendanceList);
+                return Ok(eventAttendanceModelIList);
+            }
+            catch (AppException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
         /// <summary>
@@ -84,9 +93,17 @@ namespace WebApi.Controllers
         [HttpGet("user/{User_Id}&{event_attended}")]
         public IActionResult GetAttendanceByUser(string User_Id, bool event_attended)
         {
-            var ev = _attendanceService.GetAttendanceByUser(User_Id, event_attended);
-            var model = _mapper.Map<IList<EventAttendanceModel>>(ev);
-            return Ok(model);
+            try
+            {
+                List<EventAttendance> eventAttendanceList = _attendanceService.GetAttendanceByUser(User_Id, event_attended);
+                IList<EventAttendanceModel> eventAttendanceModelIList = _mapper.Map<IList<EventAttendanceModel>>(eventAttendanceList);
+
+                return Ok(eventAttendanceModelIList);
+            }
+            catch (AppException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
         /// <summary>
@@ -97,8 +114,15 @@ namespace WebApi.Controllers
         [HttpDelete("delete/event/{event_id}")]
         public IActionResult Delete(string event_id)
         {
-            _attendanceService.DeleteByEvent(event_id);
-            return Ok();
+            try
+            {
+                _attendanceService.DeleteByEvent(event_id);
+                return Ok();
+            }
+            catch (AppException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
         /// <summary>
         /// Deletes attendance by user_id
@@ -108,8 +132,15 @@ namespace WebApi.Controllers
         [HttpDelete("delete/user/{user_id}")]
         public IActionResult DeleteByUser(string user_id)
         {
-            _attendanceService.DeleteByUser(user_id);
-            return Ok();
+            try
+            {
+                _attendanceService.DeleteByUser(user_id);
+                return Ok();
+            }
+            catch (AppException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
         /// <summary>
@@ -120,8 +151,15 @@ namespace WebApi.Controllers
         [HttpDelete("delete/event/{event_id}/user/{user_id}")]
         public IActionResult DeleteByEventAndUser(string event_id, string user_id)
         {
-            _attendanceService.DeleteByEventAndUser(event_id, user_id);
+            try
+            {
+                _attendanceService.DeleteByEventAndUser(event_id, user_id);
             return Ok();
+            }
+            catch (AppException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
     }
 }

@@ -115,7 +115,12 @@
     }
 </div>
 
-
+@if (TempData["ApiError"] != null)
+{
+    <div class="alert-danger">
+        <strong>@TempData["ApiError"].ToString()</strong>
+    </div>
+}
 
 @if (TempData["response"] != null)
 {
@@ -130,8 +135,6 @@
         <strong>@TempData["RoutingError"].ToString()</strong>
     </div>
 }
-
-
 
 @if (Model != null)
 {
@@ -188,7 +191,7 @@
                     </div>
 
                     <div class="descr_container">
-                        <div class="cta noSelect" onclick="dropdown(@descr_id, @arrow_id);">
+                        <div class="cta noSelect" onclick="dropdown('@descr_id.ToString()', '@arrow_id.ToString()');">
                             Description <b id="@arrow_id">&#8595;</b>
                         </div>
                         <div id="@descr_id" class="content" style="display:none;">
@@ -220,19 +223,3 @@ else
 {
     <h3>There are currently no Threads open.</h3>
 }
-
-<script type="text/javascript">
-    function dropdown(id, arrowId) {
-        //console.log(id);
-        //console.log(arrowId);
-        var elm = id.style.display;
-
-        if (elm == "none") {
-            id.style.display = "block";
-            arrowId.innerHTML = "&#8593;";
-        } else {
-            id.style.display = "none";
-           arrowId.innerHTML = "&#8595;";
-        }
-    }
-</script>

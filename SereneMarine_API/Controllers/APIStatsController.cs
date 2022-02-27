@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
+using WebApi.Helpers;
 using WebApi.Models.ApiStats;
 using WebApi.Services;
 
@@ -13,9 +14,7 @@ namespace WebApi.Controllers
         private IAPIStatsService _apiStatsService;
         private IMapper _mapper;
 
-        public APIStatsController(
-            IAPIStatsService apiStatsService,
-            IMapper mapper)
+        public APIStatsController(IAPIStatsService apiStatsService, IMapper mapper)
         {
             _apiStatsService = apiStatsService;
             _mapper = mapper;
@@ -24,27 +23,58 @@ namespace WebApi.Controllers
         [HttpGet]
         public IActionResult GetAllStats()
         {
-            var statistics = _apiStatsService.GetAllStats();
-            var model = _mapper.Map<StatisticsModel>(statistics);
-            return Ok(model);
+            try
+            {
+                var statistics = _apiStatsService.GetAllStats();
+                var model = _mapper.Map<StatisticsModel>(statistics);
+                return Ok(model);
+            }
+            catch (AppException ex)
+            {
+                return BadRequest( new {message = ex.Message});
+            }
         }
 
         [HttpGet("petitionsSigned")]
         public IActionResult CountPetitionsSigned()
         {
-            return Ok(_apiStatsService.CountPetitionsSigned());
+            try
+            {
+                int result = _apiStatsService.CountPetitionsSigned();
+                return Ok(result);
+            }
+            catch (AppException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
         [HttpGet("eventsAttended")]
         public IActionResult CountEventsAttended()
         {
-            return Ok(_apiStatsService.CountEventsAttended());
+            try
+            {
+                int result = _apiStatsService.CountEventsAttended();
+                return Ok(result);
+            }
+            catch (AppException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
         [HttpGet("threadMessages")]
         public IActionResult CountThreadMessages()
         {
-            return Ok(_apiStatsService.CountPetitionsSigned());
+            try
+            {
+                int result = _apiStatsService.CountThreadMessages();
+                return Ok(result);
+            }
+            catch (AppException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
     }
 }

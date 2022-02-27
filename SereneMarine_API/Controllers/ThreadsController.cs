@@ -1,7 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
 using System.Security.Claims;
@@ -37,9 +36,16 @@ namespace WebApi.Controllers
         [HttpGet]
         public IActionResult GetAll()
         {
-            var events = _threadService.GetAll();
-            var model = _mapper.Map<IList<ThreadsModel>>(events);
-            return Ok(model);
+            try
+            {
+                var events = _threadService.GetAll();
+                var model = _mapper.Map<IList<ThreadsModel>>(events);
+                return Ok(model);
+            }
+            catch (AppException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
         [HttpPost("create")]
@@ -74,9 +80,16 @@ namespace WebApi.Controllers
         [HttpGet("{thread_id}")]
         public IActionResult GetById(string thread_id)
         {
-            var threads = _threadService.GetById(thread_id);
-            var model = _mapper.Map<ThreadsModel>(threads);
-            return Ok(model);
+            try
+            {
+                var threads = _threadService.GetById(thread_id);
+                var model = _mapper.Map<ThreadsModel>(threads);
+                return Ok(model);
+            }
+            catch (AppException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
         /// <summary>
@@ -86,9 +99,16 @@ namespace WebApi.Controllers
         [HttpGet("user/{User_Id}")]
         public IActionResult GetByUser(string User_Id)
         {
-            var threads = _threadService.GetByUser(User_Id);
-            var model = _mapper.Map<IList<ThreadsModel>>(threads);
-            return Ok(model);
+            try
+            {
+                var threads = _threadService.GetByUser(User_Id);
+                var model = _mapper.Map<IList<ThreadsModel>>(threads);
+                return Ok(model);
+            }
+            catch (AppException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
         /// <summary>
@@ -126,8 +146,16 @@ namespace WebApi.Controllers
         [HttpDelete("delete/thread/{thread_id}")]
         public IActionResult DeleteByThread(string thread_id)
         {
-            _threadService.DeleteByThread(thread_id);
-            return Ok();
+            try
+            {
+                _threadService.DeleteByThread(thread_id);
+                return Ok();
+            }
+            catch (AppException ex)
+            {
+
+                return BadRequest(new { message = ex.ToString() });
+            }
         }
 
         /// <summary>
@@ -138,8 +166,15 @@ namespace WebApi.Controllers
         [HttpDelete("delete/user/{user_id}")]
         public IActionResult DeleteByUser(string user_id)
         {
-            _threadService.DeleteByUser(user_id);
-            return Ok();
+            try
+            {
+                _threadService.DeleteByUser(user_id);
+                return Ok();
+            }
+            catch (AppException ex)
+            {
+                return BadRequest(new { message = ex.ToString() });
+            }
         }
     }
 }

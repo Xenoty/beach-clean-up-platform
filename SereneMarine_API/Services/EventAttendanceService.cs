@@ -1,4 +1,5 @@
 ﻿using MongoDB.Driver;
+using MongoDB.Driver.Core.Clusters;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,97 +14,98 @@ namespace WebApi.Services
         List<EventAttendance> GetAll();
         List<EventAttendance> GetAttendanceByEvent(string id);
         List<EventAttendance> GetAttendanceByUser(string id, bool attended);
-        EventAttendance Create(EventAttendance ea);
+        EventAttendance Create(EventAttendance eventAttendance);
         void DeleteByEvent(string id);
         void DeleteByUser(string id);
         void DeleteByEventAndUser(string event_id, string user_id);
     }
+
     public class EventAttendanceService : IEventAttendanceService
     {
-        private readonly IMongoCollection<EventAttendance> _ea;
-        private readonly IMongoCollection<Event> _events;
-
-        public EventAttendanceService(IUserDatabseSettings settings)
+        private readonly IMongoCollection<EventAttendance> _eventAttendanceCollection;
+        private readonly IMongoCollection<Event> _eventCollection;
+       
+        public EventAttendanceService(IMongoClient client, IUserDatabseSettings settings)
         {
-            MongoClient client = new MongoClient(settings.ConnectionString);
             IMongoDatabase database = client.GetDatabase(settings.DatabaseName);
 
-            _ea = database.GetCollection<EventAttendance>(settings.EventAttendanceCollectionName);
-            _events = database.GetCollection<Event>(settings.EventsCollectionName);
-
+            _eventAttendanceCollection = database.GetCollection<EventAttendance>(settings.EventAttendanceCollectionName);
+            _eventCollection = database.GetCollection<Event>(settings.EventsCollectionName);
         }
-        public List<EventAttendance> GetAll() =>
-       _ea.Find(ea => true).ToList();
 
-        public List<EventAttendance> GetAttendanceByEvent(string id) => _ea.Find(ea => ea.event_id == id).ToList();
+        public List<EventAttendance> GetAll() 
+        {
+            return _eventAttendanceCollection.Find(ea => true).ToList();
+        }
+
+        public List<EventAttendance> GetAttendanceByEvent(string id)
+        {
+            return _eventAttendanceCollection.Find(ea => ea.event_id == id).ToList();
+        } 
 
         public List<EventAttendance> GetAttendanceByUser(string id, bool value)
         {
-            //check bool value returned
-            if (value == null)
+            return _eventAttendanceCollection.Find(ea => ea.User_Id == id && ea.event_attended == value).ToList();
+        }
+
+        public EventAttendance Create(EventAttendance eventAttendance)
+        {
+            // need to assign userid from bearer token to ea.user_id
+            if (string.IsNullOrEmpty(eventAttendance.User_Id))
             {
-                value = false;
+                throw new AppException("User_id is required");
             }
 
-            return _ea.Find(ea => ea.User_Id == id && ea.event_attended == value).ToList();
-        }
+            Event eventFound = _eventCollection.Find(x => x.event_id == eventAttendance.event_id).FirstOrDefault();
+            if (eventFound == null)
+            {
+                throw new AppException("Event '" + eventAttendance.event_id + "' does not exist");
+            }
 
-        public EventAttendance Create(EventAttendance ea)
-        {
-            // validation
-            //need to assign userid from bearer token to ea.user_id
-            if (string.IsNullOrEmpty(ea.User_Id))
-                throw new AppException("User_id is required");
-
-            //check if event actually exists
-            //use linq standard for inner join between two collecitons
-            var query = from x in _events.AsQueryable()
-                        join y in _ea.AsQueryable() on x.event_id equals y.event_id
-                        into MatchedEvents
-                        where (x.event_id == ea.event_id)
-                        select new
-                        {
-                            event_id = x.event_id
-                        };
-
-            //see if query has any results
-            if (!query.Any())
-                throw new AppException($"Event {ea.event_id} does not exist");
-
-            // throw error if the user has already accepted an event abd event exists
-            if (_ea.Find(x => x.User_Id == ea.User_Id && x.event_id == ea.event_id).FirstOrDefault() != null)
+            bool userHasAlreadyAcceptedEvent = _eventAttendanceCollection.Find(x => x.User_Id == eventAttendance.User_Id && x.event_id == eventAttendance.event_id).FirstOrDefault() != null;
+            if (userHasAlreadyAcceptedEvent)
+            {
                 throw new AppException("User has already participated in event");
+            }
 
-            if (ea.date_accepted == null || string.IsNullOrEmpty(Convert.ToString(ea.date_accepted)) || ea.date_accepted == default(DateTime))
-                throw new AppException("EventAttendance Start Date is required");
+            if (eventAttendance.date_accepted == default(DateTime))
+            {
+                throw new AppException("EventAttendance property 'Start Date' is required");
+            }
 
-            _ea.InsertOne(ea);
+            _eventAttendanceCollection.InsertOne(eventAttendance);
 
-            return ea;
+            //Increment the current_attendance by 1
+            eventFound.current_attendance += 1;
+            _eventCollection.ReplaceOne(ev => ev.event_id == eventFound.event_id, eventFound);
+
+            return eventAttendance;
         }
+
         public void DeleteByEvent(string id)
         {
-            EventAttendance ea = _ea.Find(ea => ea.event_id == id).FirstOrDefault();
-            if (ea != null)
+            EventAttendance eventAttendance = _eventAttendanceCollection.Find(ea => ea.event_id == id).FirstOrDefault();
+            if (eventAttendance != null)
             {
-                _ea.DeleteMany(ea => ea.event_id == id);
+                _eventAttendanceCollection.DeleteMany(ea => ea.event_id == id);
             }
         }
+
         public void DeleteByUser(string id)
         {
-            EventAttendance ea = _ea.Find(ea => ea.User_Id == id).FirstOrDefault();
-            if (ea != null)
+            EventAttendance evenAttendance = _eventAttendanceCollection.Find(ea => ea.User_Id == id).FirstOrDefault();
+            if (evenAttendance != null)
             {
-                _ea.DeleteMany(ea => ea.User_Id == id);
+                _eventAttendanceCollection.DeleteMany(ea => ea.User_Id == id);
             }
         }
 
         public void DeleteByEventAndUser(string event_id, string user_id)
         {
-            EventAttendance ea = _ea.Find(ea => ea.event_id == event_id && ea.User_Id == user_id).FirstOrDefault();
-            if (ea != null)
+            EventAttendance eventAttendance = _eventAttendanceCollection.Find(ea => ea.event_id == event_id && ea.User_Id == user_id).FirstOrDefault();
+            if (eventAttendance != null)
             {
-                _ea.DeleteOne(ea => ea.event_id == event_id && ea.User_Id == user_id);
+                _eventAttendanceCollection.DeleteOne(ea => ea.event_id == event_id && ea.User_Id == user_id);
             }
         }
     }

@@ -21,7 +21,7 @@ namespace SereneMarine_Web.Models
         [DataType(DataType.Date)]
         [DisplayFormat(DataFormatString = "{0:ddd, MMM, yyyy}")]
         public DateTime created_date { get; set; }
-        public bool thread_closed { get; set; }
+        public bool thread_closed { get; set; } = false;
 
         [Display(Name = "Author")]
         public string author { get; set; }

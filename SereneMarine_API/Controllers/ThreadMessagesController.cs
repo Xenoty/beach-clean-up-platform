@@ -33,9 +33,16 @@ namespace WebApi.Controllers
         [HttpGet]
         public IActionResult GetAll()
         {
-            var threadMessages = _threadMessagesService.GetAll();
-            var model = _mapper.Map<IList<ThreadMessagesModel>>(threadMessages);
-            return Ok(model);
+            try
+            {
+                var threadMessages = _threadMessagesService.GetAll();
+                var model = _mapper.Map<IList<ThreadMessagesModel>>(threadMessages);
+                return Ok(model);
+            }
+            catch (AppException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
         [HttpPost("create")]
@@ -69,9 +76,16 @@ namespace WebApi.Controllers
         [HttpGet("thread/{thread_id}")]
         public IActionResult GetByThread(string thread_id)
         {
-            var tm = _threadMessagesService.GetByThread(thread_id);
-            var model = _mapper.Map<IList<ThreadMessagesModel>>(tm);
-            return Ok(model);
+            try
+            {
+                var tm = _threadMessagesService.GetByThread(thread_id);
+                var model = _mapper.Map<IList<ThreadMessagesModel>>(tm);
+                return Ok(model);
+            }
+            catch (AppException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
         /// <summary>
@@ -80,9 +94,16 @@ namespace WebApi.Controllers
         [HttpGet("user/{user_id}")]
         public IActionResult GetByUser(string user_id)
         {
-            var tm = _threadMessagesService.GetByUser(user_id);
-            var model = _mapper.Map<IList<ThreadMessagesModel>>(tm);
-            return Ok(model);
+            try
+            {
+                var tm = _threadMessagesService.GetByUser(user_id);
+                var model = _mapper.Map<IList<ThreadMessagesModel>>(tm);
+                return Ok(model);
+            }
+            catch (AppException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
         /// <summary>
@@ -120,8 +141,15 @@ namespace WebApi.Controllers
         [HttpDelete("delete/thread/{thread_id}")]
         public IActionResult DeleteByThread(string thread_id)
         {
-            _threadMessagesService.DeleteByThread(thread_id);
-            return Ok();
+            try
+            {
+                _threadMessagesService.DeleteByThread(thread_id);
+                return Ok();
+            }
+            catch (AppException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
         /// <summary>
@@ -131,8 +159,15 @@ namespace WebApi.Controllers
         [HttpDelete("delete/message/{message_id}")]
         public IActionResult DeleteByMessage(string message_id)
         {
-            _threadMessagesService.DeleteByMessage(message_id);
-            return Ok();
+            try
+            {
+                _threadMessagesService.DeleteByMessage(message_id);
+                return Ok();
+            }
+            catch (AppException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
         /// <summary>
         /// Deletes messages by user_id
@@ -141,8 +176,15 @@ namespace WebApi.Controllers
         [HttpDelete("delete/user/{user_id}")]
         public IActionResult DeleteByUser(string user_id)
         {
-            _threadMessagesService.DeleteByUser(user_id);
-            return Ok();
+            try
+            {
+                _threadMessagesService.DeleteByUser(user_id);
+                return Ok();
+            }
+            catch (AppException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
         /// <summary>
@@ -152,8 +194,15 @@ namespace WebApi.Controllers
         [HttpDelete("delete/thread/{thread_id}/user/{user_id}")]
         public IActionResult DeleteByThreadAndUser(string thread_id, string user_id)
         {
-            _threadMessagesService.DeleteByThreadAndUser(thread_id, user_id);
-            return Ok();
+            try
+            {
+                _threadMessagesService.DeleteByThreadAndUser(thread_id, user_id);
+                return Ok();
+            }
+            catch (AppException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
     }
 }

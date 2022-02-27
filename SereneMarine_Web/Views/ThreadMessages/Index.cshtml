@@ -135,10 +135,24 @@
         width:100%;
         text-align:center;
         padding:1rem;
+        margin-bottom: 1rem;
     }
     
 </style>
 
+@if (TempData["response"] != null)
+{
+    <div class="alert-success">
+        <strong>@TempData["response"].ToString()</strong>
+    </div>
+}
+
+@if (TempData["ApiError"] != null)
+{
+    <div class="alert-danger">
+        <strong>@TempData["ApiError"].ToString()</strong>
+    </div>
+}
 
 @if (Model == null)
 {
@@ -188,9 +202,18 @@ else
 
         </div>
     </div>
-    <button type="button" class="btn btn-darkBlue float" data-toggle="modal" data-target="#exampleModal">
-        Reply
-    </button>
+    @if(Model.threadsModel.thread_closed){
+        <div class="empty-model">
+           Thread Has been closed by Admin.
+        </div>
+    }
+    else
+    {
+        <button type="button" class="btn btn-darkBlue float" data-toggle="modal" data-target="#exampleModal">
+            Reply
+        </button> 
+    }
+
 
     <!-- Modal -->
     <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
@@ -228,21 +251,6 @@ else
         </div>
     </div>
 
-    @if (TempData["response"] != null)
-    {
-        <div class="alert-success">
-            <strong>@TempData["response"].ToString()</strong>
-        </div>
-    }
-
-    @if (ViewBag.ApiError != null)
-    {
-        <div class="alert-danger">
-            <strong>@ViewBag.ApiError.StatusCode.ToString()</strong>
-            <strong>@ViewBag.ApiError.Content.ToString()</strong>
-        </div>
-    }
-
     @if (Model.threadMsgsList.Count == 0)
     {
         <div class="empty-model">
@@ -271,7 +279,8 @@ else
                                 @item.replied_date
                             </div>
                             <div class="msg_edit">
-                                @if (User.Identity.IsAuthenticated)
+                                @if (User.Identity.IsAuthenticated &&
+                                     !Model.threadsModel.thread_closed)
                                 {
                                     var claimsIdentity = User.Identity as System.Security.Claims.ClaimsIdentity;
                                     var user_id = claimsIdentity.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier);

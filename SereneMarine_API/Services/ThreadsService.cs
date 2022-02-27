@@ -1,4 +1,5 @@
 ﻿using MongoDB.Driver;
+using MongoDB.Driver.Core.Clusters;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,111 +21,130 @@ namespace WebApi.Services
     }
     public class ThreadsService : IThreadsService
     {
-        private readonly IMongoCollection<Thread> _threads;
-        private readonly IMongoCollection<User> _users;
+        private readonly IMongoCollection<Thread> _threadCollection;
+        private readonly IMongoCollection<User> _userCollection;
 
-        public ThreadsService(IUserDatabseSettings settings)
+        public ThreadsService(IMongoClient client, IUserDatabseSettings settings)
         {
-            MongoClient client = new MongoClient(settings.ConnectionString);
             IMongoDatabase database = client.GetDatabase(settings.DatabaseName);
 
-            _threads = database.GetCollection<Thread>(settings.ThreadsCollectionName);
-            _users = database.GetCollection<User>(settings.UsersCollectionName);
+            _threadCollection = database.GetCollection<Thread>(settings.ThreadsCollectionName);
+            _userCollection = database.GetCollection<User>(settings.UsersCollectionName);
         }
 
-        public List<Thread> GetAll() => _threads.Find(th => true).ToList();
-
-        public Thread GetById(string id) => _threads.Find(th => th.thread_id == id).FirstOrDefault();
-
-        public List<Thread> GetByUser(string id) => _threads.Find(th => th.User_Id == id).ToList();
-
-        public Thread Create(Thread th)
+        public List<Thread> GetAll() 
         {
-            // validation
-            //need to assign userid from bearer token to th.user_id
-            if (string.IsNullOrEmpty(th.User_Id))
-                throw new AppException("User_id is required");
-            //check if event name has been taken
-            // throw error if the new username is already taken
-            if (_threads.Find(x => x.thread_topic == th.thread_topic).FirstOrDefault() != null)
-                throw new AppException("Thread " + th.thread_topic + " is already taken");
-
-            if (string.IsNullOrEmpty(th.thread_topic))
-                throw new AppException("Thread Name is required");
-
-            if (string.IsNullOrEmpty(th.thread_descr))
-                throw new AppException("Thread Description is required");
-
-            if (th.created_date == null || string.IsNullOrEmpty(Convert.ToString(th.created_date)))
-                throw new AppException("Thread Created Date is required");
-
-            if (string.IsNullOrEmpty(th.thread_closed.ToString()) || th.thread_closed == null)
-                throw new AppException("Thread_closed is required");
-
-            //need to insert author name for ease of access in web end
-            Thread query = (from x in _threads.AsQueryable()
-                            join y in _users.AsQueryable() on x.User_Id equals y.User_Id
-                            select new Thread()
-                            {
-                                author = y.FirstName + " " + y.LastName
-                            }).FirstOrDefault();
-
-            if (string.IsNullOrEmpty(query.author))
-                throw new AppException($"Error binding user_id and names");
-
-            th.author = query.author;
-            _threads.InsertOne(th);
-
-            return th;
+            return _threadCollection.Find(th => true).ToList();  
         }
 
-        public void Update(Thread threadParam)
+        public Thread GetById(string id)
         {
-            Thread th = _threads.Find(th => th.thread_id == threadParam.thread_id).SingleOrDefault();
+            return _threadCollection.Find(th => th.thread_id == id).FirstOrDefault(); 
+        }
 
-            if (th == null)
-                throw new AppException("Thread not found");
+        public List<Thread> GetByUser(string id)
+        {
+            return _threadCollection.Find(th => th.User_Id == id).ToList(); 
+        }
 
-            // update event name if it has changed
-            if (!string.IsNullOrWhiteSpace(threadParam.thread_topic) && threadParam.thread_topic != th.thread_topic)
+        public Thread Create(Thread thread)
+        {
+            if (string.IsNullOrEmpty(thread.User_Id))
             {
-                // throw error if the new event name is already taken
-                if (_threads.Find(x => x.thread_topic == threadParam.thread_topic).FirstOrDefault() != null)
-                    throw new AppException("Thread " + threadParam.thread_topic + " is already taken");
-
-                //assign event name to model
-                th.thread_topic = threadParam.thread_topic;
+                throw new AppException("User_id is required");
+            }
+                
+            if (_threadCollection.Find(x => x.thread_topic == thread.thread_topic).FirstOrDefault() != null)
+            {
+                throw new AppException("Thread " + thread.thread_topic + " is already taken");
             }
 
-            // update th properties if provided
-            if (!string.IsNullOrEmpty(threadParam.thread_descr))
-                th.thread_descr = threadParam.thread_descr;
+            if (string.IsNullOrEmpty(thread.thread_topic))
+            {
+                throw new AppException("Thread Name is required");
+            }
 
-            if (!string.IsNullOrWhiteSpace(threadParam.created_date.ToString()) && threadParam.created_date != default(DateTime))
-                th.created_date = threadParam.created_date;
+            if (string.IsNullOrEmpty(thread.thread_descr))
+            {
+                throw new AppException("Thread Description is required");
+            }
 
-            if (!string.IsNullOrEmpty(threadParam.author))
-                th.author = threadParam.author;
+            if (thread.created_date == default(DateTime))
+            {
+                throw new AppException("Thread Created Date is required");
+            }
 
-            _threads.ReplaceOne(th => th.thread_id == threadParam.thread_id, th);
+            User user = _userCollection.Find(u => u.User_Id == thread.User_Id).SingleOrDefault();
+            if (user == null)
+            {
+                throw new AppException("Could not find matching user_id");
+            }
+
+            thread.author = user.FirstName + " " + user.LastName;
+
+            _threadCollection.InsertOne(thread);
+
+            return thread;
+        }
+
+        public void Update(Thread thread)
+        {
+            Thread threadToUpdate = _threadCollection.Find(th => th.thread_id == thread.thread_id).SingleOrDefault();
+
+            if (threadToUpdate == null)
+            {
+                throw new AppException("Thread not found");
+            }
+
+            if (!string.IsNullOrWhiteSpace(thread.thread_topic) 
+                && thread.thread_topic != threadToUpdate.thread_topic)
+            {
+                threadToUpdate.thread_topic = thread.thread_topic;
+            }
+
+            if (!string.IsNullOrEmpty(thread.thread_descr))
+            {
+                threadToUpdate.thread_descr = thread.thread_descr;
+            }
+
+            if (thread.created_date != default(DateTime))
+            {
+                threadToUpdate.created_date = thread.created_date;
+            }
+                
+            if (!string.IsNullOrEmpty(thread.author))
+            {
+                threadToUpdate.author = thread.author;
+            }
+
+            if (threadToUpdate.thread_closed != thread.thread_closed)
+            {
+                threadToUpdate.thread_closed = thread.thread_closed;
+            }
+
+            _threadCollection.ReplaceOne(th => th.thread_id == thread.thread_id, threadToUpdate);
         }
 
         public void DeleteByThread(string id)
         {
-            Thread th = _threads.Find(th => th.thread_id == id).FirstOrDefault();
-            if (th != null)
+            Thread threadToDelete = _threadCollection.Find(th => th.thread_id == id).FirstOrDefault();
+            if (threadToDelete == null)
             {
-                _threads.DeleteOne(th => th.thread_id == id);
+                throw new AppException("Thread not found");
             }
+
+            _threadCollection.DeleteOne(th => th.thread_id == id);
         }
 
         public void DeleteByUser(string id)
         {
-            Thread th = _threads.Find(th => th.User_Id == id).FirstOrDefault();
-            if (th != null)
+            Thread threadToDelete = _threadCollection.Find(th => th.User_Id == id).FirstOrDefault();
+            if (threadToDelete == null)
             {
-                _threads.DeleteMany(th => th.User_Id == id);
+                throw new AppException("Thread not found");
             }
+
+            _threadCollection.DeleteMany(th => th.User_Id == id);
         }
     }
 }

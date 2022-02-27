@@ -19,8 +19,13 @@ namespace SereneMarine_Web.ViewModels.Events
         [StringLength(200, MinimumLength = 10, ErrorMessage = "Please enter a event description between 10 and 200 characters in length")]
         [RegularExpression(@"^[@.,;\'""a-zA-Z0-9'-'\s]*$", ErrorMessage = "Please enter a event description made up of letters and numbers only")]
         public string event_descr { get; set; }
-        public double longitude { get; set; }
-        public double latitude { get; set; }
+
+        [Required]
+        [Display(Name = "Longitude")]
+        public double? longitude { get; set; } = null;
+        [Required]
+        [Display(Name = "Latitude")]
+        public double? latitude { get; set; } = null;
 
         [Required]
         [Display(Name = "Address")]
@@ -30,19 +35,19 @@ namespace SereneMarine_Web.ViewModels.Events
 
         [Required]
         [Display(Name = "Starting Date")]
-        [DisplayFormat(DataFormatString = "{0:MM/dd/yyyy HH:MM}")]
-        public DateTime event_startdate { get; set; }
+        [DisplayFormat(DataFormatString = "{0:dd/MM/yyyy HH:MM}")]
+        public DateTime event_startdate { get; set; } = DateTime.Now.Date.AddHours(8);
 
         [Required]
         [Display(Name = "Ending Date")]
-        [DisplayFormat(DataFormatString = "{0:MM/dd/yyyy HH:MM}")]
-        public DateTime event_enddate { get; set; }
+        [DisplayFormat(DataFormatString = "{0:dd/MM/yyyy HH:MM}")]
+        public DateTime event_enddate { get; set; } = DateTime.Now.Date.AddHours(16);
 
         [Required]
         [Display(Name = "Max Attedance for Event")]
         [Range(5, 1000, ErrorMessage = "The field Max attendance must be between 5 - 1000.")]
         [RegularExpression("^[0-9]*$", ErrorMessage = "Max Attendance must be numeric values only")]
-        public int max_attendance { get; set; }
+        public int max_attendance { get; set; } = 100;
         public Boolean event_completed { get; set; }
     }
 }

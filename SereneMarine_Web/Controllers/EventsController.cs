@@ -9,7 +9,6 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Security.Claims;
@@ -23,9 +22,11 @@ namespace SereneMarine_Web.Controllers
     {
         #region Views
 
-        public ActionResult Create() => View();
+        public ActionResult Create() => View( new EventUpdateModel());
 
         #endregion
+
+        private EventsIndexViewModel previousEventsIndexViewModel;
 
         #region Task Methods
 
@@ -33,23 +34,27 @@ namespace SereneMarine_Web.Controllers
         [HttpGet]
         public async Task<IActionResult> Index(EventsIndexViewModel filter, string submit, string clear)
         {
-            if (!string.IsNullOrEmpty(clear))
+            bool clearFitler  = !string.IsNullOrEmpty(clear);
+            if (clearFitler)
             {
                 ModelState.Clear();
+                filter = null;
+                submit = string.Empty;
             }
             //initalize variables
             EventsIndexViewModel eventsIndexViewModel = new EventsIndexViewModel();
 
             //build the url for request
             string baseUrl = SD.EventsPath;
-            string url = baseUrl;
+            response = await client.GetAsync(baseUrl);
 
-            response = await client.GetAsync(url);
-
-            if (response.StatusCode != HttpStatusCode.OK)
+            if (!response.IsSuccessStatusCode)
             {
                 //create alert for error
-                return View();
+                ApiException exception = new ApiException(response);
+                TempData["ApiError"] = exception.GetApiErrorMessage();
+
+                return View(previousEventsIndexViewModel);
             }
 
             //read data from json response
@@ -72,8 +77,12 @@ namespace SereneMarine_Web.Controllers
                 //RETRIEVE Response from api
                 response = await client.GetAsync(attUrl);
 
-                if (response.IsSuccessStatusCode == false)
+                if (!response.IsSuccessStatusCode)
                 {
+                    //create alert for error
+                    ApiException exception = new ApiException(response);
+                    TempData["ApiError"] = exception.GetApiErrorMessage();
+
                     return View(eventsIndexViewModel);
                 }
 
@@ -96,67 +105,81 @@ namespace SereneMarine_Web.Controllers
                         }
                     }
                 }
-
             }
+
+            IEnumerable<EventsViewModel> eventsViewModelEnumerable = null;
 
             if (string.IsNullOrEmpty(submit))
             {
-                //only return events that haven't been completed and not < current date
-                eventsIndexViewModel.EventsViewModel = eventsIndexViewModel.EventsViewModel.Where(x => x.event_enddate >= DateTime.Now && x.event_completed == false).OrderBy(x => x.event_startdate).ToList();
+                eventsViewModelEnumerable = eventsIndexViewModel.EventsViewModel.Where(x => x.event_startdate >= DateTime.Now);
+                if (eventsViewModelEnumerable.Count() == 0)
+                {
+                    // If there are no upcomming events, show all events
+                    eventsViewModelEnumerable = eventsIndexViewModel.EventsViewModel.Where(x => true);
+                }
             }
             else
             {
-                bool upcomming = false;
-                bool userCompleted = false;
-                bool end_date = false;
+                eventsViewModelEnumerable = GetFilteredEventsAsIEnumerable(eventsIndexViewModel, filter);
+            }
 
-                if (filter.filterEvents.UserCompleted == true)
-                {
-                    userCompleted = true;
-                    eventsIndexViewModel.EventsViewModel = eventsIndexViewModel.EventsViewModel.Where(x => true && x.matching_user == true).OrderBy(x => x.event_startdate).ToList();
-                }
-                if (filter.filterEvents.Completed == true && userCompleted == false)
-                {
-                    if (filter.filterEvents.Current == true)
-                    {
-                        upcomming = true;
-                        eventsIndexViewModel.EventsViewModel = eventsIndexViewModel.EventsViewModel.Where(x => true).OrderBy(x => x.event_startdate).ToList();
-                    }
-                    else
-                    {
-                        //only return events that haven't been completed and not < current date
-                        eventsIndexViewModel.EventsViewModel = eventsIndexViewModel.EventsViewModel.Where(x => x.event_enddate <= DateTime.Now /*|| x.event_completed == false*/).OrderBy(x => x.event_startdate).ToList();
-                    }
-                }
-                if (filter.filterEvents.Current == true && upcomming == false && userCompleted == false)
-                {
-                    eventsIndexViewModel.EventsViewModel = eventsIndexViewModel.EventsViewModel.Where(x => x.event_enddate >= DateTime.Now || x.event_completed == true).OrderBy(x => x.event_startdate).ToList();
-                }
+            // Order by descending by default
+            eventsIndexViewModel.EventsViewModel = eventsViewModelEnumerable.OrderByDescending(x => x.event_startdate).ToList();
+            if (previousEventsIndexViewModel != eventsIndexViewModel)
+            {
+                previousEventsIndexViewModel = eventsIndexViewModel;
+            }
 
-                if (filter.filterEvents.event_startdate != null && filter.filterEvents.event_startdate != default(DateTime))
-                {
-                    if (filter.filterEvents.event_enddate != null)
-                    {
-                        end_date = true;
-                        eventsIndexViewModel.EventsViewModel = eventsIndexViewModel.EventsViewModel.Where(x => x.event_startdate >= filter.filterEvents.event_startdate
-                        && x.event_enddate <= filter.filterEvents.event_enddate).OrderBy(x => x.event_startdate).ToList();
-                    }
-                    else
-                    {
-                        eventsIndexViewModel.EventsViewModel = eventsIndexViewModel.EventsViewModel.Where(x => x.event_startdate >= filter.filterEvents.event_startdate).OrderBy(x => x.event_startdate).ToList();
-                    }
-                }
-                if (filter.filterEvents.event_enddate != null && filter.filterEvents.event_enddate != default(DateTime) && end_date == false)
-                {
-                    eventsIndexViewModel.EventsViewModel = eventsIndexViewModel.EventsViewModel.Where(x => x.event_enddate <= filter.filterEvents.event_enddate).OrderBy(x => x.event_startdate).ToList();
-                }
-                if (filter.filterEvents.max_attendance != 0 && filter.filterEvents.max_attendance != null)
-                {
-                    eventsIndexViewModel.EventsViewModel = eventsIndexViewModel.EventsViewModel.Where(x => x.max_attendance <= filter.filterEvents.max_attendance).OrderBy(x => x.event_startdate).ToList();
-                }
+            if (clearFitler)
+            {
+                return RedirectToAction("Index", "Events");
             }
 
             return View(eventsIndexViewModel);
+        }
+
+        private IEnumerable<EventsViewModel> GetFilteredEventsAsIEnumerable(EventsIndexViewModel eventsIndexViewModel, EventsIndexViewModel filter)
+        {
+            IEnumerable<EventsViewModel> eventsViewModelEnumerable = null;
+
+            bool userHasParticpatedInEvent = filter.filterEvents.UserParticipatedEvents;
+            bool getUpcommingEvents = filter.filterEvents.GetUpCommingEvents;
+            bool getPastEvents = filter.filterEvents.GetPastEvents;
+            DateTime? startDate = filter.filterEvents.EventStartDate;
+            DateTime? endDate = filter.filterEvents.EventEndDate;
+            int? maxAttendance = filter.filterEvents.MaxAttendance;
+
+            bool getStartDate = startDate.HasValue;
+            bool getEndDate = endDate.HasValue;
+            bool getMaxAttendance = maxAttendance.HasValue;
+
+            eventsViewModelEnumerable = eventsIndexViewModel.EventsViewModel.Where(x => x.matching_user == userHasParticpatedInEvent);
+
+            if (getUpcommingEvents)
+            {
+                eventsViewModelEnumerable = eventsViewModelEnumerable.Where(x => x.event_startdate >= DateTime.Now);
+            }
+            else if (getPastEvents)
+            {
+                eventsViewModelEnumerable = eventsViewModelEnumerable.Where(x => x.event_startdate <= DateTime.Now);
+            }
+
+            if (getStartDate)
+            {
+                eventsViewModelEnumerable = eventsViewModelEnumerable.Where(x => x.event_startdate > startDate);
+            }
+
+            if (getEndDate)
+            {
+                eventsViewModelEnumerable = eventsViewModelEnumerable.Where(x => x.event_enddate < endDate);
+            }
+
+            if (getMaxAttendance)
+            {
+                eventsViewModelEnumerable = eventsViewModelEnumerable.Where(x => x.max_attendance <= maxAttendance);
+            }
+
+            return eventsViewModelEnumerable;
         }
 
         [AllowAnonymous]
@@ -167,11 +190,7 @@ namespace SereneMarine_Web.Controllers
             {
                 return BadRequest();
             }
-            if (TempData["ApiError"] != null)
-            {
-                ApiException exception = JsonConvert.DeserializeObject<ApiException>((string)TempData["ApiError"]);
-                ViewBag.ApiError = exception;
-            }
+
             //initalize variables
             EventsViewModel evm = new EventsViewModel();
 
@@ -181,8 +200,11 @@ namespace SereneMarine_Web.Controllers
 
             response = await client.GetAsync(url);
 
-            if (response.IsSuccessStatusCode == false)
+            if (!response.IsSuccessStatusCode)
             {
+                ApiException exception = new ApiException(response);
+                TempData["ApiError"] = exception.GetApiErrorMessage();
+
                 //create alert for error
                 return View();
             }
@@ -235,21 +257,14 @@ namespace SereneMarine_Web.Controllers
             //Http Response
             response = await client.PostAsync(url, content);
             //</upload>
-            if (response.IsSuccessStatusCode == false)
+            if (!response.IsSuccessStatusCode)
             {
-                ApiException exception = new ApiException
-                {
-                    StatusCode = (int)response.StatusCode,
-                    Content = await response.Content.ReadAsStringAsync()
-                };
-
-                TempData["ApiError"] = JsonConvert.SerializeObject(exception);
+                ApiException exception = new ApiException(response);
+                TempData["ApiError"] = exception.GetApiErrorMessage();
 
                 return RedirectToAction("Details", "Events", new { id });
             }
 
-            //maybe add tempdata or return url 
-            //maybe redirect to EventsPage with tempdata showing joining event was successful
             TempData["response"] = $"Successfully joined Event {event_name} on {DateTime.Now}";
 
             return RedirectToAction("Index", "Events");
@@ -262,9 +277,6 @@ namespace SereneMarine_Web.Controllers
             {
                 return View();
             }
-            //lets convert comma to decimal 
-            model.longitude = Math.Round(Convert.ToDouble(model.longitude, new CultureInfo("en-GB")), 7);
-            model.latitude = Math.Round(Convert.ToDouble(model.latitude, new CultureInfo("en-GB")), 7);
 
             //create api url request
             string url = SD.EventsPath + "create/";
@@ -282,16 +294,10 @@ namespace SereneMarine_Web.Controllers
             //check response
             response = await client.PostAsync(url, content);
 
-            if (response.IsSuccessStatusCode == false)
+            if (!response.IsSuccessStatusCode)
             {
-                //display api error message
-                //create alert for error
-                ApiException exception = new ApiException
-                {
-                    StatusCode = (int)response.StatusCode,
-                    Content = await response.Content.ReadAsStringAsync()
-                };
-                ViewBag.ApiError = exception;
+                ApiException exception = new ApiException(response);
+                TempData["ApiError"] = exception.GetApiErrorMessage();
 
                 return View();
             }
@@ -322,9 +328,10 @@ namespace SereneMarine_Web.Controllers
 
             response = await client.GetAsync(url);
 
-            if (response.IsSuccessStatusCode == false)
+            if (!response.IsSuccessStatusCode)
             {
-                //create new api error code
+                ApiException exception = new ApiException(response);
+                TempData["ApiError"] = exception.GetApiErrorMessage();
                 //create tempdata to store and display
                 RedirectToAction("Details", "Events", new { id });
             }
@@ -336,16 +343,12 @@ namespace SereneMarine_Web.Controllers
 
             response = await client.GetAsync(apiUrl);
 
-            if (response.IsSuccessStatusCode == false)
+            if (!response.IsSuccessStatusCode)
             {
                 //create alert for error
-                ApiException exception = new ApiException
-                {
-                    StatusCode = (int)response.StatusCode,
-                    Content = await response.Content.ReadAsStringAsync()
-                };
+                ApiException exception = new ApiException(response);
+                TempData["ApiError"] = exception.GetApiErrorMessage();
 
-                TempData["ApiError"] = JsonConvert.SerializeObject(exception);
                 return View();
             }
             //read data from json response
@@ -383,16 +386,12 @@ namespace SereneMarine_Web.Controllers
             //check response
             response = await client.PutAsync(url, content);
 
-            if (response.IsSuccessStatusCode == false)
+            if (!response.IsSuccessStatusCode)
             {
                 //display api error message
                 //create alert for error
-                ApiException exception = new ApiException
-                {
-                    StatusCode = (int)response.StatusCode,
-                    Content = await response.Content.ReadAsStringAsync()
-                };
-                ViewBag.ApiError = JsonConvert.SerializeObject(exception);
+                ApiException exception = new ApiException(response);
+                TempData["ApiError"] = exception.GetApiErrorMessage();
 
                 return View();
             }
@@ -419,16 +418,12 @@ namespace SereneMarine_Web.Controllers
 
             response = await client.GetAsync(apiUrl);
 
-            if (response.IsSuccessStatusCode == false)
+            if (!response.IsSuccessStatusCode)
             {
                 //create alert for error
-                ApiException exception = new ApiException
-                {
-                    StatusCode = (int)response.StatusCode,
-                    Content = await response.Content.ReadAsStringAsync()
-                };
+                ApiException exception = new ApiException(response);
+                TempData["ApiError"] = exception.GetApiErrorMessage();
 
-                TempData["ApiError"] = JsonConvert.SerializeObject(exception);
                 return View();
             }
 
@@ -453,16 +448,12 @@ namespace SereneMarine_Web.Controllers
 
             response = await client.DeleteAsync(apiUrl);
 
-            if (response.IsSuccessStatusCode == false)
+            if (!response.IsSuccessStatusCode)
             {
                 //create alert for error
-                ApiException exception = new ApiException
-                {
-                    StatusCode = (int)response.StatusCode,
-                    Content = await response.Content.ReadAsStringAsync()
-                };
+                ApiException exception = new ApiException(response);
+                TempData["ApiError"] = exception.GetApiErrorMessage();
 
-                TempData["ApiError"] = JsonConvert.SerializeObject(exception);
                 return RedirectToAction("Delete", "Events", new { id });
             }
 

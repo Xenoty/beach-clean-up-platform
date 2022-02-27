@@ -6,15 +6,29 @@
 
 <h3>Are you sure you want to delete this thread?</h3>
 
+@if (TempData["ApiError"] != null)
+{
+    <div class="alert-danger">
+        <strong>@TempData["ApiError"].ToString()</strong>
+    </div>
+}
+
+@if (TempData["response"] != null)
+{
+    <div class="alert-success">
+        <strong>@TempData["response"].ToString()</strong>
+    </div>
+}
+
+@if (TempData["RoutingError"] != null)
+{
+    <div class="alert-danger">
+        <strong>@TempData["RoutingError"].ToString()</strong>
+    </div>
+}
+
 <div class="form-horizontal">
     <hr />
-    @if (ViewBag.ApiError != null)
-    {
-        <div class="alert-danger">
-            <strong>@ViewBag.ApiError.StatusCode.ToString()</strong>
-            <strong>@ViewBag.ApiError.Content.ToString()</strong>
-        </div>
-    }
     @Html.ValidationSummary(true, "", new { @class = "text-danger" })
 
     @if (Model == null)

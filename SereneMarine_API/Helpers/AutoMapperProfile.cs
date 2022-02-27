@@ -1,6 +1,7 @@
 using AutoMapper;
 using WebApi.Entities;
 using WebApi.Models.ApiStats;
+using WebApi.Models.EventAttendance;
 using WebApi.Models.Events;
 using WebApi.Models.Petitions;
 using WebApi.Models.PetitionsSigned;
@@ -23,6 +24,11 @@ namespace WebApi.Helpers
             CreateMap<Event, EventsModel>();
             CreateMap<EventRegisterModel, Event>();
             CreateMap<EventUpdateModel, Event>();
+
+            //events_attendance
+            CreateMap<EventAttendance, EventAttendanceModel>();
+            CreateMap<EventAttendanceRegisterModel, EventAttendance>();
+            CreateMap<EventAttendanceModel, EventAttendance>();
 
             //petitions
             CreateMap<Petition, PetitionsModel>();

@@ -8,6 +8,13 @@
     @Html.ActionLink("Back to Petitions", "Index")
 </div>
 
+@if (TempData["ApiError"] != null)
+{
+    <div class="alert-danger">
+        <strong>@TempData["ApiError"].ToString()</strong>
+    </div>
+}
+
 <hr />
 
 @using (Html.BeginForm("Update", "Petitions", FormMethod.Post))

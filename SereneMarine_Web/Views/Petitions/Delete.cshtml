@@ -6,6 +6,13 @@
 
 <h3>Are you sure you want to delete this Petition?</h3>
 
+@if (TempData["ApiError"] != null)
+{
+    <div class="alert-danger">
+        <strong>@TempData["ApiError"].ToString()</strong>
+    </div>
+}
+
 <div class="form-horizontal">
     <hr />
     <div>

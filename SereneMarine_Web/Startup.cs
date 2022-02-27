@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using SereneMarine_Web.Helpers;
 using System;
 
 namespace SereneMarine_Web
@@ -37,12 +38,17 @@ namespace SereneMarine_Web
             services.AddHttpClient();
             services.AddSession(options =>
             {
-                // Set a short timeout for easy testing.
-                options.IdleTimeout = TimeSpan.FromMinutes(10);
+                options.IdleTimeout = TimeSpan.FromDays(3);
                 options.Cookie.HttpOnly = true;
                 // Make the session cookie essential
                 options.Cookie.IsEssential = true;
             });
+
+            // configure DI for application services
+            services.AddSingleton<CacheProvider>();
+            services.AddScoped<ICacheProvider, CacheProvider>();
+
+            services.AddMemoryCache();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

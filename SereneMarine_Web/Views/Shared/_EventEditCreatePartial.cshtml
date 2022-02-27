@@ -1,10 +1,18 @@
 ﻿@model SereneMarine_Web.ViewModels.Events.EventUpdateModel
+@using Microsoft.Extensions.Configuration
+@inject IConfiguration Configuration
 
-<script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v4.5.1/mapbox-gl-geocoder.min.js"></script>
-<link rel="stylesheet" href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v4.5.1/mapbox-gl-geocoder.css" type="text/css" />
+
+<script src='https://api.mapbox.com/mapbox-gl-js/v2.7.0/mapbox-gl.js'></script>
+<link href='https://api.mapbox.com/mapbox-gl-js/v2.7.0/mapbox-gl.css' rel='stylesheet' />
+
+<!-- Load the `mapbox-gl-geocoder` plugin. -->
+<script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v4.7.2/mapbox-gl-geocoder.min.js"></script>
+<link rel="stylesheet" href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v4.7.2/mapbox-gl-geocoder.css" type="text/css">
 <!-- Promise polyfill script required to use Mapbox GL Geocoder in IE 11 -->
 <script src="https://cdn.jsdelivr.net/npm/es6-promise@4/dist/es6-promise.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/es6-promise@4/dist/es6-promise.auto.min.js"></script>
+<script src="~/js/mapbox.js" type="text/javascript"></script>
 
 <style>
     .map-wrapper{
@@ -37,6 +45,12 @@
     .map-wrapper {
         margin-top: 1rem;
     }
+
+    .grayed-out{
+        background-color: #f1f1f1;
+        border: none;
+        color: #565656;
+    }
 </style>
 
 <div class="form-group">
@@ -65,20 +79,17 @@
 
 <div class="form-group">
     <div class="col-md-10">
-        <label class="form-title">Coordinates <i>(optional)</i></label>
-        <label>. Please use the map below, and click on the location.</label>
-        <div class="collapsible" onclick="dropdown('map', 'descr_arrow');">
-            Show Map <b id="descr_arrow">&#8593;</b>
-        </div>
+        <label class="form-title">Coordinates </label><br />
+        <label> Please click on the map below to set the exact location of where the event is happening.</label>
         <div class="coordinates-wrapper">
             <div class="event-section">
                 @Html.LabelFor(model => model.latitude, htmlAttributes: new { @class = "control-label col-md-5" })
-                @Html.EditorFor(model => model.latitude, new { htmlAttributes = new { @class = "control-label col-md-5", @id = "latitude" } })
+                @Html.EditorFor(model => model.latitude, new { htmlAttributes = new { @class = "control-label col-md-5 grayed-out", @id = "latitude", @readonly = "true" } })
                 @Html.ValidationMessageFor(model => model.latitude, "", new { @class = "text-danger" })
             </div>
             <div class="event-section">
                 @Html.LabelFor(model => model.longitude, htmlAttributes: new { @class = "control-label col-md-5" })
-                @Html.EditorFor(model => model.longitude, new { htmlAttributes = new { @class = "control-label col-md-5 cancel", @id = "longitude" } })
+                @Html.EditorFor(model => model.longitude, new { htmlAttributes = new { @class = "control-label col-md-5 grayed-out", @id = "longitude", @readonly = "true" } })
                 @Html.ValidationMessageFor(model => model.longitude, "", new { @class = "text-danger" })
             </div>
         </div>
@@ -87,7 +98,7 @@
     <div class="col-md-10">
         
         <div class="map-wrapper">
-            <div id="map" style="display:none;width: auto;height: 600px;position: relative;">
+            <div id="map" style="display:block;width: auto;height: 600px;position: relative;">
 
             </div>
         </div>
@@ -105,7 +116,7 @@
 <div class="form-group">
     @Html.LabelFor(model => model.event_startdate, htmlAttributes: new { @class = "control-label col-md-2" })
     <div class="col-md-10">
-        <div class="input-group date" id="datetimepicker1">
+        <div class="input-group date">
             @Html.EditorFor(model => model.event_startdate, new { htmlAttributes = new { @class = "form-control" } })
             <span class="input-group-addon">
                 <span class="glyphicon glyphicon-calendar"></span>
@@ -118,7 +129,7 @@
 <div class="form-group">
     @Html.LabelFor(model => model.event_enddate, htmlAttributes: new { @class = "control-label col-md-2" })
     <div class="col-md-10">
-        <div class="input-group date" id="datetimepicker2">
+        <div class="input-group date">
             @Html.EditorFor(model => model.event_enddate, new { htmlAttributes = new { @class = "form-control" } })
             <span class="input-group-addon">
                 <span class="glyphicon glyphicon-calendar"></span>
@@ -130,22 +141,9 @@
 
 <script type="text/javascript">
 
-    mapboxgl.accessToken = 'pk.eyJ1IjoiZGF5bmU5NSIsImEiOiJjazZnOWhpYmUweWVsM2xtdmZvemxxZ3RmIn0.CCVZlLeLo_gsyIMA5iX08w';
-
-    var map = new mapboxgl.Map({
-        container: 'map',
-        style: 'mapbox://styles/mapbox/streets-v11',
-        center: [31.0218, -29.8587], // starting position [lng, lat]
-        zoom: 12 // starting zoom
-
-    });
-
-    map.addControl(
-        new MapboxGeocoder({
-            accessToken: mapboxgl.accessToken,
-            mapboxgl: mapboxgl
-        })
-    );
+    mapboxgl.accessToken = '@Configuration["AppSettings:MapboxAPIkey"].ToString()';
+    // CreateMapBox from mapbox.js
+    var map = CreateMapBox();
 
     map.on('style.load', function () {
         map.on('click', function (e) {
@@ -154,44 +152,23 @@
                 .setLngLat(coordinates)
                 .setHTML('you clicked here: <br/>' + coordinates)
                 .addTo(map);
-            //now populate fields for lat long
-            //split coordinates 
+
             var tempCoord = coordinates.toString().split("(");
-            //console.log("tempCoord: " + tempCoord);
+
             var coord = tempCoord[1].replace(")", "");
-            //console.log("coord: " + coord);
+
             var FinalCoord = coord.split(",");
-            //console.log("FinalCoord: " + coord);
-            //for (var i = 0; i < FinalCoord.length; i++) {
-            //    FinalCoord[i] = FinalCoord[i].replace(".", ",");
-            //    console.log("FinalCoord[i]: " + FinalCoord[i])
-            //};
+
             var lat = FinalCoord[0];
-            //console.log("lat = "+ lat);
+
             var long = FinalCoord[1];
-            //console.log("long = "+ long);
-            //console.log(FinalCoord);
+
+            lat = lat.replace('.', ',');
+            long = long.replace('.', ',');
+
             document.getElementById("latitude").value = lat;
             document.getElementById("longitude").value = long;
         });
     });
 
-
-    function dropdown(id, arrowId) {
-        var elm = document.getElementById(id).style.display;
-
-        if (elm == "none") {
-            document.getElementById(id).style.display = "block";
-            document.getElementById(arrowId).innerHTML = "&#8593;";
-            map.resize();
-        } else {
-            document.getElementById(id).style.display = "none";
-            document.getElementById(arrowId).innerHTML = "&#8595;";
-        }
-    }
-
-    $(function () {
-        $('#datetimepicker1').datetimepicker();
-        $('#datetimepicker2').datetimepicker();
-    });
 </script>

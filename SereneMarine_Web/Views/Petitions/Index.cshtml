@@ -77,6 +77,13 @@
     </div>
 }
 
+@if (TempData["ApiError"] != null)
+{
+    <div class="alert-danger">
+        <strong>@TempData["ApiError"].ToString()</strong>
+    </div>
+}
+
 @if (Model != null)
 {
     var count = 0;

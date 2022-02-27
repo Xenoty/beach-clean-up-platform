@@ -28,7 +28,6 @@ namespace WebApi.Controllers
             _mapper = mapper;
         }
 
-
         //[AllowAnonymous]
         [HttpPost("create")]
         public IActionResult Create([FromBody] EventRegisterModel model)
@@ -62,9 +61,16 @@ namespace WebApi.Controllers
         [HttpGet]
         public IActionResult GetAll()
         {
-            var events = _eventService.GetAll();
-            var model = _mapper.Map<IList<EventsModel>>(events);
-            return Ok(model);
+            try
+            {
+                var events = _eventService.GetAll();
+                var model = _mapper.Map<IList<EventsModel>>(events);
+                return Ok(model);
+            }
+            catch (AppException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
         /// <summary>
@@ -75,9 +81,16 @@ namespace WebApi.Controllers
         [HttpGet("{id}")]
         public IActionResult GetById(string id)
         {
-            var ev = _eventService.GetById(id);
-            var model = _mapper.Map<EventsModel>(ev);
-            return Ok(model);
+            try
+            {
+                var ev = _eventService.GetById(id);
+                var model = _mapper.Map<EventsModel>(ev);
+                return Ok(model);
+            }
+            catch (AppException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
         /// <summary>
@@ -115,8 +128,16 @@ namespace WebApi.Controllers
         [HttpDelete("delete/{id}")]
         public IActionResult Delete(string id)
         {
-            _eventService.Delete(id);
-            return Ok();
+            try
+            {
+                _eventService.Delete(id);
+                return Ok();
+            }
+            catch (AppException ex)
+            {
+                // return error message if there was an exception
+                return BadRequest(new { message = ex.Message });
+            }
         }
     }
 }

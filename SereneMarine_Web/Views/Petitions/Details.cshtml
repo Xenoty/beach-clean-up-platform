@@ -164,6 +164,13 @@
     }
 </style>
 
+@if (TempData["ApiError"] != null)
+{
+    <div class="alert-danger">
+        <strong>@TempData["ApiError"].ToString()</strong>
+    </div>
+}
+
 <div class="petition-container">
 
     <a href="@Url.Action("Index", "Petitions")" class="back-btn">

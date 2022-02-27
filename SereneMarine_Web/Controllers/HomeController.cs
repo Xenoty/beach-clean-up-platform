@@ -1,9 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
 using SereneMarine_Web.Helpers;
 using SereneMarine_Web.Models;
+using System;
 using System.Diagnostics;
-using System.Threading.Tasks;
 
 namespace SereneMarine_Web.Controllers
 {
@@ -18,28 +17,48 @@ namespace SereneMarine_Web.Controllers
 
         #endregion
 
+        #region Private Variables
+
+        private ICacheProvider _cacheProvider;
+        private ApiStatisticsModel previousStaticsModel = new ApiStatisticsModel();
+
+        #endregion
+
+        #region Constructor
+
+        public HomeController(ICacheProvider cacheProvider)
+        {
+            _cacheProvider = cacheProvider;
+        }
+
+        #endregion
+
         #region Task Methods
 
-        public async Task<IActionResult> Index()
+        public IActionResult Index()
         {
-            //get all the totals from the api
-            ApiStatisticsModel model = new ApiStatisticsModel();
-            string baseUrl = SD.ApiStatsPath;
-            string url = baseUrl;
-
-            response = await client.GetAsync(url);
-
-            if (response.IsSuccessStatusCode == false)
+            try
             {
-                //set defualt values
-                return View();
+                ApiStatisticsModel model = _cacheProvider.GetCachedResponse().Result;
+                if (previousStaticsModel != model)
+                {
+                    previousStaticsModel = model;
+                }
+                
+                return View(model);
             }
+            catch (Exception ex)
+            {
+                ApiException exception = new ApiException()
+                {
+                    StatusCode = 500,
+                    Content = "{ \n error : " + ex.Message + "}"
+                };
 
-            var jsonString = await response.Content.ReadAsStringAsync();
+                TempData["ApiError"] = exception.GetApiErrorMessage();
 
-            model = JsonConvert.DeserializeObject<ApiStatisticsModel>(jsonString);
-
-            return View(model);
+                return View(previousStaticsModel);
+            }
         }
 
         #endregion

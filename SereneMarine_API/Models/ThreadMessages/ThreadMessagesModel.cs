@@ -15,5 +15,6 @@ namespace WebApi.Models.ThreadMessages
         public string Name { get; set; }
         public string thread_message { get; set; }
         public DateTime replied_date { get; set; }
+        public bool thread_closed { get; set; }
     }
 }

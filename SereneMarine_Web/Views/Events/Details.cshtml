@@ -1,4 +1,6 @@
 ﻿@model SereneMarine_Web.ViewModels.Events.EventsViewModel;
+@using Microsoft.Extensions.Configuration
+@inject IConfiguration Configuration
 
 @{
     ViewBag.Title = "Event Details";
@@ -12,11 +14,17 @@
     var percentLiteral = ViewBag.Attending + "%";
 }
 
-<script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v4.5.1/mapbox-gl-geocoder.min.js"></script>
-<link rel="stylesheet" href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v4.5.1/mapbox-gl-geocoder.css" type="text/css" />
+
+<script src='https://api.mapbox.com/mapbox-gl-js/v2.7.0/mapbox-gl.js'></script>
+<link href='https://api.mapbox.com/mapbox-gl-js/v2.7.0/mapbox-gl.css' rel='stylesheet' />
+
+<!-- Load the `mapbox-gl-geocoder` plugin. -->
+<script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v4.7.2/mapbox-gl-geocoder.min.js"></script>
+<link rel="stylesheet" href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v4.7.2/mapbox-gl-geocoder.css" type="text/css">
 <!-- Promise polyfill script required to use Mapbox GL Geocoder in IE 11 -->
 <script src="https://cdn.jsdelivr.net/npm/es6-promise@4/dist/es6-promise.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/es6-promise@4/dist/es6-promise.auto.min.js"></script>
+<script src="~/js/mapbox.js" type="text/javascript"></script>
 
 <style>
 
@@ -132,17 +140,17 @@
 
 </style>
 
-@if (ViewBag.ApiError != null)
-{
-    <div class="alert-danger">
-        <strong>@ViewBag.ApiError.StatusCode.ToString()</strong>
-        <strong>@ViewBag.ApiError.Content.ToString()</strong>
-    </div>
-}
 @if (TempData["response"] != null)
 {
     <div class="alert-success">
         <strong>@TempData["response"].ToString()</strong>
+    </div>
+}
+
+@if (TempData["ApiError"] != null)
+{
+    <div class="alert-danger">
+        <strong>@TempData["ApiError"].ToString()</strong>
     </div>
 }
 
@@ -295,52 +303,15 @@
     </div>
 </div>
 
-<script type="text/javascript">
-      mapboxgl.accessToken = 'pk.eyJ1IjoiZGF5bmU5NSIsImEiOiJjazZnOWhpYmUweWVsM2xtdmZvemxxZ3RmIn0.CCVZlLeLo_gsyIMA5iX08w';
+@section scripts{
 
-    var map = new mapboxgl.Map({
-        container: 'map',
-        style: 'mapbox://styles/mapbox/streets-v11',
-        center: [31.0218, -29.8587], // starting position [lng, lat]
-        zoom: 12 // starting zoom
+    <script type="text/javascript">
 
-    });
-        map.addControl(
-            new MapboxGeocoder({
-                accessToken: mapboxgl.accessToken,
-                mapboxgl: mapboxgl
-            })
-    );
+    mapboxgl.accessToken = '@Configuration["AppSettings:MapboxAPIkey"].ToString()';
+    // Create map from mapbox.js
+    var map = CreateMapBox();
+    // Add single marker to map from mapbox.js
+    AddSingleMarkerToMapByLatAndLongCoordinate(map, "@Model.latitude", "@Model.longitude", "@Model.event_name");
 
-    var lat_List = [];
-    var long_List = []
-    var eventNames_List = []
-
-
-    lat_List.push("@Model.latitude");
-    long_List.push("@Model.longitude");
-    eventNames_List.push("@Model.event_name");
-
-    for (var i = 0; i < lat_List.length; i++) {
-
-        var latC = lat_List[i].toString().replace(/,/, '.');
-        var longC = long_List[i].toString().replace(/,/, '.');
-
-        window["Marker" + i] = new mapboxgl.Marker()
-            .setLngLat([latC, longC]).addTo(map).setPopup(new mapboxgl.Popup().setHTML(eventNames_List[i]));
-    }
-
-    function dropdown(id, arrowId) {
-        var elm = document.getElementById(id).style.display;
-
-        if (elm == "none") {
-            document.getElementById(id).style.display = "block";
-            document.getElementById(arrowId).innerHTML = "&#8593;";
-        } else {
-            document.getElementById(id).style.display = "none";
-            document.getElementById(arrowId).innerHTML = "&#8595;";
-        }
-    }
 </script>
-
-
+}

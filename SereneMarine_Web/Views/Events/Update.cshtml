@@ -3,6 +3,21 @@
 @{
     ViewBag.Title = "Edit Event";
 }
+
+@if (TempData["response"] != null)
+{
+    <div class="alert-success">
+        <strong>@TempData["response"].ToString()</strong>
+    </div>
+}
+
+@if (TempData["ApiError"] != null)
+{
+    <div class="alert-danger">
+        <strong>@TempData["ApiError"].ToString()</strong>
+    </div>
+}
+
 <div>
     @Html.ActionLink("Back to List", "Index")
 </div>
