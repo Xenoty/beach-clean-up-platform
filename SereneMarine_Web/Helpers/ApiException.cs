@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json.Linq;
 using System;
+using System.Net;
 using System.Net.Http;
 
 namespace SereneMarine_Web.Helpers
@@ -32,6 +33,11 @@ namespace SereneMarine_Web.Helpers
 
             StatusCode = (int)httpResponseMessage.StatusCode;
             Content = response;
+
+            if (StatusCode == 401)
+            {
+                Content += " .Please login again.";
+            }
         }
 
         public string GetApiErrorMessage()
