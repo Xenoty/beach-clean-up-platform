@@ -70,7 +70,7 @@ namespace WebApi
                 UserDatabaseSettings userDatabaseSettings = CreateUserDatabaseSettings();
                 // Create Services
                 UserService userService = new UserService(client, userDatabaseSettings);
-                EventsService eventsService = new EventsService(client, userDatabaseSettings, _configuration);
+                EventsService eventsService = new EventsService(client, userDatabaseSettings);
                 PetitionsSevice petitionsSevice = new PetitionsSevice(client, userDatabaseSettings);
                 ThreadsService threadsService = new ThreadsService(client, userDatabaseSettings);
                 // Create dummy data
@@ -307,8 +307,8 @@ namespace WebApi
                 longitude = -29.852241f,
                 latitude = 31.039504f,
                 address = "North Beach, Durban, KwaZulu-Natal",
-                event_startdate = DateTime.Now.AddDays(1),
-                event_enddate = DateTime.Now.AddDays(1).AddHours(4),
+                event_startdate = DateTime.Now.Date.AddDays(1).AddHours(8),
+                event_enddate = DateTime.Now.Date.AddDays(1).AddHours(16),
                 event_createddate = DateTime.Now,
                 max_attendance = 75,
                 event_completed = false
@@ -323,8 +323,8 @@ namespace WebApi
                 longitude = -29.862501f,
                 latitude = 31.04359f,
                 address = "South Beach, Durban, KwaZulu-Natal",
-                event_startdate = DateTime.Now.AddDays(2),
-                event_enddate = DateTime.Now.AddDays(2).AddHours(4),
+                event_startdate = DateTime.Now.Date.AddDays(2).AddHours(8),
+                event_enddate = DateTime.Now.Date.AddDays(2).AddHours(12),
                 event_createddate = DateTime.Now,
                 max_attendance = 50,
                 event_completed = false
@@ -339,8 +339,8 @@ namespace WebApi
                 longitude = -29.829147f,
                 latitude = 31.037263f,
                 address = "Bike & Bean, Durban, KwaZulu-Natal",
-                event_startdate = DateTime.Now.AddDays(3),
-                event_enddate = DateTime.Now.AddDays(3).AddHours(4),
+                event_startdate = DateTime.Now.Date.AddDays(3).AddHours(16),
+                event_enddate = DateTime.Now.Date.AddDays(3).AddHours(18),
                 event_createddate = DateTime.Now,
                 max_attendance = 100,
                 event_completed = false
@@ -370,8 +370,8 @@ namespace WebApi
                 longitude = -29.852241f,
                 latitude = 31.039504f,
                 address = "North Beach, Durban, KwaZulu-Natal",
-                event_startdate = DateTime.Now.AddDays(-1),
-                event_enddate = DateTime.Now.AddDays(-1).AddHours(4),
+                event_startdate = DateTime.Now.Date.AddDays(-1).AddHours(7),
+                event_enddate = DateTime.Now.Date.AddDays(-1).AddHours(12),
                 event_createddate = DateTime.Now,
                 max_attendance = 50,
                 event_completed = true
@@ -386,8 +386,8 @@ namespace WebApi
                 longitude = -29.862501f,
                 latitude = 31.04359f,
                 address = "South Beach, Durban, KwaZulu-Natal",
-                event_startdate = DateTime.Now.AddDays(-2),
-                event_enddate = DateTime.Now.AddDays(-2).AddHours(4),
+                event_startdate = DateTime.Now.Date.AddDays(-2).AddHours(10),
+                event_enddate = DateTime.Now.Date.AddDays(-2).AddHours(14),
                 event_createddate = DateTime.Now,
                 max_attendance = 70,
                 event_completed = true
@@ -402,8 +402,8 @@ namespace WebApi
                 longitude = -29.829147f,
                 latitude = 31.037263f,
                 address = "Bike & Bean, Durban, KwaZulu-Natal",
-                event_startdate = DateTime.Now.AddDays(-3),
-                event_enddate = DateTime.Now.AddDays(-3).AddHours(4),
+                event_startdate = DateTime.Now.Date.AddDays(-3).AddHours(12),
+                event_enddate = DateTime.Now.Date.AddDays(-3).AddHours(18),
                 event_createddate = DateTime.Now,
                 max_attendance = 100,
                 event_completed = true
