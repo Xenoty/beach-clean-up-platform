@@ -1,6 +1,5 @@
 ﻿using Microsoft.Extensions.Configuration;
 using MongoDB.Driver;
-using MongoDB.Driver.Core.Clusters;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,14 +20,11 @@ namespace WebApi.Services
 
     public class EventsService : IEventService
     {
-        private readonly IMongoCollection<EventAttendance> _eventAttendanceCollection;
         private readonly IMongoCollection<Event> _eventCollection;
 
-        public EventsService(IMongoClient client, IUserDatabseSettings settings, IConfiguration configuration)
+        public EventsService(IMongoClient client, IUserDatabseSettings settings)
         {
             IMongoDatabase database = client.GetDatabase(settings.DatabaseName);
-
-            _eventAttendanceCollection = database.GetCollection<EventAttendance>(settings.EventAttendanceCollectionName);
             _eventCollection = database.GetCollection<Event>(settings.EventsCollectionName);
         }
 
@@ -102,12 +98,6 @@ namespace WebApi.Services
 
             if (!string.IsNullOrWhiteSpace(eventParam.event_name))
             {
-                // throw error if the new event name is already taken
-                if (_eventCollection.Find(x => x.event_name == eventParam.event_name).FirstOrDefault() != null)
-                {
-                    throw new AppException("Event " + eventParam.event_name + " is already taken");
-                }
-
                 ev.event_name = eventParam.event_name;
             }
 
@@ -157,10 +147,13 @@ namespace WebApi.Services
         public void Delete(string id)
         {
             Event ev = _eventCollection.Find(ev => ev.event_id == id).FirstOrDefault();
-            if (ev != null)
+
+            if (ev == null)
             {
-                _eventCollection.DeleteOne(ev => ev.event_id == id);
+                throw new AppException("Event not found");
             }
+
+            _eventCollection.DeleteOne(ev => ev.event_id == id);
         }
     }
 }
