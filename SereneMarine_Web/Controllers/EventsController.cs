@@ -22,7 +22,7 @@ namespace SereneMarine_Web.Controllers
     {
         #region Views
 
-        public ActionResult Create() => View();
+        public ActionResult Create() => View( new EventUpdateModel());
 
         #endregion
 

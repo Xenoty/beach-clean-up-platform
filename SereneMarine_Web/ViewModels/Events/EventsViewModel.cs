@@ -25,9 +25,11 @@ namespace SereneMarine_Web.ViewModels.Events
         public string address { get; set; }
 
         [Display(Name = " Starting Date")]
+        [DisplayFormat(DataFormatString = "{0:dd/MM/yyyy HH:MM}")]
         public DateTime event_startdate { get; set; }
 
         [Display(Name = " Ending Date")]
+        [DisplayFormat(DataFormatString = "{0:dd/MM/yyyy HH:MM}")]
         public DateTime event_enddate { get; set; }
         public DateTime event_createddate { get; set; }
         public int max_attendance { get; set; }
