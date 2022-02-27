@@ -3,10 +3,11 @@
 1. [Summary](#summary)
     1. [Key Notes](#key-notes)
     2. [Tech Stack](#tech-stack)
+    3. [Login Details for Admin](#login-details-for-admin)
 2. [Getting Started](#getting-started)
     1. [Requirements](#requirements)
     2. [Steps](#steps)
-    3. [Issues & Solutions](#issues-and-solutions)
+    4. [Issues & Solutions](#issues-and-solutions)
     
 ## Summary
 
@@ -15,13 +16,22 @@ Final year University project aiming to increase the participation of beach clea
 ### Key Notes
 
 - Project has been configured and updated to run locally.
-- Database is currently setup to use MongoDB Atlas (cloud).
+- Database has been setup to use MongoDB, make sure check your connection string.
 - When running the project for the first time, it will create the database and load default data.
+- MapBox GL JS has been integrated for marking and setting locations for events.
+- Admins can CRUD Events, Petitions and Threads. 
+- Users can participate in Events, Petitions and Threads. 
+- Anonymous users can join events using their email address.
 
 ### Tech Stack
 1. ASP.NET core WebApi (*API*)
 2. ASP.NET Core WebApp MVC (*front-end & back-end*)
 3. MongoDB (*database*)
+
+### Login Details for Admin
+|Email| Password |
+|---|---|
+| admin@serenemarine.com | 123456|
 
 ## Getting Started
 
@@ -63,9 +73,9 @@ Final year University project aiming to increase the participation of beach clea
     1. Locate your MongoDB Server install and double-click the 'mongod.exe' file. This is usually located in 
         1. 'C:\Program Files\MongoDB\Server\<version>\bin\mongod.exe'
 
-#### 3. Update Connection String
+#### 3. Update Database Connection String
 
-1. In Solution Explorer, drop-down the WebAPI project and double-click the 'appsettings.json' file.
+1. In Solution Explorer, drop-down the <b>WebAPI</b> project and double-click the 'appsettings.json' file.
 2. Under 'UserDatabaseSettings', replace the field value for 'ConnectionString' with your connection string.
     1. MongoDB Atlas (cloud)
         1. In your Database Deployments View, click the 'Connect' button for the cluster you created.
@@ -75,6 +85,12 @@ Final year University project aiming to increase the participation of beach clea
         5. Make sure 'Include full drive code example' is **unchecked**.
         6. Copy the connection string provided.
 3. If there is a \<password\> tag in your connection string, make sure to replace this with your password for the user.
+
+#### 4. Update MapBox Api Key String
+
+1. Follow [How-to add url Restrictions to access token](https://blog.mapbox.com/url-restrictions-for-access-tokens-5f7f7eb90092) and get copy your token.
+2. In the Solution Explorer, drop-down the <b>SereneMarine_Web</b> project and double-click the 'appsettings.json' file.
+3. Under 'AppSettings', replace the value for the key 'MapboxAPIkey'.
 
 ### Issues and Solutions
 1. Project does not run both files
