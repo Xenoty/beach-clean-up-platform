@@ -8,12 +8,6 @@
     }
   },
   "profiles": {
-    "Development": {
-      "commandName": "Project",
-      "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
-      }
-    },
     "Web": {
       "commandName": "IISExpress",
       "launchBrowser": true,
