@@ -101,16 +101,8 @@ namespace WebApi.Services
                 throw new AppException("Petition not found");
             }
 
-            // update event name if it has changed
             if (!string.IsNullOrWhiteSpace(petition.name))
             {
-                // throw error if the new petition name is already taken
-                if (_petitionCollection.Find(x => x.name == petition.name).FirstOrDefault() != null)
-                {
-                    throw new AppException("Petition " + petition.name + " is already taken");
-                }
-
-                //assign event name to model
                 petitionToUpdate.name = petition.name;
             }
 
@@ -135,10 +127,12 @@ namespace WebApi.Services
         public void Delete(string id)
         {
             Petition pet = _petitionCollection.Find(pet => pet.petition_id == id).FirstOrDefault();
-            if (pet != null)
+            if (pet == null)
             {
-                _petitionCollection.DeleteOne(pet => pet.petition_id == id);
+                throw new AppException("Petition not found");
             }
+
+            _petitionCollection.DeleteOne(pet => pet.petition_id == id);
         }
     }
 }
