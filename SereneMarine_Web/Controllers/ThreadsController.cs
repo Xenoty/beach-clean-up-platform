@@ -51,7 +51,7 @@ namespace SereneMarine_Web.Controllers
             model.ThreadsViewModel = JsonConvert.DeserializeObject<List<ThreadsModel>>(jsonString);
 
             //sort threads by created date
-            model.ThreadsViewModel.OrderBy(a => a.created_date);
+            model.ThreadsViewModel = model.ThreadsViewModel.OrderByDescending(a => a.created_date).ToList();
 
             return View(model);
         }
