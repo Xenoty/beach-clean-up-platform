@@ -111,37 +111,38 @@ namespace SereneMarine_Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> Register(RegisterViewModel model, string returnUrl)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                // <post web api>
-                //httpPost /users/register
-                string url = SD.UserPath + "register";
-
-                //LOADING DATA TO JSON OBJECT
-                //create <upload contents>
-                var json = JsonConvert.SerializeObject(model);
-                var content = new StringContent(json, Encoding.UTF8, "application/json");
-                //</upload contents>
-
-                //<upload>
-                response = await client.PostAsync(url, content);
-                //</upload>
-
-                if (!response.IsSuccessStatusCode)
-                {
-                    ApiException exception = new ApiException(response);
-                    TempData["ApiError"] = exception.GetApiErrorMessage();
-
-                    return View();
-                }
-
-                TempData["registerResult"] = $"Your profile was succesfully created.\nPlease Login to your account";
-
-                return RedirectToAction("Login", "Account", new { returnUrl });
+                return View(model);
             }
 
-            // If we got this far, something failed, redisplay form
-            return View(model);
+            model.Email_address = model.Email_address.ToLower();
+
+            // <post web api>
+            //httpPost /users/register
+            string url = SD.UserPath + "register";
+
+            //LOADING DATA TO JSON OBJECT
+            //create <upload contents>
+            var json = JsonConvert.SerializeObject(model);
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
+            //</upload contents>
+
+            //<upload>
+            response = await client.PostAsync(url, content);
+            //</upload>
+
+            if (!response.IsSuccessStatusCode)
+            {
+                ApiException exception = new ApiException(response);
+                TempData["ApiError"] = exception.GetApiErrorMessage();
+
+                return View();
+            }
+
+            TempData["registerResult"] = $"Your profile was succesfully created.\nPlease Login to your account";
+
+            return RedirectToAction("Login", "Account", new { returnUrl });
         }
 
         public async Task<IActionResult> Logout()
