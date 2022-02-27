@@ -10,11 +10,13 @@
     
 ## Summary
 
-> Coming soon...
+Final year University project aiming to increase the participation of beach clean up events by providing an easy-to-use platform for people to find and join events. Provides additional features such as Petitions, Threads and Donation channels.
 
 ### Key Notes
 
-> Coming soon...
+- Project has been configured and updated to run locally.
+- Database is currently setup to use MongoDB Atlas (cloud).
+- When running the project for the first time, it will create the database and load default data.
 
 ### Tech Stack
 1. ASP.NET core WebApi (*API*)
@@ -35,10 +37,16 @@
 #### 1. Visual Studio
 1.  [Clone](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository#cloning-a-repository)  or [Fork](https://docs.github.com/en/get-started/quickstart/fork-a-repo#forking-a-repository) the repo.
 2.	In the folder, double-click the .sln file to open the solution.
-3.	Clean and Rebuild the entire Solution.
-4.	Once step '2. Setup MongoDB' & '3. Update Connection String' is complete, click 'Start'.
+3.  Set the Solution to startup using Multiple Projects:
+    1. In the Solution Explorer, Right-click the 'Solution SereneMarine' and select 'Properties'
+    2. In the left-menu tab under 'Common Properties' select 'Startup Project'
+    3. Choose 'Multiple startup projects' radio checkbox option.
+    4. Set both projects to Action -> Start.
+    Make sure WebApi starts before the website.
+    5. Make Sure <b>WebApi</b> is above <b>SereneMarine_Web</b>.
+4.	Clean and Rebuild the entire Solution.
 
-#### 2. Setup MongoDB
+#### 2. Setup Your MongoDB
 
 ##### 2.1 MongoDB Atlas (Cloud Version, easiest option and less setup)
 1. [Create an organization](https://docs.atlas.mongodb.com/tutorial/manage-organizations/)
@@ -55,9 +63,9 @@
     1. Locate your MongoDB Server install and double-click the 'mongod.exe' file. This is usually located in 
         1. 'C:\Program Files\MongoDB\Server\<version>\bin\mongod.exe'
 
-#### 3. Update Connection String (*Atlas only*)
+#### 3. Update Connection String
 
-1. In Solution Explorer, drop-down the WebAPI project and double-click the appsettings.json.
+1. In Solution Explorer, drop-down the WebAPI project and double-click the 'appsettings.json' file.
 2. Under 'UserDatabaseSettings', replace the field value for 'ConnectionString' with your connection string.
     1. MongoDB Atlas (cloud)
         1. In your Database Deployments View, click the 'Connect' button for the cluster you created.
@@ -66,7 +74,6 @@
         4. For Version, select 2.5 or later
         5. Make sure 'Include full drive code example' is **unchecked**.
         6. Copy the connection string provided.
-    2.  On-premise MongoDB (local), the default connection string is already provided. (Make sure your Mongod server is running).
 3. If there is a \<password\> tag in your connection string, make sure to replace this with your password for the user.
 
 ### Issues and Solutions
