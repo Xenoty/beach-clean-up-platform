@@ -7,6 +7,7 @@ using SereneMarine_Web.Models;
 using SereneMarine_Web.ViewModels.ThreadMessages;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
@@ -70,12 +71,7 @@ namespace SereneMarine_Web.Controllers
             //read data from json response
             var jsonString2 = await response.Content.ReadAsStringAsync();
             model.threadMsgsList = JsonConvert.DeserializeObject<List<ThreadMessagesModel>>(jsonString2);
-
-            //check if there are any other api errors
-            if (TempData["ApiError"] != null)
-            {
-                ViewBag.ApiError = JsonConvert.DeserializeObject(TempData["ApiError"].ToString());
-            }
+            model.threadMsgsList = model.threadMsgsList.OrderByDescending(x => x.replied_date).ToList();
 
             return View(model);
         }

@@ -99,12 +99,6 @@ namespace WebApi.Services
             if (!string.IsNullOrWhiteSpace(thread.thread_topic) 
                 && thread.thread_topic != threadToUpdate.thread_topic)
             {
-                if (_threadCollection.Find(x => x.thread_topic == thread.thread_topic).FirstOrDefault() != null)
-                {
-                    throw new AppException("Thread " + thread.thread_topic + " is already taken");
-                }
-
-                //assign event name to model
                 threadToUpdate.thread_topic = thread.thread_topic;
             }
 
@@ -123,25 +117,34 @@ namespace WebApi.Services
                 threadToUpdate.author = thread.author;
             }
 
+            if (threadToUpdate.thread_closed != thread.thread_closed)
+            {
+                threadToUpdate.thread_closed = thread.thread_closed;
+            }
+
             _threadCollection.ReplaceOne(th => th.thread_id == thread.thread_id, threadToUpdate);
         }
 
         public void DeleteByThread(string id)
         {
             Thread threadToDelete = _threadCollection.Find(th => th.thread_id == id).FirstOrDefault();
-            if (threadToDelete != null)
+            if (threadToDelete == null)
             {
-                _threadCollection.DeleteOne(th => th.thread_id == id);
+                throw new AppException("Thread not found");
             }
+
+            _threadCollection.DeleteOne(th => th.thread_id == id);
         }
 
         public void DeleteByUser(string id)
         {
             Thread threadToDelete = _threadCollection.Find(th => th.User_Id == id).FirstOrDefault();
-            if (threadToDelete != null)
+            if (threadToDelete == null)
             {
-                _threadCollection.DeleteMany(th => th.User_Id == id);
+                throw new AppException("Thread not found");
             }
+
+            _threadCollection.DeleteMany(th => th.User_Id == id);
         }
     }
 }

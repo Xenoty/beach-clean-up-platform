@@ -45,23 +45,7 @@ namespace WebApi.Services
 
         public List<ThreadMessage> GetByThread(string id)
         {
-
-            //use linq standard for inner join between two collections
-            IQueryable<ThreadMessage> query = from x in _threadMessageCollection.AsQueryable()
-                                              join y in _userCollection.AsQueryable() on x.User_Id equals y.User_Id
-                                              where x.thread_id == id
-                                              select new ThreadMessage()
-                                              {
-                                                  Id = x.Id,
-                                                  thread_message_id = x.thread_message_id,
-                                                  thread_id = x.thread_id,
-                                                  User_Id = x.User_Id,
-                                                  thread_message = x.thread_message,
-                                                  replied_date = x.replied_date,
-                                                  Name = y.FirstName + " " + y.LastName
-                                              };
-
-            return query.ToList();
+            return _threadMessageCollection.Find(x => x.thread_id == id).ToList();
         }
 
         public List<ThreadMessage> GetByUser(string id)
@@ -71,7 +55,6 @@ namespace WebApi.Services
 
         public ThreadMessage Create(ThreadMessage threadMessage)
         {
-
             if (string.IsNullOrEmpty(threadMessage.User_Id))
             {
                 throw new AppException("User_id is required");
@@ -82,21 +65,6 @@ namespace WebApi.Services
                 throw new AppException("thread_id is required");
             }
 
-            var query = from x in _threadCollection.AsQueryable()
-                        join y in _threadMessageCollection.AsQueryable() on x.thread_id equals y.thread_id
-                        into MatchedEvents
-                        where (x.thread_id == threadMessage.thread_id)
-                        select new
-                        {
-                            thread_id = x.thread_id
-                        };
-
-            //see if query has any results
-            if (!query.Any())
-            {
-                throw new AppException($"Thread {threadMessage.thread_id} does not exist");
-            }
-
             if (string.IsNullOrEmpty(threadMessage.thread_message))
             {
                 throw new AppException("Thread_message is required");
@@ -105,6 +73,17 @@ namespace WebApi.Services
             if (threadMessage.replied_date == default(DateTime))
             {
                 throw new AppException("ThreadMessage reply Date is required");
+            }
+
+            Thread foundThread = _threadCollection.Find(x => x.thread_id == threadMessage.thread_id).SingleOrDefault();
+            if (foundThread == null)
+            {
+                throw new AppException($"Thread '{threadMessage.thread_id}' does not exist");
+            }
+
+            if (foundThread.thread_closed)
+            {
+                throw new Exception($"Cannot create new ThreadMessage as Thread '{foundThread.thread_topic}' has been closed");
             }
 
             _threadMessageCollection.InsertOne(threadMessage);
@@ -124,7 +103,6 @@ namespace WebApi.Services
             if (!string.IsNullOrWhiteSpace(threadMessage.thread_message) 
                 && threadMessage.thread_message != threadMessageToUpdate.thread_message)
             {
-                // throw error if the new petition thread_message is already taken
                 if (_threadMessageCollection.Find(x => x.thread_message == threadMessage.thread_message).FirstOrDefault() != null)
                 {
                     throw new AppException("ThreadMessage " + threadMessage.thread_message + " is already taken");
