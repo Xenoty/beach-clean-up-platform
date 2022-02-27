@@ -1,5 +1,7 @@
 # Serene Marine - Beach Clean Up
 
+![Serene Marine - Home page](https://user-images.githubusercontent.com/60667206/155885803-d1511fcc-d72a-475d-9a39-51f7e878d159.png)
+
 1. [Summary](#summary)
     1. [Key Notes](#key-notes)
     2. [Tech Stack](#tech-stack)
